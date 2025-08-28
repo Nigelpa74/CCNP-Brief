@@ -1,6 +1,7 @@
 # Topicos Presentes
 > OSPF y temas avanzados
-. Areas: Manera que las areas generadas en ospf se comunican.
+
+. `Areas`: Manera que las areas generadas en ospf se comunican.
 . Link-State Advertisements: LSA y sus tipos.
 . Discontiguous Networks: Un mal area 0 distribuido genera problemas a menos que lo realices por GRE TUNNEL
 . OSPF Path Selection: OSPF prefiere el intra area (que sea en una misma area) que inter area (viaje por otras areas)
