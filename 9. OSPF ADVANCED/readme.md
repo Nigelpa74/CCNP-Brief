@@ -1,3 +1,4 @@
+# Topicos Presentes
 . Areas: Manera que las areas generadas en ospf se comunican.
 . Link-State Advertisements: LSA y sus tipos.
 . Discontiguous Networks: Un mal area 0 distribuido genera problemas a menos que lo realices por GRE TUNNEL
