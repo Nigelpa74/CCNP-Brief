@@ -38,6 +38,7 @@ La sumarizacion es bastante util cuando quieres promocionar rutas que son 192.16
 
  ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/3edf90946c3009e917077579b2dcde6759cc2fa6/9.%20OSPF%20ADVANCED/suma.PNG)
 
+Ademas la sumarizacion ocurre en Type 1 LSA dentro de area y se genera solo hacia la backbone (destino AREA 0)
 
 > [!NOTE]
 > Useful information that users should know, even when skimming content.
