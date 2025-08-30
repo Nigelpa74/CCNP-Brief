@@ -1,9 +1,6 @@
 # Topicos Presentes
 > OSPF y temas avanzados
 
-## Areas: 
-Manera que las `areas` generadas en ospf se comunican.
-
 * Link-State Advertisements: LSA `#0969DA` y sus tipos.
   
 * Discontiguous Networks: Un mal area 0 distribuido genera problemas a menos que lo realices por GRE TUNNEL
@@ -17,7 +14,8 @@ Manera que las `areas` generadas en ospf se comunican.
 > [!NOTE]
 > Soporta hasta 4 ECMP paths default y se puede aumentar dentro del proceso OSPF `maximun paths #s`.
 
-- [ ] Carpeta completa :tada:\
+## Areas: 
+Manera que las `areas` generadas en ospf se comunican.
 
  ![Image Alt](https://github.com/Nigelpa74/CCNP-brief/blob/35479f397f5912056e406a0c9b2250337302fe77/Area%20Ospf.png)
 
@@ -52,3 +50,5 @@ En verificacion con Wireshark se tiene lo siguiente:
 
 > [!CAUTION]
 > Advises about risks or negative outcomes of certain actions.
+
+- [ ] Carpeta completa :tada:\
