@@ -40,6 +40,10 @@ La sumarizacion es bastante util cuando quieres promocionar rutas que son 192.16
 
 Ademas la sumarizacion ocurre en Type 1 LSA dentro de area y se genera solo hacia la backbone (destino AREA 0)
 
+Para comnfigurar la sumarizacion debe ser en el ABR y con comando `area 12 range 172.16.0.0 255.255.0.0 cost 45`, asi cuando pase un cambio en el area 12 el area 0 ni lo sentira.
+
+Cabe mencionar cuando es automatico la metrica que se elije es la minima y cuando pase algo con la ruta con menor metrica se recalculara y eso soluciona la sumarizacion.
+
 > [!NOTE]
 > Useful information that users should know, even when skimming content.
 
