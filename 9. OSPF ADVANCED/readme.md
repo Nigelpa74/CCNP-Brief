@@ -14,6 +14,9 @@ Manera que las `areas` generadas en ospf se comunican.
 
 * Route Filtering: Hay manera de filtrar lo que se publica en los LSDB para otras areas
 
+> [!NOTE]
+> Soporta hasta 4 ECMP paths default y se puede aumentar dentro del proceso OSPF `maximun paths #s`.
+
 - [ ] Carpeta completa :tada:\
 
  ![Image Alt](https://github.com/Nigelpa74/CCNP-brief/blob/35479f397f5912056e406a0c9b2250337302fe77/Area%20Ospf.png)
