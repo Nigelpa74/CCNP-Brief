@@ -30,13 +30,13 @@ Manera que las `areas` generadas en ospf se comunican.
 
 En verificacion con Wireshark se tiene lo siguiente:
 
- ![Image Alt]([https://github.com/Nigelpa74/CCNP-brief/blob/35479f397f5912056e406a0c9b2250337302fe77/Area%20Ospf.png](https://github.com/Nigelpa74/CCNP-Brief/blob/ead14c4af8c198126e84c16f1ea5065cbdc7cd8a/9.%20OSPF%20ADVANCED/TRig.PNG))
+ ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/ead14c4af8c198126e84c16f1ea5065cbdc7cd8a/9.%20OSPF%20ADVANCED/TRig.PNG)
 
 ## Sumarizacion de Areas: 
 
 La sumarizacion es bastante util cuando quieres promocionar rutas que son 192.168.1.0, 192.168.2.0, 192.168.3.0 ... 192.168.15.0. Su sumarizacion para promocion es 192.168.0.0 /20
 
- ![Image Alt]()
+ ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/3edf90946c3009e917077579b2dcde6759cc2fa6/9.%20OSPF%20ADVANCED/suma.PNG)
 
 
 > [!NOTE]
