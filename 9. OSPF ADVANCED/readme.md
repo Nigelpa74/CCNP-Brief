@@ -20,7 +20,24 @@ Manera que las `areas` generadas en ospf se comunican.
 - [ ] Carpeta completa :tada:\
 
  ![Image Alt](https://github.com/Nigelpa74/CCNP-brief/blob/35479f397f5912056e406a0c9b2250337302fe77/Area%20Ospf.png)
-\
+
+## Tipos de LSAs:
+
+- Type 1, router LSA: Advertises the LSAs that originate within an area
+- Type 2, network LSA: Advertises a multi-access network segment attached to a DR
+- Type 3, summary LSA: Promociona las otras redes de otras areas.
+- Type 4, ASBR summary LSA: Advertises a summary LSA for a specific ASBR
+- Type 5, AS external LSA: Advertises LSAs for routes that have been redistributed
+- Type 7, NSSA external LSA: Advertises redistributed routes in NSSAs
+
+En verificacion con Wireshark se tiene lo siguiente:
+
+
+
+## Sumarizacion de Areas: 
+
+
+
 > [!NOTE]
 > Useful information that users should know, even when skimming content.
 
