@@ -17,8 +17,8 @@
 
 Direccion ip de informacion es publicitado independientemente por los tipos de LSAs:
 
--Intra-area prefix LSA
--Link LSA
+- Intra-area prefix LSA
+- Link LSA
 
 > [!IMPORTANT]
 >La comunicacion de OSPFv3 es por numero de protocolo 89 en el campo IPV6 y tambien usa os 5 paquetes y logica como OSPFv2 dependiendo del destino o si es un UNICAST LINK-LOCAL o un MULTICAST.
@@ -28,13 +28,14 @@ Direccion ip de informacion es publicitado independientemente por los tipos de L
 
 ## OSPFv3 Configuration: Ambiente necesario para que OSPF v3 funcione
 
-- PASO 1: Necesario el `ipv6 unicast-routing` y luego `router ospfv3` *id*.
-- PASO 2: Definir el router ID `router-id` *id* que puede ser 0.1.2.3.
+- PASO 1: Necesario el `ipv6 unicast-routing` y luego `router ospfv3 ID`.
+- PASO 2: Definir el router ID `router-id ID` que puede ser 0.1.2.3.
 - PASO 3: Opcional de definir el address family `address-family (ipv6/ipv4) unicast`
-- PASO 4: Habilitarlo en una interface `ospfv3` *process-id* `ipv6 area` *area-id*
+- PASO 4: Habilitarlo en una interface `ospfv3 PROCCESS-ID ipv6 area AREA-ID`
 
 > [!NOTE]
 > OSPFv3 no usa el estado de network para inicializar interfaces.
 
 ## IPv4 Support in OSPFv3: Intercambio de rutas IPV4
+
 
