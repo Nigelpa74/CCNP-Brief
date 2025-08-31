@@ -66,12 +66,12 @@ Sin embargo, en el ejemplo se crea prefix-list fuera del proceso OSPF.
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/71d55795914e6d0fbe45fdc768d8584720859c1b/9.%20OSPF%20ADVANCED/filtrado%20area%20re.PNG)
 
-# Comandos Finales
-
-![Image Alt]()
-
 > [!NOTE]
 > Cabe mencionar con cada salto el area negada antes, este negado pasa al siguiente router.
+
+# Comandos Finales
+
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/52146393c32170344fc278ad45b5b2b511c86199/9.%20OSPF%20ADVANCED/comandos.PNG)
 
 > [!NOTE]
 > Useful information that users should know, even when skimming content.
