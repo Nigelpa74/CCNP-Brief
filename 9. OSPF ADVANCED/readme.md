@@ -17,7 +17,7 @@
 ## Areas: 
 Manera que las `areas` generadas en ospf se comunican.
 
- ![Image Alt](https://github.com/Nigelpa74/CCNP-brief/blob/35479f397f5912056e406a0c9b2250337302fe77/Area%20Ospf.png)
+![Image Alt](https://github.com/Nigelpa74/CCNP-brief/blob/35479f397f5912056e406a0c9b2250337302fe77/Area%20Ospf.png)
 
 ## Tipos de LSAs:
 
@@ -30,13 +30,13 @@ Manera que las `areas` generadas en ospf se comunican.
 
 En verificacion con Wireshark se tiene lo siguiente:
 
- ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/ead14c4af8c198126e84c16f1ea5065cbdc7cd8a/9.%20OSPF%20ADVANCED/TRig.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/ead14c4af8c198126e84c16f1ea5065cbdc7cd8a/9.%20OSPF%20ADVANCED/TRig.PNG)
 
 ## Sumarizacion de Areas: 
 
 La sumarizacion es bastante util cuando quieres promocionar rutas que son 192.168.1.0, 192.168.2.0, 192.168.3.0 ... 192.168.15.0. Su sumarizacion para promocion es 192.168.0.0 /20
 
- ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/3edf90946c3009e917077579b2dcde6759cc2fa6/9.%20OSPF%20ADVANCED/suma.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/3edf90946c3009e917077579b2dcde6759cc2fa6/9.%20OSPF%20ADVANCED/suma.PNG)
 
 Ademas la sumarizacion ocurre en Type 1 LSA dentro de area y se genera solo hacia la backbone (destino AREA 0)
 
@@ -52,19 +52,19 @@ Necesario para manipular la inundacion de trafico, reducir utilizacion de memori
 
 Metodo mas rapido con comando dentro del proceso OSPF: `area 12 range 172.16.2.0 255.255.255.0 not-advertise` TIENE QUE SER EN EL ABR y en el ejemplo es hacia area 0 donde desaparecio.
 
- ![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/71d55795914e6d0fbe45fdc768d8584720859c1b/9.%20OSPF%20ADVANCED/FILTRADO.PNG)
 
 ### Filtrado con AREA:
 
 Este tipo de filtro depende de habilidad, en este caso OSPF soporte el filtro cuando el tipo de LSA 3 ocurre.
  
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/71d55795914e6d0fbe45fdc768d8584720859c1b/9.%20OSPF%20ADVANCED/filtrado%20area.PNG)
 
 La manera de filtrado se logra con el comando, `area *0* filter-list prefix *prefix-list-name* (in/out)` en el ABR.
 
 Sin embargo, en el ejemplo se crea prefix-list fuera del proceso OSPF.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/71d55795914e6d0fbe45fdc768d8584720859c1b/9.%20OSPF%20ADVANCED/filtrado%20area%20re.PNG)
 
 > [!NOTE]
 > Cabe mencionar con cada salto el area negada antes, este negado pasa al siguiente router.
