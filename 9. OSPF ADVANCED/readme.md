@@ -44,6 +44,31 @@ Para comnfigurar la sumarizacion debe ser en el ABR y con comando `area 12 range
 
 Cabe mencionar cuando es automatico la metrica que se elije es la minima y cuando pase algo con la ruta con menor metrica se recalculara y eso soluciona la sumarizacion.
 
+## Filtrado de Rutas:
+
+Necesario para manipular la inundacion de trafico, reducir utilizacion de memoria y/o mejorar seguridad. Hay 2 tipos de filtro que se puede usar.
+
+### Filtrado con sumarizacion:
+
+Metodo mas rapido con comando dentro del proceso OSPF: `area 12 range 172.16.2.0 255.255.255.0 not-advertise` TIENE QUE SER EN EL ABR y en el ejemplo es hacia area 0 donde desaparecio.
+
+ ![Image Alt]()
+
+### Filtrado con AREA:
+
+Este tipo de filtro depende de habilidad, en este caso OSPF soporte el filtro cuando el tipo de LSA 3 ocurre.
+ 
+![Image Alt]()
+
+La manera de filtrado se logra con el comando, `area *0* filter-list prefix *prefix-list-name* (in/out)` en el ABR.
+
+Sin embargo, en el ejemplo se crea prefix-list fuera del proceso OSPF.
+
+![Image Alt]()
+
+> [!NOTE]
+> Cabe mencionar con cada salto el area negada antes, este negado pasa al siguiente router.
+
 > [!NOTE]
 > Useful information that users should know, even when skimming content.
 
@@ -58,5 +83,3 @@ Cabe mencionar cuando es automatico la metrica que se elije es la minima y cuand
 
 > [!CAUTION]
 > Advises about risks or negative outcomes of certain actions.
-
-- [ ] Carpeta completa :tada:\
