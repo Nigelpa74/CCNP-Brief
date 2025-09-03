@@ -42,7 +42,7 @@ Ejemplo configuracion interfaces y el LINK local por router.
 
 La verificacion de los servicios donde se cambio esencialmente el `ip ospf` hacia `ospfv3 ipv6`. Para verificar por interfaz es `show ospfv3 interface [interface-id]`.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/d4a5ea504937385836cf0d48ac7612f4cd461cd5/10.%20OSPF%20v3/cuidados%20ospfv3.PNG)
 
 Tambien tiene interfaces pasovas que puede ser actividado por `default` o por puerto dentro del proceso OSPFv3.
 
@@ -58,5 +58,6 @@ El RFC 5838 indica que OSPFv3 deberia soportar ambos `address families`
 
 # COMANDOS:
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/d4a5ea504937385836cf0d48ac7612f4cd461cd5/10.%20OSPF%20v3/comandos%20ospfv3.PNG)
+
 
