@@ -36,6 +36,26 @@ Direccion ip de informacion es publicitado independientemente por los tipos de L
 > [!NOTE]
 > OSPFv3 no usa el estado de network para inicializar interfaces.
 
+Ejemplo configuracion interfaces y el LINK local por router.
+
+![Image Alt]()
+
+La verificacion de los servicios donde se cambio esencialmente el `ip ospf` hacia `ospfv3 ipv6`. Para verificar por interfaz es `show ospfv3 interface [interface-id]`.
+
+![Image Alt]()
+
+Tambien tiene interfaces pasovas que puede ser actividado por `default` o por puerto dentro del proceso OSPFv3.
+
+Incluye funciones de sumarizacion con el comando siguiente `area area-id range [prefix/prefix-length]`
+
+![Image Alt]()
+
 ## IPv4 Support in OSPFv3: Intercambio de rutas IPV4
 
+El RFC 5838 indica que OSPFv3 deberia soportar ambos `address families`
 
+![Image Alt]()
+
+# COMANDOS:
+
+![Image Alt]()
