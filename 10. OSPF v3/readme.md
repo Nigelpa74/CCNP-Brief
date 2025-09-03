@@ -38,7 +38,7 @@ Direccion ip de informacion es publicitado independientemente por los tipos de L
 
 Ejemplo configuracion interfaces y el LINK local por router.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/da96fd1f40ca1ebcbf62b4c4ccc91720268cbf4d/10.%20OSPF%20v3/OSPFV3%20CON.PNG)
 
 La verificacion de los servicios donde se cambio esencialmente el `ip ospf` hacia `ospfv3 ipv6`. Para verificar por interfaz es `show ospfv3 interface [interface-id]`.
 
@@ -48,14 +48,15 @@ Tambien tiene interfaces pasovas que puede ser actividado por `default` o por pu
 
 Incluye funciones de sumarizacion con el comando siguiente `area area-id range [prefix/prefix-length]`
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/da96fd1f40ca1ebcbf62b4c4ccc91720268cbf4d/10.%20OSPF%20v3/sumarizacion%20ipv6.PNG)
 
 ## IPv4 Support in OSPFv3: Intercambio de rutas IPV4
 
 El RFC 5838 indica que OSPFv3 deberia soportar ambos `address families`
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/da96fd1f40ca1ebcbf62b4c4ccc91720268cbf4d/10.%20OSPF%20v3/ospfv4%20soporte%20ipv4.PNG)
 
 # COMANDOS:
 
 ![Image Alt]()
+
