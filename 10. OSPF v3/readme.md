@@ -21,7 +21,7 @@ Direccion ip de informacion es publicitado independientemente por los tipos de L
 - Link LSA
 
 > [!IMPORTANT]
->La comunicacion de OSPFv3 es por numero de protocolo 89 en el campo IPV6 y tambien usa os 5 paquetes y logica como OSPFv2 dependiendo del destino o si es un UNICAST LINK-LOCAL o un MULTICAST.
+> La comunicacion de OSPFv3 es por numero de protocolo 89 en el campo IPV6 y tambien usa os 5 paquetes y logica como OSPFv2 dependiendo del destino o si es un UNICAST LINK-LOCAL o un MULTICAST.
 
 - `FF02::05:` OSPFv3 AllSPFRouters
 - `FF02::06:` OSPFv3 AllDRouters
@@ -59,5 +59,6 @@ El RFC 5838 indica que OSPFv3 deberia soportar ambos `address families`
 # COMANDOS:
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/d4a5ea504937385836cf0d48ac7612f4cd461cd5/10.%20OSPF%20v3/comandos%20ospfv3.PNG)
+
 
 
