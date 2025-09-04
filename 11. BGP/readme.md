@@ -106,3 +106,31 @@ La Figura 11-5 muestra las sesiones eBGP e iBGP necesarias entre los enrutadores
 
 ### Mensajes BGP:
 
+Nombre|Description general
+:---|:---
+OPEN|Establece la adyacencia BGP
+UPDATE|Anuncia, actualiza o retira rutas
+NOTIFICATION|Indica la condicion de error de un vecino BGP.
+KEEPALIVE|Se asegura que los vecinos BGP estan activos.
+
+- Open: Ambas partes negocian las capacidades de sesión antes de establecer el peering BGP. El mensaje OPEN contiene el número de versión de BGP, el ASN del router de origen, el `tiempo de espera` y el `identificador de BGP`.
+  - Tiempo de espera: Establece el valor propuesto para el temporizador de retención en segundos para cada vecino BGP. El temporizador de espera, junto con los mensajes de keepalive, funciona como un mecanismo de latido para los vecinos BGP. El valor del tiempo de retención debe ser de al menos 3 segundos o establecerse en 0 para deshabilitar los mensajes de keepalive. En los routers Cisco, el temporizador de retención predeterminado es de 180 segundos.
+  - Identificador BGP: El ID del enrutador BGP (RID) es un número único de 32 bits. El RID puede utilizarse como mecanismo para prevenir bucles. Evitar el valor 0.
+- Keepalive: BGP no depende del estado de la conexión TCP. Los mensajes de mantenimiento activo se intercambian cada tercio del tiempo de espera acordado. Los dispositivos Cisco tienen un tiempo de espera predeterminado de 180 segundos, por lo que el intervalo de mantenimiento activo predeterminado es de 60 segundos. Si el tiempo de espera se establece en 0, no se envían mensajes de mantenimiento activo entre los vecinos BGP.
+- Update: Un mensaje de ACTUALIZACIÓN anuncia las rutas viables. Incluye los prefijos anunciados en la `Network Layer Reachability Information` (NLRI). Los prefijos que deben retirarse se anuncian en el campo "RUTAS RETIRADAS" del mensaje de ACTUALIZACIÓN. Un mensaje de ACTUALIZACIÓN puede actuar como un mecanismo de `Keepalive` para reducir el tráfico innecesario. Al recibir una ACTUALIZACIÓN, el temporizador de retención se restablece a su valor inicial. Si el temporizador de retención llega a cero, la sesión BGP se interrumpe, las rutas de ese vecino se eliminan y se envía un mensaje de ACTUALIZACIÓN a otros vecinos BGP para retirar los prefijos afectados.
+- Notification: Como un temporizador de retención que expira, un cambio en las capacidades del vecino o una solicitud de restablecimiento de sesión BGP.
+
+### Estados de vecino BGP:
+
+BGP usa el `finite state machine` (FSM) para mantener una tabla de puntos BGP en estatus operacional.
+
+- Idle
+- Connect
+- Active
+- OpenSent
+- OpenConfirm
+- Established
+
+En la figura se muestra BGP FSM y los estados.
+
+![Image Alt]()
