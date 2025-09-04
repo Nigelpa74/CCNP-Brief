@@ -36,7 +36,7 @@ BGP es un protocolo de enrutamiento por vector de ruta y no contiene una topolog
 
 El atributo BGP AS_Path es un atributo obligatorio bien conocido e incluye una lista completa de todos los ASN que el anuncio de prefijo ha recorrido desde su AS de origen.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/628ca403d621dc3d5f0000ceed1dfffd160e84d8/11.%20BGP/BGP%201.PNG)
 
 ### Address Families:
 
@@ -59,7 +59,7 @@ Las implementaciones más recientes de BGP establecen el `do-not-fragment` (DF) 
 
 BGP utiliza TCP, que es capaz de cruzar límites de red (es decir, tiene capacidad para múltiples saltos). También puede formar adyacencias que están a varios saltos de distancia.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/628ca403d621dc3d5f0000ceed1dfffd160e84d8/11.%20BGP/BGP%202.PNG)
 
 > [!NOTE]
 > Los vecinos BGP conectados a la misma red utilizan la tabla ARP para localizar la dirección IP del router. Las sesiones BGP multisalto requieren información de la tabla de enrutamiento para encontrar la dirección IP del router.
@@ -77,11 +77,11 @@ La necesidad de BGP dentro de un sistema autónomo (AS) suele surgir cuando se r
 
 En la Figura 11-3, el AS 65200 proporciona conectividad de tránsito al AS 65100 y al AS 65300. El AS 65100 se conecta en R2 y el AS 65300 en R4. 
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/628ca403d621dc3d5f0000ceed1dfffd160e84d8/11.%20BGP/BGP%203.PNG)
 
 R2 podría establecer una sesión iBGP directamente con R4, pero R3 no sabría a dónde reenviar el tráfico para llegar al AS 65100 o al AS 65300 cuando el tráfico de cualquiera de los AS llegue a R3, como se muestra en la Figura, porque R3 no tendría la información de reenvío de ruta adecuada para el tráfico de destino.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/628ca403d621dc3d5f0000ceed1dfffd160e84d8/11.%20BGP/BGP%204.PNG)
 
 Se podría suponer que redistribuir la tabla BGP en un IGP soluciona el problema, pero esta no es una solución viable por varias razones:
 
@@ -102,7 +102,7 @@ Las configuraciones para las sesiones eBGP e iBGP son fundamentalmente las misma
 
 La Figura 11-5 muestra las sesiones eBGP e iBGP necesarias entre los enrutadores para permitir la accesibilidad entre AS 65100 y AS 65300. Observe que todos los routers en AS 65200 establecen sesiones iBGP en una malla completa para permitir un reenvío adecuado entre AS 65100 y AS 65300.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/628ca403d621dc3d5f0000ceed1dfffd160e84d8/11.%20BGP/BGP%205.PNG)
 
 ### Mensajes BGP:
 
@@ -133,4 +133,5 @@ BGP usa el `finite state machine` (FSM) para mantener una tabla de puntos BGP en
 
 En la figura se muestra BGP FSM y los estados.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/628ca403d621dc3d5f0000ceed1dfffd160e84d8/11.%20BGP/BGP%206.PNG)
+
