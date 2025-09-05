@@ -153,5 +153,50 @@ El estado de la conexión cambia a `OpenConfirm`. Si se encuentra un error en el
 - OpenConfirm: BGP espera un mensaje de `KEEPALIVE` o `NOTIFICATION`. Al recibir el mensaje de `KEEPALIVE` de un vecino, el estado cambia a `Established`. Si pasa un error se pasa a `Idle`.
 - Established: Los vecinos BGP intercambian rutas mediante mensajes `UPDATE`. A medida que se reciben los mensajes `UPDATE` y `KEEPALIVE`, el `hold time` se reinicia. Si se acaba el tiempo pasa a `Idle`.
 
-# BGP configuracion basica:
+## BGP configuracion basica:
 
+- Parámetros de sesión BGP: Los parámetros de sesión BGP proporcionan la configuración necesaria para establecer la comunicación con el vecino BGP remoto. La configuración de sesión incluye el ASN del par BGP, la autenticación y los temporizadores de keepalive.
+- Inicialización de Address Family: La Address Family se inicializa en el modo de configuración del enrutador BGP. El anuncio y la sumarizacion de la red se realizan dentro de Address Family.
+- Activar la Address Family en el punto BGP: Para iniciar una sesión, se debe activar una Address Family para un vecino. La dirección IP del router se añade a la tabla de vecinos.
+
+Lo siguiente pasos se siguen para activacion de BGP:
+
+- Paso 1: Inicialice el proceso de enrutamiento BGP con el comando global `router bgp (as-number)`.
+- Paso 2: Define ESTATICAMENTE el RID router id con el comando `bgp router-id (router-id)` cuando el proceso de BGP de inicialice.
+- Pase 3: Identifique la dirección IP y el número de sistema autónomo del vecino BGP con el comando de configuración del enrutador BGP `neighbor (ip-address) remote-as (as-number)`. Si el origen del paquete BGP no coincide con una entrada en la tabla de vecinos, el paquete no se puede asociar a un vecino y se descarta.
+
+> [!NOTE]
+> En IOS XE el address family esta por default en IPV4. El comando de configuración del enrutador BGP `no bgp default ipv4-unicast` deshabilita la activación automática de la AFI IPv4, por lo que se requieren los pasos 4 y 5.
+
+- Paso 4: Inicializa el Address Family con la configuracion BGP. Para el `AFI` es ipv4 o ipv6 y para el `SAFI` es `unicast` o `multicast`.
+- Paso 5: Activa el Address Family del vecino con el comando `neighbor (ip-address) activate`.
+
+El ejemplo 11-2 muestra cómo configurar R1 y R2 mediante la sintaxis CLI del modificador AFI IPv4 predeterminado y opcional. R1 se configura con la Address Family IPv4 predeterminada habilitada, y R2 deshabilita la Address Family IPv4 predeterminada de IOS y la activa manualmente para el vecino específico 10.12.1.1. El comando `no bgp default ipv4-unicast` no es necesario en R2, y BGP funcionará correctamente con prefijos IPv4, pero la estandarización del comportamiento es más sencilla cuando se trabaja con otras familias de direcciones como IPv6.
+
+![Image Alt]()
+
+### Verificar sesiones BGP:
+
+La sesión BGP se verifica con el comando `show bgp afi safi summary`
+
+> [!NOTE]
+> El comando `show ip bgp summary` vino antes de MBGP y no proporcionan una estructura para las capacidades multiprotocolo actuales de BGP. El uso de la sintaxis AFI y SAFI garantiza la coherencia de los comandos, independientemente de la información intercambiada por BGP. Esto se hará más evidente a medida que los ingenieros trabajen con familias de direcciones como IPv6, VPNv4 y VPNv6.
+
+Imagen pra verificar sesion BGP.
+
+![Image Alt]()
+
+Campo|Description general
+:---|:---
+Neighbor|Dirección IP del punto BGP
+V|Version BGP hablado por el punto BGP
+AS|Numero de sistema autonomo del punto BGP
+MsgRcvd|Contador de mensajes recibido del punto BGP
+MsgSent|Contador de mensajes enviados al punto BGP
+TblVer|Ultima version de base de datos BGP enviado al punto BGP
+InQ|Número de mensajes recibidos del par y puestos en cola para ser procesados
+OutQ|Número de mensajes en cola para ser enviados al par
+Up/Down|Tiempo que la sesión BGP está establecida o el estado actual si la sesión no está en un estado establecido
+State/PfxRcd|Estado actual del par BGP o la cantidad de prefijos recibidos del par
+
+El estado de la sesión vecina BGP, los temporizadores y otra información esencial sobre el punto BGP están disponibles con el comando `show bgp afi safi neighbors ip-address`.
