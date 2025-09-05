@@ -138,7 +138,7 @@ En la figura se muestra BGP FSM y los estados.
 - Idle: Es la primera etapa del FSM de BGP. BGP detecta un evento de inicio e intenta iniciar un TCP.
 - Connect: BGP inicia la conexion BGP, si el TCP 3 hand se completa resetea el `ConnectRetryTimer` y envia el mensaje `Open` al vecino, entonces cambia al estado `OpenSent`. Si el `ConnectRetryTimer` se agota antes de que el episodio se coplete una nueva conexion TCP es intentada. Si la conexion TCP falla el estado pasa a `Active`. BGP usa el TCP en puerto 179 para escuchar las conexiones entrantes.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/847616f49fbe52cf61b0662c0bb3be45fa2105b8/11.%20BGP/BGP%207.PNG)
 
 - Active: BGP inicia un nuevo protocolo de enlace TCP 3 hand. Si se establece una conexión, se envía un mensaje de `Open`, el `temporizador de espera` se establece en 4 minutos y el estado cambia a `OpenSent`. Si este intento de conexión TCP falla, el estado vuelve a Conectar y el `ConnectRetryTimer` se reinicia.
 - OpenSent: Se ha enviado un mensaje `Open` desde el enrutador de origen y se está esperando un mensaje `Open` del otro router. Se examina lo siguiente.
@@ -173,7 +173,7 @@ Lo siguiente pasos se siguen para activacion de BGP:
 
 El ejemplo 11-2 muestra cómo configurar R1 y R2 mediante la sintaxis CLI del modificador AFI IPv4 predeterminado y opcional. R1 se configura con la Address Family IPv4 predeterminada habilitada, y R2 deshabilita la Address Family IPv4 predeterminada de IOS y la activa manualmente para el vecino específico 10.12.1.1. El comando `no bgp default ipv4-unicast` no es necesario en R2, y BGP funcionará correctamente con prefijos IPv4, pero la estandarización del comportamiento es más sencilla cuando se trabaja con otras familias de direcciones como IPv6.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/847616f49fbe52cf61b0662c0bb3be45fa2105b8/11.%20BGP/BGP%208.PNG)
 
 ### Verificar sesiones BGP:
 
@@ -184,7 +184,7 @@ La sesión BGP se verifica con el comando `show bgp afi safi summary`
 
 Imagen pra verificar sesion BGP.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/847616f49fbe52cf61b0662c0bb3be45fa2105b8/11.%20BGP/BGP%209.PNG)
 
 Campo|Description general
 :---|:---
@@ -262,5 +262,5 @@ Next-Hop|Un atributo de ruta BGP obligatorio bien conocido que define la direcci
 Metric|Multiple-exit discrimator (MED). Un atributo de ruta BGP no transitivo opcional utilizado en BGP para la ruta específica.
 LocPrf|Local Preference. Un atributo de ruta BGP discrecional bien conocido que se utiliza en el algoritmo de mejor ruta BGP para la ruta específica.
 Weight|Un atributo definido por Cisco y de importancia local que se utiliza en el algoritmo de mejor ruta de BGP para la ruta específica.
-Path and Origin|AS_Path: Un atributo de ruta BGP obligatorio y well-known, utilizado para la prevención de bucles y en BGP.
-Origen: Un atributo de ruta BGP obligatorio y well-known, utilizado en el algoritmo BGP bestpath. Un valor de i representa un IGP, e indica EGP y ? indica una ruta redistribuida en BGP.
+Path and Origin|AS_Path: Un atributo de ruta BGP obligatorio y well-known, utilizado para la prevención de bucles y en BGP. Origen: Un atributo de ruta BGP obligatorio y well-known, utilizado en el algoritmo BGP bestpath. Un valor de i representa un IGP, e indica EGP y ? indica una ruta redistribuida en BGP.
+
