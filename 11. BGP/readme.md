@@ -135,3 +135,23 @@ En la figura se muestra BGP FSM y los estados.
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/628ca403d621dc3d5f0000ceed1dfffd160e84d8/11.%20BGP/BGP%206.PNG)
 
+- Idle: Es la primera etapa del FSM de BGP. BGP detecta un evento de inicio e intenta iniciar un TCP.
+- Connect: BGP inicia la conexion BGP, si el TCP 3 hand se completa resetea el `ConnectRetryTimer` y envia el mensaje `Open` al vecino, entonces cambia al estado `OpenSent`. Si el `ConnectRetryTimer` se agota antes de que el episodio se coplete una nueva conexion TCP es intentada. Si la conexion TCP falla el estado pasa a `Active`. BGP usa el TCP en puerto 179 para escuchar las conexiones entrantes.
+
+![Image Alt]()
+
+- Active: BGP inicia un nuevo protocolo de enlace TCP 3 hand. Si se establece una conexión, se envía un mensaje de `Open`, el `temporizador de espera` se establece en 4 minutos y el estado cambia a `OpenSent`. Si este intento de conexión TCP falla, el estado vuelve a Conectar y el `ConnectRetryTimer` se reinicia.
+- OpenSent: Se ha enviado un mensaje `Open` desde el enrutador de origen y se está esperando un mensaje `Open` del otro router. Se examina lo siguiente.
+  - Versiones BGP deben ser iguales.
+  - La dirección IP de origen del mensaje `Open` debe coincidir con la dirección IP configurada para el vecino.
+  - ASN deben ser iguales cuando se configura con el vecino.
+  - BGP identificador (RIDs) debe ser unico.
+  - Parametros de seguridad como TTL y contrasena deben ser configurados apropiadamente.
+
+Si los mensajes de APERTURA no contienen errores, se negocia el `hold time` (utilizando el valor más bajo) y se envía un mensaje de KEEPALIVE.
+El estado de la conexión cambia a `OpenConfirm`. Si se encuentra un error en el mensaje de `Open`A, se envía un mensaje de `NOTIFICATION` y el estado vuelve a `Idle`.
+- OpenConfirm: BGP espera un mensaje de `KEEPALIVE` o `NOTIFICATION`. Al recibir el mensaje de `KEEPALIVE` de un vecino, el estado cambia a `Established`. Si pasa un error se pasa a `Idle`.
+- Established: Los vecinos BGP intercambian rutas mediante mensajes `UPDATE`. A medida que se reciben los mensajes `UPDATE` y `KEEPALIVE`, el `hold time` se reinicia. Si se acaba el tiempo pasa a `Idle`.
+
+# BGP configuracion basica:
+
