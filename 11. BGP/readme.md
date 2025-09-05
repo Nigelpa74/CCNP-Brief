@@ -257,10 +257,9 @@ Explicacion de los campos.
 
 Campo|Description general
 :---|:---
-Network|Una lista de los prefijos instalados en BGP. Si existen varias rutas para el mismo prefijo, solo se muestra el primero; las demás rutas dejan un espacio en blanco en la salida. Las válidas se indican con *.La meor ruta se indica con un corchete angular (>).
+Network|Una lista de los prefijos instalados en BGP. Si existen varias rutas para el mismo prefijo, solo se muestra el primero; las demás rutas dejan un espacio en blanco en la salida. Las válidas se indican con *.La meJor ruta se indica con un corchete angular (>).
 Next-Hop|Un atributo de ruta BGP obligatorio bien conocido que define la dirección IP para el siguiente salto para esa ruta específica.
 Metric|Multiple-exit discrimator (MED). Un atributo de ruta BGP no transitivo opcional utilizado en BGP para la ruta específica.
 LocPrf|Local Preference. Un atributo de ruta BGP discrecional bien conocido que se utiliza en el algoritmo de mejor ruta BGP para la ruta específica.
 Weight|Un atributo definido por Cisco y de importancia local que se utiliza en el algoritmo de mejor ruta de BGP para la ruta específica.
 Path and Origin|AS_Path: Un atributo de ruta BGP obligatorio y well-known, utilizado para la prevención de bucles y en BGP. Origen: Un atributo de ruta BGP obligatorio y well-known, utilizado en el algoritmo BGP bestpath. Un valor de i representa un IGP, e indica EGP y ? indica una ruta redistribuida en BGP.
-
