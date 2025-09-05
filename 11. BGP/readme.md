@@ -197,6 +197,70 @@ TblVer|Ultima version de base de datos BGP enviado al punto BGP
 InQ|Número de mensajes recibidos del par y puestos en cola para ser procesados
 OutQ|Número de mensajes en cola para ser enviados al par
 Up/Down|Tiempo que la sesión BGP está establecida o el estado actual si la sesión no está en un estado establecido
-State/PfxRcd|Estado actual del par BGP o la cantidad de prefijos recibidos del par
+State/PfxRcd|Estado actual del par BGP o la cantidad de prefijos recibidos del punto BGP
 
 El estado de la sesión vecina BGP, los temporizadores y otra información esencial sobre el punto BGP están disponibles con el comando `show bgp afi safi neighbors ip-address`.
+
+![Image Alt]()
+![Image Alt]()
+![Image Alt]()
+
+### Anunciado de rutas:
+
+Las declaraciones de red BGP no habilitan BGP para una interfaz específica; en cambio, identifican prefijos de red específicos que se instalarán en la tabla BGP, conocidos como `Loc-RIB`.
+Despues de configurar un `BGP network` estado, el proceso BGP procesa busquedas en la `RIB` rutas de un prefijo que encaje con a red exacta. Despues de comprobarlo lo siguiente pasa.
+
+- Connected Network (C): El atributo BGP del siguiente salto se establece en 0.0.0.0, el atributo de origen BGP se establece en i (IGP) y el peso BGP se establece en 32.768.
+- Ruta estatica o procolo de enrutamiento: El atributo BGP del siguiente salto se establece en la dirección IP del siguiente salto en la RIB, el atributo de origen BGP se establece en i (IGP) y el peso BGP se establece en 32 768.
+
+Una vez configurados los PA BGP, la ruta se instala en Loc-RIB (la tabla BGP). Solo si cumplen ciertas condiciones.
+- Paso 1: Pase una comprobación de validez. Verifique que el NLRI sea válido y que la dirección del siguiente salto se pueda resolver en el RIB. SINO RIP.
+- Paso 2: Procesar las políticas de rutas vecinas salientes. Tras el procesamiento, si una ruta no fue denegada por las políticas de salida, se conserva en Adj-RIB-Out para su posterior consulta.
+- Paso 3: Anunciar las rutas a los pares BGP. Si el PA BGP del siguiente salto es 0.0.0.0 para los prefijos del PA NLRI, la dirección del siguiente salto se cambia a la dirección IP de la sesión BGP.
+
+Imagen para el proceso mencionado.
+
+![Image Alt]()
+
+> [!NOTE]
+> BGP solo anuncia la mejor ruta de forma predeterminada a otros puntos BGP, independientemente de la cantidad de rutas en Loc-RIB.
+
+La declaración de red reside en la Address Family correspondiente dentro de la configuración del enrutador BGP. El comando `network (network) mask (subnet-mask) [route-map routemap-name]` se utiliza para anunciar redes IPv4. El comando `route-map` opcional proporciona un método para configurar PA BGP específicos cuando la ruta se instala en la Loc-RIB. 
+
+Imagen para mostrar como se anuncia desde 2 perspectivas del Address Family automatico y no auto.
+
+![Image Alt]()
+
+### Recepción y visualización de rutas:
+
+BGP utiliza tres tablas para mantener el prefijo de red y los atributos de ruta (PA) para una ruta.
+
+- Adj-RIB-In: Contiene las rutas en su formato original (es decir, antes de procesar las políticas de ruta entrantes). Para ahorrar memoria, la tabla se purga después de procesar todas las políticas de ruta.
+- Loc-RIB: Contiene todas las rutas originadas localmente o recibidas de otros puntos BGP. Una vez que las rutas superan la comprobación de validez y accesibilidad del siguiente salto, el algoritmo de mejor ruta de BGP selecciona la mejor ruta para un prefijo específico.
+- Adj-RIB-Out: Contiene las rutas después de que se hayan procesado las políticas de ruta de salida.
+
+No todas las rutas en el Loc-RIB se anuncian a un par BGP ni se instalan en el RIB cuando se reciben de un punto BGP. Se procesa:
+
+- Paso 1: Almacena la ruta en la RIB Adjunta en su estado original y aplique la política de rutas entrantes según el vecino en el que se recibió.
+- Paso 2. Actualice la Loc-RIB con la última entrada. La Adj-RIB se borra para ahorrar memoria.
+- Paso 3. Realice una comprobación de validez para verificar que la ruta sea válida y que la dirección del siguiente salto se pueda resolver en la RIB. Si la ruta falla, permanece en la Adj-RIB, pero no se procesa.
+- Paso 4. Identifique la mejor ruta BGP y pase solo la mejor ruta y sus atributos al paso 5.
+- Paso 5. Instale la ruta de mejor ruta en la RIB, procese la política de rutas salientes, almacene las rutas no descartadas en la Adj-RIB-Out y anuncie a puntos BGP.
+
+La figura 11-9 muestra la lógica completa de procesamiento de ruta BGP.
+
+![Image Alt]()
+
+El comando show bgp afi safi muestra el contenido de la tabla BGP (Loc-RIB) en el router.
+
+Explicacion de los campos.
+
+Campo|Description general
+:---|:---
+Network|Una lista de los prefijos instalados en BGP. Si existen varias rutas para el mismo prefijo, solo se muestra el primero; las demás rutas dejan un espacio en blanco en la salida. Las válidas se indican con *.La meor ruta se indica con un corchete angular (>).
+Next-Hop|Un atributo de ruta BGP obligatorio bien conocido que define la dirección IP para el siguiente salto para esa ruta específica.
+Metric|Multiple-exit discrimator (MED). Un atributo de ruta BGP no transitivo opcional utilizado en BGP para la ruta específica.
+LocPrf|Local Preference. Un atributo de ruta BGP discrecional bien conocido que se utiliza en el algoritmo de mejor ruta BGP para la ruta específica.
+Weight|Un atributo definido por Cisco y de importancia local que se utiliza en el algoritmo de mejor ruta de BGP para la ruta específica.
+Path and Origin|AS_Path: Un atributo de ruta BGP obligatorio y well-known, utilizado para la prevención de bucles y en BGP.
+Origen: Un atributo de ruta BGP obligatorio y well-known, utilizado en el algoritmo BGP bestpath. Un valor de i representa un IGP, e indica EGP y ? indica una ruta redistribuida en BGP.
