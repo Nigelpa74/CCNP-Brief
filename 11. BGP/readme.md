@@ -201,9 +201,9 @@ State/PfxRcd|Estado actual del par BGP o la cantidad de prefijos recibidos del p
 
 El estado de la sesión vecina BGP, los temporizadores y otra información esencial sobre el punto BGP están disponibles con el comando `show bgp afi safi neighbors ip-address`.
 
-![Image Alt]()
-![Image Alt]()
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/1e5c4cf0df680752ed0a152e2d2445c5b2eb306f/11.%20BGP/BGP%2010.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/1e5c4cf0df680752ed0a152e2d2445c5b2eb306f/11.%20BGP/BGP%2011.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/1e5c4cf0df680752ed0a152e2d2445c5b2eb306f/11.%20BGP/BGP%2012.PNG)
 
 ### Anunciado de rutas:
 
@@ -263,3 +263,4 @@ Metric|Multiple-exit discrimator (MED). Un atributo de ruta BGP no transitivo op
 LocPrf|Local Preference. Un atributo de ruta BGP discrecional bien conocido que se utiliza en el algoritmo de mejor ruta BGP para la ruta específica.
 Weight|Un atributo definido por Cisco y de importancia local que se utiliza en el algoritmo de mejor ruta de BGP para la ruta específica.
 Path and Origin|AS_Path: Un atributo de ruta BGP obligatorio y well-known, utilizado para la prevención de bucles y en BGP. Origen: Un atributo de ruta BGP obligatorio y well-known, utilizado en el algoritmo BGP bestpath. Un valor de i representa un IGP, e indica EGP y ? indica una ruta redistribuida en BGP.
+
