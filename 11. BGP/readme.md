@@ -220,7 +220,7 @@ Una vez configurados los PA BGP, la ruta se instala en Loc-RIB (la tabla BGP). S
 
 Imagen para el proceso mencionado.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/1aa8906696610a3b94c70380ebeb5d357dcc9584/11.%20BGP/BGP%2014.PNG)
 
 > [!NOTE]
 > BGP solo anuncia la mejor ruta de forma predeterminada a otros puntos BGP, independientemente de la cantidad de rutas en Loc-RIB.
@@ -229,7 +229,7 @@ La declaración de red reside en la Address Family correspondiente dentro de la 
 
 Imagen para mostrar como se anuncia desde 2 perspectivas del Address Family automatico y no auto.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/1aa8906696610a3b94c70380ebeb5d357dcc9584/11.%20BGP/BGP%2015.PNG)
 
 ### Recepción y visualización de rutas:
 
@@ -249,7 +249,7 @@ No todas las rutas en el Loc-RIB se anuncian a un par BGP ni se instalan en el R
 
 La figura 11-9 muestra la lógica completa de procesamiento de ruta BGP.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/1aa8906696610a3b94c70380ebeb5d357dcc9584/11.%20BGP/BGP%2016.PNG)
 
 El comando show bgp afi safi muestra el contenido de la tabla BGP (Loc-RIB) en el router.
 
@@ -263,4 +263,5 @@ Metric|Multiple-exit discrimator (MED). Un atributo de ruta BGP no transitivo op
 LocPrf|Local Preference. Un atributo de ruta BGP discrecional bien conocido que se utiliza en el algoritmo de mejor ruta BGP para la ruta específica.
 Weight|Un atributo definido por Cisco y de importancia local que se utiliza en el algoritmo de mejor ruta de BGP para la ruta específica.
 Path and Origin|AS_Path: Un atributo de ruta BGP obligatorio y well-known, utilizado para la prevención de bucles y en BGP. Origen: Un atributo de ruta BGP obligatorio y well-known, utilizado en el algoritmo BGP bestpath. Un valor de i representa un IGP, e indica EGP y ? indica una ruta redistribuida en BGP.
+
 
