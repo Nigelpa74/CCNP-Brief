@@ -305,4 +305,44 @@ El ejemplo 11-13 muestra las tablas de enrutamiento BGP en R1 y R2. Observe que 
 ## IPV4 sumarizacion de rutas.
 
 También conocida como agregación de rutas, conserva los recursos del enrutador y acelera el cálculo de la mejor ruta al reducir el tamaño de la tabla. Si bien la mayoría de los proveedores de servicios no aceptan prefijos mayores que /24 para IPv4 (de /25 a /32), Internet, en la actualidad, aún cuenta con más de 940 000 rutas y continúa creciendo. El resumen de rutas es necesario para reducir el tamaño de la tabla BGP para los enrutadores de Internet.
-El resumen de rutas BGP en los enrutadores de borde BGP reduce el cálculo de rutas.
+El resumen de rutas BGP en los **ROUTERS DE BORDE** BGP reduce el cálculo de rutas.
+
+Hay 2 tecnicas de sumarizacion de rutas:
+
+- Estatico: Cree una ruta estática a Null0 para el prefijo de red sumarizada y anuncie el prefijo con un **ESTADO** de red. La desventaja de esta técnica es que la ruta sumarizada siempre se anuncia, incluso si las redes no están disponibles.
+- Dinamico: Configure un prefijo de red de agregación. Cuando las rutas de componentes viables que coinciden con el prefijo de red de agregación entran en la tabla BGP, se crea el prefijo de agregación. El enrutador de origen establece el siguiente salto en Null0 como ruta de descarte para el prefijo de agregación para prevenir bucles.
+
+En ambos métodos de agregación de rutas, se anuncia en BGP un nuevo prefijo de red con una longitud de prefijo más corta. Dado que el prefijo agregado es una nueva ruta, el router sumarizador es el originador de la nueva ruta agregada.
+
+### Agregando direcciones:
+
+El resumen de ruta dinámica se logra con el comando de configuración de Address Family BGP `aggregate-address network subnet-mask [summary-only] [as-set]`.
+
+![Image Alt]()
+
+El ejemplo 11-14 muestra las tablas BGP de R1, R2 y R3 antes de realizar el resumen de ruta. Las redes stub de R1 (172.16.1.0/24, 172.16.2.0/24 y 172.16.3.0/24) se anuncian a través de todos los sistemas autónomos, junto con las direcciones de bucle invertido de R1, R2 y R3 (192.168.1.1/32, 192.168.2.2/32 y 192.168.3.3/32) y los enlaces de los puntos (10.12.1.0/24 y 10.23.1.0/24).
+
+![Image Alt]()
+![Image Alt]()
+
+El R1 agrupa todas las redes stub (172.16.1.0/24, 172.16.2.0/24 y 172.16.3.0/24) en una ruta resumen 172.16.0.0/20. El R2 agrupa todas las direcciones de bucle invertido del router en una ruta resumen 192.168.0.0/16.
+
+![Image Alt]()
+![Image Alt]()
+
+Despues de sumarizacion.
+
+![Image Alt]()
+![Image Alt]()
+
+Observe que las rutas de resumen 172.16.0.0/20 y 192.168.0.0/16 son visibles, pero las rutas de componente más pequeñas aún existen en todos los enrutadores. El comando "aggregate-address" anuncia la ruta de resumen además de las rutas de componente originales. El uso de la palabra clave opcional "summary-only" suprime las rutas de componente y solo se anuncia la ruta de resumen. El ejemplo 11-17 muestra la configuración con la palabra clave "summary-only".
+
+![Image Alt]()
+
+Tablas de R2 despues de la sumarizacion con "summary-only".
+
+![Image Alt]()
+
+El ejemplo 11-20 muestra que se han suprimido las redes stub del R1 y que la ruta de descarte de resumen para la red 172.16.0.0/20 también se ha instalado en el RIB.
+
+![Image Alt]()
