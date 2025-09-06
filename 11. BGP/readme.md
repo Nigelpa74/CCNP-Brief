@@ -265,3 +265,44 @@ Metric|Multiple-exit discrimator (MED). Un atributo de ruta BGP no transitivo op
 LocPrf|Local Preference. Un atributo de ruta BGP discrecional bien conocido que se utiliza en el algoritmo de mejor ruta BGP para la ruta específica.
 Weight|Un atributo definido por Cisco y de importancia local que se utiliza en el algoritmo de mejor ruta de BGP para la ruta específica.
 Path and Origin|AS_Path: Un atributo de ruta BGP obligatorio y well-known, utilizado para la prevención de bucles y en BGP. Origen: Un atributo de ruta BGP obligatorio y well-known, utilizado en el algoritmo BGP bestpath. Un valor de i representa un IGP, e indica EGP y ? indica una ruta redistribuida en BGP.
+
+El comando `show bgp afi safi network` muestra todas las rutas para un prefijo específico y los atributos de ruta BGP para ese prefijo.
+
+![Image Alt]()
+
+> [!NOTE]
+> El comando `show bgp afi safi detail` muestra la tabla BGP completa.
+
+La Adj-RIB-Out es una tabla única que se mantiene para cada punto BGP. El comando `show bgp afi safi neighbor ip-address adverted route` muestra el contenido de la Adj-RIB-Out del router vecino específico.
+
+![Image Alt]()
+
+> [!NOTE]
+> El comando `show bgp ipv4 unicast summary` también se puede usar para verificar el intercambio de rutas entre nodos.
+
+### Anuncios de rutas BGP de fuentes indirectas:
+
+BGP debe considerarse como una aplicación de enrutamiento, ya que la sesión BGP y el anuncio de ruta son dos componentes separados. En lo siguiente se menctra las instalaciones de diferentes rutas aprendidos por EIGRP, OSPF y estatico.
+
+![Image Alt]()
+
+Tabla de R1
+
+![Image Alt]()
+
+Comandos donde se usa el estado `network` para la instalacion de las rutas por eigrp y estatica. OSPF se REDISTRIBUYE.
+
+![Image Alt]()
+
+> [!NOTE]
+> Redistribuir las rutas aprendidas de un IGP a BGP es completamente seguro; sin embargo, las rutas aprendidas de BGP deben redistribuirse a un IGP con precaución ya que lo sobrecargara con mas 1 MM de rutas.
+
+El ejemplo 11-13 muestra las tablas de enrutamiento BGP en R1 y R2. Observe que en R1, el siguiente salto coincide con el siguiente salto aprendido de la RIB, la ruta AS_Path está vacía y el código de origen es `IGP` (para rutas aprendidas de la declaración de red) o *incomplete* (redistribuido). La métrica se transfiere de los protocolos de enrutamiento IGP de R3 y R5 y se refleja como el MED. R2 aprende las rutas estrictamente de eBGP y solo ve el MED y los códigos de origen.
+
+![Image Alt]()
+![Image Alt]()
+
+## IPV4 sumarizacion de rutas.
+
+También conocida como agregación de rutas, conserva los recursos del enrutador y acelera el cálculo de la mejor ruta al reducir el tamaño de la tabla. Si bien la mayoría de los proveedores de servicios no aceptan prefijos mayores que /24 para IPv4 (de /25 a /32), Internet, en la actualidad, aún cuenta con más de 940 000 rutas y continúa creciendo. El resumen de rutas es necesario para reducir el tamaño de la tabla BGP para los enrutadores de Internet.
+El resumen de rutas BGP en los enrutadores de borde BGP reduce el cálculo de rutas.
