@@ -1,4 +1,4 @@
-<img width="888" height="611" alt="image" src="https://github.com/user-attachments/assets/6d9a3cc3-409f-410e-865a-b815b4582e19" /># BGP:
+# BGP:
 
 ## Fundamentos de BGP:
 
@@ -323,27 +323,29 @@ El resumen de ruta dinámica se logra con el comando de configuración de Addres
 El ejemplo 11-14 muestra las tablas BGP de R1, R2 y R3 antes de realizar el resumen de ruta. Las redes stub de R1 (172.16.1.0/24, 172.16.2.0/24 y 172.16.3.0/24) se anuncian a través de todos los sistemas autónomos, junto con las direcciones de bucle invertido de R1, R2 y R3 (192.168.1.1/32, 192.168.2.2/32 y 192.168.3.3/32) y los enlaces de los puntos (10.12.1.0/24 y 10.23.1.0/24).
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2025.PNG)
-![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2026.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/bb70bde854f14f6998ffb3fb5fa60f2061380d16/11.%20BGP/BGP%2027.PNG)
 
 El R1 agrupa todas las redes stub (172.16.1.0/24, 172.16.2.0/24 y 172.16.3.0/24) en una ruta resumen 172.16.0.0/20. El R2 agrupa todas las direcciones de bucle invertido del router en una ruta resumen 192.168.0.0/16.
 
-![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2027.PNG)
-![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2028.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/bb70bde854f14f6998ffb3fb5fa60f2061380d16/11.%20BGP/BGP%2028.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/bb70bde854f14f6998ffb3fb5fa60f2061380d16/11.%20BGP/BGP%2029.PNG)
 
 Despues de sumarizacion.
 
-![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2029.PNG)
-![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2030.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/bb70bde854f14f6998ffb3fb5fa60f2061380d16/11.%20BGP/BGP%2030.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/bb70bde854f14f6998ffb3fb5fa60f2061380d16/11.%20BGP/BGP%2031.PNG)
 
 Observe que las rutas de resumen 172.16.0.0/20 y 192.168.0.0/16 son visibles, pero las rutas de componente más pequeñas aún existen en todos los enrutadores. El comando "aggregate-address" anuncia la ruta de resumen además de las rutas de componente originales. El uso de la palabra clave opcional "summary-only" suprime las rutas de componente y solo se anuncia la ruta de resumen. El ejemplo 11-17 muestra la configuración con la palabra clave "summary-only".
 
-![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2031.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/bb70bde854f14f6998ffb3fb5fa60f2061380d16/11.%20BGP/BGP%2032.PNG)
 
 Tablas de R2 despues de la sumarizacion con "summary-only".
 
-![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2032.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/bb70bde854f14f6998ffb3fb5fa60f2061380d16/11.%20BGP/BGP%2033.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/bb70bde854f14f6998ffb3fb5fa60f2061380d16/11.%20BGP/BGP%2034.PNG)
 
 El ejemplo 11-20 muestra que se han suprimido las redes stub del R1 y que la ruta de descarte de resumen para la red 172.16.0.0/20 también se ha instalado en el RIB.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/bb70bde854f14f6998ffb3fb5fa60f2061380d16/11.%20BGP/BGP%2035.PNG)
+
 
