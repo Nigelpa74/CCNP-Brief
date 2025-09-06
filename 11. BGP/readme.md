@@ -1,4 +1,4 @@
-# BGP:
+<img width="888" height="611" alt="image" src="https://github.com/user-attachments/assets/6d9a3cc3-409f-410e-865a-b815b4582e19" /># BGP:
 
 ## Fundamentos de BGP:
 
@@ -268,14 +268,14 @@ Path and Origin|AS_Path: Un atributo de ruta BGP obligatorio y well-known, utili
 
 El comando `show bgp afi safi network` muestra todas las rutas para un prefijo específico y los atributos de ruta BGP para ese prefijo.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/34db4bdeb2911c4233071470a958ba73823186a0/11.%20BGP/BGP%2017.PNG)
 
 > [!NOTE]
 > El comando `show bgp afi safi detail` muestra la tabla BGP completa.
 
 La Adj-RIB-Out es una tabla única que se mantiene para cada punto BGP. El comando `show bgp afi safi neighbor ip-address adverted route` muestra el contenido de la Adj-RIB-Out del router vecino específico.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/34db4bdeb2911c4233071470a958ba73823186a0/11.%20BGP/BGP%2018.PNG)
 
 > [!NOTE]
 > El comando `show bgp ipv4 unicast summary` también se puede usar para verificar el intercambio de rutas entre nodos.
@@ -284,23 +284,23 @@ La Adj-RIB-Out es una tabla única que se mantiene para cada punto BGP. El coman
 
 BGP debe considerarse como una aplicación de enrutamiento, ya que la sesión BGP y el anuncio de ruta son dos componentes separados. En lo siguiente se menctra las instalaciones de diferentes rutas aprendidos por EIGRP, OSPF y estatico.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/34db4bdeb2911c4233071470a958ba73823186a0/11.%20BGP/BGP%2019.PNG)
 
 Tabla de R1
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/34db4bdeb2911c4233071470a958ba73823186a0/11.%20BGP/BGP%2020.PNG)
 
 Comandos donde se usa el estado `network` para la instalacion de las rutas por eigrp y estatica. OSPF se REDISTRIBUYE.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/34db4bdeb2911c4233071470a958ba73823186a0/11.%20BGP/BGP%2021.PNG)
 
 > [!NOTE]
 > Redistribuir las rutas aprendidas de un IGP a BGP es completamente seguro; sin embargo, las rutas aprendidas de BGP deben redistribuirse a un IGP con precaución ya que lo sobrecargara con mas 1 MM de rutas.
 
 El ejemplo 11-13 muestra las tablas de enrutamiento BGP en R1 y R2. Observe que en R1, el siguiente salto coincide con el siguiente salto aprendido de la RIB, la ruta AS_Path está vacía y el código de origen es `IGP` (para rutas aprendidas de la declaración de red) o *incomplete* (redistribuido). La métrica se transfiere de los protocolos de enrutamiento IGP de R3 y R5 y se refleja como el MED. R2 aprende las rutas estrictamente de eBGP y solo ve el MED y los códigos de origen.
 
-![Image Alt]()
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/34db4bdeb2911c4233071470a958ba73823186a0/11.%20BGP/BGP%2022.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/34db4bdeb2911c4233071470a958ba73823186a0/11.%20BGP/BFP%2023.PNG)
 
 ## IPV4 sumarizacion de rutas.
 
@@ -318,31 +318,32 @@ En ambos métodos de agregación de rutas, se anuncia en BGP un nuevo prefijo de
 
 El resumen de ruta dinámica se logra con el comando de configuración de Address Family BGP `aggregate-address network subnet-mask [summary-only] [as-set]`.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/34db4bdeb2911c4233071470a958ba73823186a0/11.%20BGP/BGP%2024.PNG)
 
 El ejemplo 11-14 muestra las tablas BGP de R1, R2 y R3 antes de realizar el resumen de ruta. Las redes stub de R1 (172.16.1.0/24, 172.16.2.0/24 y 172.16.3.0/24) se anuncian a través de todos los sistemas autónomos, junto con las direcciones de bucle invertido de R1, R2 y R3 (192.168.1.1/32, 192.168.2.2/32 y 192.168.3.3/32) y los enlaces de los puntos (10.12.1.0/24 y 10.23.1.0/24).
 
-![Image Alt]()
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2025.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2026.PNG)
 
 El R1 agrupa todas las redes stub (172.16.1.0/24, 172.16.2.0/24 y 172.16.3.0/24) en una ruta resumen 172.16.0.0/20. El R2 agrupa todas las direcciones de bucle invertido del router en una ruta resumen 192.168.0.0/16.
 
-![Image Alt]()
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2027.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2028.PNG)
 
 Despues de sumarizacion.
 
-![Image Alt]()
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2029.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2030.PNG)
 
 Observe que las rutas de resumen 172.16.0.0/20 y 192.168.0.0/16 son visibles, pero las rutas de componente más pequeñas aún existen en todos los enrutadores. El comando "aggregate-address" anuncia la ruta de resumen además de las rutas de componente originales. El uso de la palabra clave opcional "summary-only" suprime las rutas de componente y solo se anuncia la ruta de resumen. El ejemplo 11-17 muestra la configuración con la palabra clave "summary-only".
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2031.PNG)
 
 Tablas de R2 despues de la sumarizacion con "summary-only".
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/11fbf754f8fcf165e3d3c3771edd512170da097b/11.%20BGP/BGP%2032.PNG)
 
 El ejemplo 11-20 muestra que se han suprimido las redes stub del R1 y que la ruta de descarte de resumen para la red 172.16.0.0/20 también se ha instalado en el RIB.
 
 ![Image Alt]()
+
