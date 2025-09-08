@@ -1,12 +1,10 @@
-# BGP:
-
-## Fundamentos de BGP:
+# Fundamentos de BGP:
 
 RFC 1654 define el Protocolo de Puerta de Enlace Fronteriza (BGP) como un protocolo de enrutamiento estandarizado EGP que proporciona escalabilidad, flexibilidad y estabilidad de red. 
 BGP es el único protocolo utilizado para intercambiar redes en Internet que al momento cuenta con más de 940.000 prefijos de red IPv4 y más de 180.000 prefijos de red IPv6 y continúa creciendo.
 En la perspectiva de BGP es una coleccion de routers dentro del control de una misma organizacion.
 
-### Numeros de sistemas autonomos (ASN):
+## Numeros de sistemas autonomos (ASN):
 
 Los ASN eran originalmente de 2 bytes (rango de 16 bits), lo que hizo posible 65.535 ASN. Despues de agotarse con ayuda del `RFC 4893` se expandio a 4 bytes (32 bits) 4,294,967,295 ASN.
 
@@ -18,7 +16,7 @@ La Autoridad de Números Asignados de Internet (IANA) es responsable de asignar 
 - Prueba de que la conectividad a Internet se proporciona a través de múltiples conexiones.
 - Necesidad de una política de enrutamiento única por parte de los proveedores.
 
-### Atributos de ruta:
+## Atributos de ruta:
 
 BGP utiliza atributos de ruta (PA) asociados a cada ruta de red. Los PA proporcionan a BGP granularidad y control de las políticas de enrutamiento dentro de BGP.
 
@@ -30,7 +28,7 @@ BGP utiliza atributos de ruta (PA) asociados a cada ruta de red. Los PA proporci
 Según RFC 4271, los WELL-KNOW deben ser reconocidos por todas las implementaciones de BGP, para el DISCRETIONARY pueden o no incluirse con un anuncio de prefijo.
 Los atributos opcionales no tienen que ser reconocidos por todas las implementaciones de BGP.
 
-### Prevention de LOOP
+## Prevention de LOOP
 
 BGP es un protocolo de enrutamiento por vector de ruta y no contiene una topología completa de la red.
 
@@ -38,7 +36,7 @@ El atributo BGP AS_Path es un atributo obligatorio bien conocido e incluye una l
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/628ca403d621dc3d5f0000ceed1dfffd160e84d8/11.%20BGP/BGP%201.PNG)
 
-### Address Families:
+## Address Families:
 
 Originalmente BGP se diseñó para el enrutamiento de prefijos IPv4. 
 
@@ -48,7 +46,7 @@ Originalmente BGP se diseñó para el enrutamiento de prefijos IPv4.
 Una familia de direcciones se correlaciona con un protocolo de red específico como IPv4 o IPv6 y se proporciona granularidad adicional a través de un `subsequent addressfamily identifier` (SAFI) como unicast or multicast.
 En BGP, `Network Layer Reachability Information ` (NLRI) es la longitud del prefijo y el prefijo.
 
-### Comunicación entre ROUTERS:
+## Comunicación entre ROUTERS:
 
 BGP no utiliza paquetes de saludo para descubrir vecinos. BGP se diseñó como un protocolo de enrutamiento autónomo. Los vecinos BGP se definen por dirección IP.
 
@@ -71,7 +69,7 @@ Tipos de sesiones BGP:
 - Internal BGP (iBGP): Sesiones establecidas con un enrutador iBGP que se encuentran en el mismo AS. Distancia administrativa (AD) de 200 al momento de la instalación en la RIB del enrutador.
 - BGP externo (eBGP): sesiones establecidas con un enrutador BGP que se encuentra en un AS diferente. Con AD de 20
 
-### iBGP:
+## iBGP:
 
 La necesidad de BGP dentro de un sistema autónomo (AS) suele surgir cuando se requieren múltiples políticas de enrutamiento o cuando se proporciona conectividad de tránsito entre sistemas autónomos. 
 
@@ -89,7 +87,7 @@ Se podría suponer que redistribuir la tabla BGP en un IGP soluciona el problema
 - Enrutamiento personalizado: Los protocolos de estado de enlace y los protocolos de enrutamiento por vector de distancia utilizan la métrica como método principal para la selección de rutas. Los protocolos IGP siempre utilizan este patrón de enrutamiento para la selección de rutas. BGP utiliza varios pasos para identificar la mejor ruta y permite que los atributos de ruta BGP manipulen la ruta de un prefijo.
 - Atributos de ruta: No se pueden mantener todos los atributos de ruta BGP dentro de los protocolos IGP.
 
-### eBGP:
+## eBGP:
 
 Los puntos eBGP son el componente central de BGP en Internet. Tienen los siguientes comportamietos en comparacion de iBGP.
 
@@ -104,7 +102,7 @@ La Figura 11-5 muestra las sesiones eBGP e iBGP necesarias entre los enrutadores
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/628ca403d621dc3d5f0000ceed1dfffd160e84d8/11.%20BGP/BGP%205.PNG)
 
-### Mensajes BGP:
+## Mensajes BGP:
 
 Nombre|Description general
 :---|:---
@@ -120,7 +118,7 @@ KEEPALIVE|Se asegura que los vecinos BGP estan activos.
 - Update: Un mensaje de ACTUALIZACIÓN anuncia las rutas viables. Incluye los prefijos anunciados en la `Network Layer Reachability Information` (NLRI). Los prefijos que deben retirarse se anuncian en el campo "RUTAS RETIRADAS" del mensaje de ACTUALIZACIÓN. Un mensaje de ACTUALIZACIÓN puede actuar como un mecanismo de `Keepalive` para reducir el tráfico innecesario. Al recibir una ACTUALIZACIÓN, el temporizador de retención se restablece a su valor inicial. Si el temporizador de retención llega a cero, la sesión BGP se interrumpe, las rutas de ese vecino se eliminan y se envía un mensaje de ACTUALIZACIÓN a otros vecinos BGP para retirar los prefijos afectados.
 - Notification: Como un temporizador de retención que expira, un cambio en las capacidades del vecino o una solicitud de restablecimiento de sesión BGP.
 
-### Estados de vecino BGP:
+## Estados de vecino BGP:
 
 BGP usa el `finite state machine` (FSM) para mantener una tabla de puntos BGP en estatus operacional.
 
@@ -153,7 +151,7 @@ El estado de la conexión cambia a `OpenConfirm`. Si se encuentra un error en el
 - OpenConfirm: BGP espera un mensaje de `KEEPALIVE` o `NOTIFICATION`. Al recibir el mensaje de `KEEPALIVE` de un vecino, el estado cambia a `Established`. Si pasa un error se pasa a `Idle`.
 - Established: Los vecinos BGP intercambian rutas mediante mensajes `UPDATE`. A medida que se reciben los mensajes `UPDATE` y `KEEPALIVE`, el `hold time` se reinicia. Si se acaba el tiempo pasa a `Idle`.
 
-## BGP configuracion basica:
+# BGP configuracion basica:
 
 - Parámetros de sesión BGP: Los parámetros de sesión BGP proporcionan la configuración necesaria para establecer la comunicación con el vecino BGP remoto. La configuración de sesión incluye el ASN del par BGP, la autenticación y los temporizadores de keepalive.
 - Inicialización de Address Family: La Address Family se inicializa en el modo de configuración del enrutador BGP. El anuncio y la sumarizacion de la red se realizan dentro de Address Family.
@@ -175,7 +173,7 @@ El ejemplo 11-2 muestra cómo configurar R1 y R2 mediante la sintaxis CLI del mo
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/847616f49fbe52cf61b0662c0bb3be45fa2105b8/11.%20BGP/BGP%208.PNG)
 
-### Verificar sesiones BGP:
+## Verificar sesiones BGP:
 
 La sesión BGP se verifica con el comando `show bgp afi safi summary`
 
@@ -205,7 +203,7 @@ El estado de la sesión vecina BGP, los temporizadores y otra información esenc
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/1e5c4cf0df680752ed0a152e2d2445c5b2eb306f/11.%20BGP/BGP%2011.PNG)
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/1e5c4cf0df680752ed0a152e2d2445c5b2eb306f/11.%20BGP/BGP%2012.PNG)
 
-### Anunciado de rutas:
+## Anunciado de rutas:
 
 Las declaraciones de red BGP no habilitan BGP para una interfaz específica; en cambio, identifican prefijos de red específicos que se instalarán en la tabla BGP, conocidos como `Loc-RIB`.
 Despues de configurar un `BGP network` estado, el proceso BGP procesa busquedas en la `RIB` rutas de un prefijo que encaje con a red exacta. Despues de comprobarlo lo siguiente pasa.
@@ -231,7 +229,7 @@ Imagen para mostrar como se anuncia desde 2 perspectivas del Address Family auto
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/edcd51fda694f184d236405b5ac0121aaddc1869/11.%20BGP/BGP%2014.PNG)
 
-### Recepción y visualización de rutas:
+## Recepción y visualización de rutas:
 
 BGP utiliza tres tablas para mantener el prefijo de red y los atributos de ruta (PA) para una ruta.
 
@@ -280,7 +278,7 @@ La Adj-RIB-Out es una tabla única que se mantiene para cada punto BGP. El coman
 > [!NOTE]
 > El comando `show bgp ipv4 unicast summary` también se puede usar para verificar el intercambio de rutas entre nodos.
 
-### Anuncios de rutas BGP de fuentes indirectas:
+## Anuncios de rutas BGP de fuentes indirectas:
 
 BGP debe considerarse como una aplicación de enrutamiento, ya que la sesión BGP y el anuncio de ruta son dos componentes separados. En lo siguiente se menctra las instalaciones de diferentes rutas aprendidos por EIGRP, OSPF y estatico.
 
@@ -302,7 +300,7 @@ El ejemplo 11-13 muestra las tablas de enrutamiento BGP en R1 y R2. Observe que 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/34db4bdeb2911c4233071470a958ba73823186a0/11.%20BGP/BGP%2022.PNG)
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/34db4bdeb2911c4233071470a958ba73823186a0/11.%20BGP/BFP%2023.PNG)
 
-## IPV4 sumarizacion de rutas.
+# IPV4 sumarizacion de rutas.
 
 También conocida como agregación de rutas, conserva los recursos del enrutador y acelera el cálculo de la mejor ruta al reducir el tamaño de la tabla. Si bien la mayoría de los proveedores de servicios no aceptan prefijos mayores que /24 para IPv4 (de /25 a /32), Internet, en la actualidad, aún cuenta con más de 940 000 rutas y continúa creciendo. El resumen de rutas es necesario para reducir el tamaño de la tabla BGP para los enrutadores de Internet.
 El resumen de rutas BGP en los **ROUTERS DE BORDE** BGP reduce el cálculo de rutas.
@@ -314,7 +312,7 @@ Hay 2 tecnicas de sumarizacion de rutas:
 
 En ambos métodos de agregación de rutas, se anuncia en BGP un nuevo prefijo de red con una longitud de prefijo más corta. Dado que el prefijo agregado es una nueva ruta, el router sumarizador es el originador de la nueva ruta agregada.
 
-### Agregando direcciones:
+## Agregando direcciones:
 
 El resumen de ruta dinámica se logra con el comando de configuración de Address Family BGP `aggregate-address network subnet-mask [summary-only] [as-set]`.
 
@@ -348,4 +346,36 @@ El ejemplo 11-20 muestra que se han suprimido las redes stub del R1 y que la rut
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/bb70bde854f14f6998ffb3fb5fa60f2061380d16/11.%20BGP/BGP%2035.PNG)
 
+## Atomic Aggregate:
 
+Las rutas sumarizadas funcionan como nuevas rutas BGP con una longitud de prefijo más corta. Cuando un enrutador BGP resume una ruta, no publica la información de AS_Path anterior al resumen. Los atributos de ruta BGP como AS_Path, MED y comunidades BGP no se incluyen en el nuevo anuncio BGP.
+
+El atributo de **Atomic Aggregate** indica que se ha producido una pérdida de información de ruta. Para demostrarlo mejor en la siguiente imagen, se ha eliminado el resumen de ruta BGP anterior en R1 y se ha añadido a R2, de modo que R2 ahora resume las redes 172.16.0.0/20 y 192.168.0.0/16 con supresión de ruta específica mediante la palabra clave "**summary-only**".
+
+![Image Alt]()
+
+En lo siguiente se muestra las tablas de R2, R3 y R2 resume y suprime las redes stub de R1 (172.16.1.0/24, 172.16.2.0/24 y 172.16.3.0/24) en la ruta de resumen 172.16.0.0/20. Las rutas componentes mantienen un AS_Path de 65100 en R2 (**Solo en R2**), mientras que la ruta de resumen 172.16.0.0/20 en R3 aparece generada localmente por R2.
+
+![Image Alt]()
+
+En la siguiente imagen se muestra la ruta sumarizada 17.16.0.0/20 en router 3. La información del router indica que el enrutador con el RID 192.168.2.2 sumarizo (agregó) las rutas en AS 65200.
+
+## Agregación de rutas con AS_SET:
+
+Para mantener el historial de información de la ruta BGP (paso de ASN), se puede usar la palabra clave opcional `as-set` con el comando de `aggregate address`. A medida que el enrutador genera la ruta resumida, se copia la información de la ruta BGP de las rutas componentes. Ejemplo en R2.
+
+![Image Alt]()
+
+y asi es como se muestra en el R3 despues del comando reconfigurado con `as-set`
+
+![Image Alt]()
+
+¿Observaste que la ruta resumida 192.168.0.0/16 ya no está presente en la tabla BGP de R3? y de echo lo estara e R1, el motivo es que R2 esta sumarizando la red 192.168.0.0/16 donde estan la **LOOPBACK DE R1 Y R3** al generalizar las rutas de loopbacks traen consigo su ASN que son 65100 y 65300 que serian detectados como LOOP por parte de BGP. Imagen de R2 en `aggregate-address` y su tabla BGP.
+
+![Image Alt]()
+
+Ejemplo de que R1 no importa 192.168.0.0/16 de R2 por detectar el AS65100 de su propia loopback que es anunciada por R2.
+
+![Image Alt]()
+
+##
