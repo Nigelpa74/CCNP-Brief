@@ -417,7 +417,7 @@ Todas las reglas de configuración de BGP mostradas anteriormente se aplican a I
 La sesión TCP utilizada por BGP es un protocolo de capa 4 y puede usar una dirección IPv4 o IPv6 para establecer la adyacencia de sesión e intercambiar rutas. _Publicitar prefijos IPv6 en una sesión BGP IPv4 es factible, pero queda fuera del alcance de este libro, ya que requiere configuración adicional (INVENTIGACION FUTURA)_.
 
 > [!IMPORTANT]
-> El direccionamiento **Unique global unicast** es el método recomendado para el punto BGP a fin de evitar la complejidad operativa. El punto BGP mediante `Link-local` de enlace puede suponer un riesgo si la dirección no se asigna manualmente a una interfaz. Un fallo de hardware o un cambio de cableado cambiará la dirección MAC, lo que generará una nueva `Link-local` de enlace. Esto provocará el fallo de la sesión, ya que la autoconfiguración de la dirección sin estado generará una nueva dirección IP.
+> El direccionamiento **Unique global unicast** es el método recomendado para el punto BGP a fin de evitar la complejidad operativa. El punto BGP mediante `Link-local` de enlace puede suponer un riesgo si la dirección no se asigna manualmente a una interfaz. Un fallo de hardware o un cambio de cableado cambiará la dirección MAC, lo que generará una nueva `Link-local` de enlace. Esto provocará el fallo de la sesión, ya que la autoconfiguración de la dirección sin estado (SLAAC **DHCP para IPV6**) generará una nueva dirección IP.
 
 El ejemplo 11-28 muestra la configuración BGP de IPv6 para R1, R2 y R3. El punto utiliza direccionamiento **global unicast** para establecer la sesión. El RID de BGP se ha configurado en loopback en formato de IPv4. R1 anuncia todas sus redes mediante **redistribución**, y R2 y R3 utilizan la declaración de **network** para anunciar todas sus redes conectadas.
 
@@ -443,3 +443,4 @@ Algunos atributos comunes, como AS_Path, origen y preferencia local, son idénti
 El ejemplo 11-33 muestra las entradas de ruta BGP IPv6 para R2. Observe que la dirección del siguiente salto son `Link-local` de enlace para la dirección de reenvío del siguiente salto, que se resuelve mediante una búsqueda recursiva.
 
 ![Image Alt]()
+
