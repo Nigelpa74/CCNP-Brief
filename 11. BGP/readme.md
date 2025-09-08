@@ -166,7 +166,7 @@ Lo siguiente pasos se siguen para activacion de BGP:
 > [!NOTE]
 > En IOS XE el address family esta por default en IPV4. El comando de configuración del enrutador BGP `no bgp default ipv4-unicast` deshabilita la activación automática de la AFI IPv4, por lo que se requieren los pasos 4 y 5.
 
-- Paso 4: Inicializa el Address Family con la configuracion BGP. Para el `AFI` es ipv4 o ipv6 y para el `SAFI` es `unicast` o `multicast`.
+- Paso 4: Inicializa el Address Family con la configuracion BGP `Ejmplo: Address-family ipv4 unicast`. Para el `AFI` es ipv4 o ipv6 y para el `SAFI` es `unicast` o `multicast`.
 - Paso 5: Activa el Address Family del vecino con el comando `neighbor (ip-address) activate`.
 
 El ejemplo 11-2 muestra cómo configurar R1 y R2 mediante la sintaxis CLI del modificador AFI IPv4 predeterminado y opcional. R1 se configura con la Address Family IPv4 predeterminada habilitada, y R2 deshabilita la Address Family IPv4 predeterminada de IOS y la activa manualmente para el vecino específico 10.12.1.1. El comando `no bgp default ipv4-unicast` no es necesario en R2, y BGP funcionará correctamente con prefijos IPv4, pero la estandarización del comportamiento es más sencilla cuando se trabaja con otras familias de direcciones como IPv6.
@@ -378,4 +378,68 @@ Ejemplo de que R1 no importa 192.168.0.0/16 de R2 por detectar el AS65100 de su 
 
 ![Image Alt]()
 
-##
+# Multiprotocol BGP (MP-BGP) for IPV6:
+
+Permite que BGP transporte rutas para múltiples protocolos, como IPv4, IPv6 y redes privadas virtuales de Capa 3 (L3VPN) con Multiprotocol Label Switching (MPLS).
+
+La **RFC 4760** define las siguientes nuevas características:
+- Un nuevo modelo de identificador de familia de direcciones (AFI)
+- Nuevos atributos opcionales y no transitivos de BGPv4:
+  - NLRI multiprotocolo alcanzable
+  - NLRI multiprotocolo inalcanzable
+
+El nuevo atributo de ruta _NLRI multiprotocolo alcanzable describe la información de la ruta IPv6_, y el atributo _NLRI multiprotocolo inalcanzable retira la ruta IPv6 del servicio_. Los atributos **son opcionales y no transitivos**, por lo que si un router antiguo no los comprende, la información puede ignorarse y descartarse.
+
+Las mismas características y reglas subyacentes del protocolo de enrutamiento por vector de ruta IPv4 también se aplican a MP-BGP para IPv6. MP-BGP para IPv6 continúa utilizando el mismo puerto TCP conocido 179 para el punto de sesiones como el que utiliza BGP para IPv4.
+
+Las extensiones MP-BGP incluyen un identificador de familia de direcciones (AFI) que describe los protocolos compatibles, junto con los campos de atributo del identificador de familia de direcciones (SAFI) que describen si el prefijo se aplica a la tabla de enrutamiento de unidifusión o multidifusión:
+
+- IPv4 unicast: AFI: 1, SAFI: 1
+- IPv6 unicast: AFI: 2, SAFI: 1
+
+Ejemplo de sesiones eBGP dnde se define los `link-local` en cada router iniciando con `FE80::1`. 
+
+> [!IMPORTANT]
+> TOPOLOGIA PARA TODOS LOS EJEMPLOS CON IPV6
+
+![Image Alt]()
+
+## Configuración de IPv6:
+
+Todas las reglas de configuración de BGP mostradas anteriormente se aplican a IPv6, **excepto que la familia de direcciones IPv6 debe inicializarse con IPV6 y el vecino debe activarse**. Los enrutadores con solo direccionamiento IPv6 deben definir estáticamente el RID de BGP para permitir la formación de sesiones.
+
+> [!IMPORTANT]
+> RECUERDO: En IOS XE el address family esta por default en IPV4. El comando de configuración del enrutador BGP `no bgp default ipv4-unicast` deshabilita la activación automática de la AFI IPv4, por lo que se requieren los pasos 4 y 5.
+> 
+> - Paso 4: Inicializa el Address Family con la configuracion BGP `Ejmplo: Address-family ipv4 unicast`. Para el `AFI` es ipv4 o ipv6 y para el `SAFI` es `unicast` o `multicast`.
+> - Paso 5: Activa el Address Family del vecino con el comando `neighbor (ip-address) activate`.
+
+La sesión TCP utilizada por BGP es un protocolo de capa 4 y puede usar una dirección IPv4 o IPv6 para establecer la adyacencia de sesión e intercambiar rutas. _Publicitar prefijos IPv6 en una sesión BGP IPv4 es factible, pero queda fuera del alcance de este libro, ya que requiere configuración adicional (INVENTIGACION FUTURA)_.
+
+> [!IMPORTANT]
+> El direccionamiento **Unique global unicast** es el método recomendado para el punto BGP a fin de evitar la complejidad operativa. El punto BGP mediante `Link-local` de enlace puede suponer un riesgo si la dirección no se asigna manualmente a una interfaz. Un fallo de hardware o un cambio de cableado cambiará la dirección MAC, lo que generará una nueva `Link-local` de enlace. Esto provocará el fallo de la sesión, ya que la autoconfiguración de la dirección sin estado generará una nueva dirección IP.
+
+El ejemplo 11-28 muestra la configuración BGP de IPv6 para R1, R2 y R3. El punto utiliza direccionamiento **global unicast** para establecer la sesión. El RID de BGP se ha configurado en loopback en formato de IPv4. R1 anuncia todas sus redes mediante **redistribución**, y R2 y R3 utilizan la declaración de **network** para anunciar todas sus redes conectadas.
+
+![Image Alt]()
+
+Los routers intercambian AFI durante la negociación inicial de la sesión BGP. El comando `show bgp ipv6 unicast neighbors ip-address [detail]` muestra información detallada sobre si las capacidades IPv6 se negociaron correctamente. El ejemplo 11-29 muestra los campos que deben examinarse para el establecimiento de la sesión IPv6 y el anuncio de ruta.
+
+![Image Alt]()
+
+El comando `show bgp ipv6 unicast summary` muestra un resumen del estado de las sesiones, incluyendo la cantidad de prefijos intercambiados y el tiempo de actividad de la sesión. Ejemplo en R2.
+
+![Image Alt]()
+
+El ejemplo 11-31. Muestra las tablas BGP unicast IPv6 para R1, R2 y R3. Observe que algunas rutas incluyen una dirección no especificada (::) como siguiente salto (**SIENDO IGUAL PARA BGP IPV4 0.0.0.0**). Una dirección no especificada indica que el enrutador **LOCAL** está generando el prefijo para la tabla BGP. El valor de peso 32,768 también indica que el enrutador genera el prefijo **LOCAL**.
+
+![Image Alt]()
+
+Los atributos de ruta BGP para una ruta IPv6 se muestran con el comando `show bgp ipv6 unicast prefix/prefix-length`. El ejemplo 11-32 muestra a R3 examinando loopback de R1.
+Algunos atributos comunes, como AS_Path, origen y preferencia local, son idénticos a los de las rutas IPv4.
+
+![Image Alt]()
+
+El ejemplo 11-33 muestra las entradas de ruta BGP IPv6 para R2. Observe que la dirección del siguiente salto son `Link-local` de enlace para la dirección de reenvío del siguiente salto, que se resuelve mediante una búsqueda recursiva.
+
+![Image Alt]()
