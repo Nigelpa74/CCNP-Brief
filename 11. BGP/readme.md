@@ -352,31 +352,34 @@ Las rutas sumarizadas funcionan como nuevas rutas BGP con una longitud de prefij
 
 El atributo de **Atomic Aggregate** indica que se ha producido una pérdida de información de ruta. Para demostrarlo mejor en la siguiente imagen, se ha eliminado el resumen de ruta BGP anterior en R1 y se ha añadido a R2, de modo que R2 ahora resume las redes 172.16.0.0/20 y 192.168.0.0/16 con supresión de ruta específica mediante la palabra clave "**summary-only**".
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/BGP%20ATOMICO%201.PNG)
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/BGP%20ATOMICO%202.PNG)
 
 En lo siguiente se muestra las tablas de R2, R3 y R2 resume y suprime las redes stub de R1 (172.16.1.0/24, 172.16.2.0/24 y 172.16.3.0/24) en la ruta de resumen 172.16.0.0/20. Las rutas componentes mantienen un AS_Path de 65100 en R2 (**Solo en R2**), mientras que la ruta de resumen 172.16.0.0/20 en R3 aparece generada localmente por R2.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/BGP%20ATOMICO%203.PNG)
 
 En la siguiente imagen se muestra la ruta sumarizada 17.16.0.0/20 en router 3. La información del router indica que el enrutador con el RID 192.168.2.2 sumarizo (agregó) las rutas en AS 65200.
+
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/BGP%20ATOMICO%204.PNG)
 
 ## Agregación de rutas con AS_SET:
 
 Para mantener el historial de información de la ruta BGP (paso de ASN), se puede usar la palabra clave opcional `as-set` con el comando de `aggregate address`. A medida que el enrutador genera la ruta resumida, se copia la información de la ruta BGP de las rutas componentes. Ejemplo en R2.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/BGP%20AS-SET%201.PNG)
 
 y asi es como se muestra en el R3 despues del comando reconfigurado con `as-set`
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/BGP%20AS-SET%202.PNG)
 
 ¿Observaste que la ruta resumida 192.168.0.0/16 ya no está presente en la tabla BGP de R3? y de echo lo estara e R1, el motivo es que R2 esta sumarizando la red 192.168.0.0/16 donde estan la **LOOPBACK DE R1 Y R3** al generalizar las rutas de loopbacks traen consigo su ASN que son 65100 y 65300 que serian detectados como LOOP por parte de BGP. Imagen de R2 en `aggregate-address` y su tabla BGP.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/BGP%20AS-SET%203.PNG)
 
 Ejemplo de que R1 no importa 192.168.0.0/16 de R2 por detectar el AS65100 de su propia loopback que es anunciada por R2.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/BGP%20AS-SET%204.PNG)
 
 # Multiprotocol BGP (MP-BGP) for IPV6:
 
@@ -402,7 +405,7 @@ Ejemplo de sesiones eBGP dnde se define los `link-local` en cada router iniciand
 > [!IMPORTANT]
 > TOPOLOGIA PARA TODOS LOS EJEMPLOS CON IPV6
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/MBGP%20V6%201.PNG)
 
 ## Configuración de IPv6:
 
@@ -421,26 +424,27 @@ La sesión TCP utilizada por BGP es un protocolo de capa 4 y puede usar una dire
 
 El ejemplo 11-28 muestra la configuración BGP de IPv6 para R1, R2 y R3. El punto utiliza direccionamiento **global unicast** para establecer la sesión. El RID de BGP se ha configurado en loopback en formato de IPv4. R1 anuncia todas sus redes mediante **redistribución**, y R2 y R3 utilizan la declaración de **network** para anunciar todas sus redes conectadas.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/MBGP%20V6%202.PNG)
 
 Los routers intercambian AFI durante la negociación inicial de la sesión BGP. El comando `show bgp ipv6 unicast neighbors ip-address [detail]` muestra información detallada sobre si las capacidades IPv6 se negociaron correctamente. El ejemplo 11-29 muestra los campos que deben examinarse para el establecimiento de la sesión IPv6 y el anuncio de ruta.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/MBGP%20V6%203.PNG)
 
 El comando `show bgp ipv6 unicast summary` muestra un resumen del estado de las sesiones, incluyendo la cantidad de prefijos intercambiados y el tiempo de actividad de la sesión. Ejemplo en R2.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/MBGP%20V6%204.PNG)
 
 El ejemplo 11-31. Muestra las tablas BGP unicast IPv6 para R1, R2 y R3. Observe que algunas rutas incluyen una dirección no especificada (::) como siguiente salto (**SIENDO IGUAL PARA BGP IPV4 0.0.0.0**). Una dirección no especificada indica que el enrutador **LOCAL** está generando el prefijo para la tabla BGP. El valor de peso 32,768 también indica que el enrutador genera el prefijo **LOCAL**.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/MBGP%20V6%205.PNG)
 
 Los atributos de ruta BGP para una ruta IPv6 se muestran con el comando `show bgp ipv6 unicast prefix/prefix-length`. El ejemplo 11-32 muestra a R3 examinando loopback de R1.
 Algunos atributos comunes, como AS_Path, origen y preferencia local, son idénticos a los de las rutas IPv4.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/MBGP%20V6%206.PNG)
 
 El ejemplo 11-33 muestra las entradas de ruta BGP IPv6 para R2. Observe que la dirección del siguiente salto son `Link-local` de enlace para la dirección de reenvío del siguiente salto, que se resuelve mediante una búsqueda recursiva.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/MBGP%20V6%207.PNG)
+
 
