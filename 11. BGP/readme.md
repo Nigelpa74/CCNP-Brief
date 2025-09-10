@@ -449,4 +449,20 @@ El ejemplo 11-33 muestra las entradas de ruta BGP IPv6 para R2. Observe que la d
 
 # IPV6 Sumarizacion de rutas:
 
-El mismo proceso de sumarizacion y agregacion para rutas IPv4 ocurre de igual manera con las rutas IPv6, excepto que la configuración se coloca bajo la familia de direcciones IPv6 mediante el comando `agregate-address prefix/prefix-length [summary-only] [as-set]`.
+El mismo proceso de sumarizacion y agregacion para rutas IPv4 ocurre de igual manera con las rutas IPv6, excepto que la configuración se coloca dentro de la Address Family IPv6 mediante el comando `agregate-address prefix/prefix-length [summary-only] [as-set]`.
+
+Repasemos con el ejemplo anterior de IPv6, pero ahora queremos resumir todas las direcciones Loopback (2001:db8:0:1/128, 2001:db8:0:2/128 y 2001:db8:0:3/128) junto con el enlace entre R1 y R2 (2001:db8:0:12/64) en el router R2. La configuración se vería como se muestra en el Ejemplo 11-34.
+
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/ba73cdf79847786b06d92ab7944674499b6ea68f/11.%20BGP/Img/BGP%20IPV6%20SUM/BGP%20IPV6%20SUM%201.PNG)
+
+Ejemplo de como se ve la tabla BGP de R1 y R3 donde es sumarizado en la ruta `2001:db8::/58`.
+
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/ba73cdf79847786b06d92ab7944674499b6ea68f/11.%20BGP/Img/BGP%20IPV6%20SUM/BGP%20IPV6%20SUM%202.PNG)
+
+El resumen de las direcciones Loopback IPv6 (2001:db8::1/128, 2001:db8::2/128 y 2001:db8::3/128) y las redes stub de R1/R3 (2001:db8:0:1::/64 y 2001:db8:0:3::/64) es bastante sencillo, ya que todas se encuentran dentro del rango de resumen base de IPv6 2001:db8:0:0::/64. El cuarto hexteto que comienza con un valor decimal de 1, 2 o 3 consumiría solo 2 bits; el rango podría resumirse fácilmente en el rango de red 2001:db8:0:0::/62 (o 2001:db8::/62). El enlace de intercambio entre R2 y R3 (2001:db8:0:23::/64) requiere primero pensar en hexadecimal, en lugar de decimal. El cuarto hexteto lleva un valor decimal de 35 (no 23), lo que requiere un mínimo de 6 bits. La Tabla 11-5 enumera los bits necesarios para el resumen, la dirección de resumen IPv6 y las redes que lo componen.
+
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/ba73cdf79847786b06d92ab7944674499b6ea68f/11.%20BGP/Img/BGP%20IPV6%20SUM/BGP%20IPV6%20SUM%203.PNG)
+
+# Comandos:
+
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/ba73cdf79847786b06d92ab7944674499b6ea68f/11.%20BGP/Img/BGP%20IPV6%20SUM/BGP%20IPV6%20SUM%20com.PNG)
