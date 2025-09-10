@@ -447,4 +447,6 @@ El ejemplo 11-33 muestra las entradas de ruta BGP IPv6 para R2. Observe que la d
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/9c668db6f48d95c7f2aeccb9783642309a70f429/11.%20BGP/Img/MBGP%20V6%207.PNG)
 
+# IPV6 Sumarizacion de rutas:
 
+El mismo proceso de sumarizacion y agregacion para rutas IPv4 ocurre de igual manera con las rutas IPv6, excepto que la configuración se coloca bajo la familia de direcciones IPv6 mediante el comando `agregate-address prefix/prefix-length [summary-only] [as-set]`.
