@@ -42,7 +42,7 @@ Cuando la red funciona correctamente, el tráfico entre los sitios utiliza la re
 
 Durante una falla de enlace en la red SP, existe la posibilidad de que un router de rama se conecte al router de rama de destino a través de un router de rama intermediario.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/beb580f8f8ca10746df0c2d17744d2b25cfb39bd/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20MULTI/ADV%20BGP%20MULTI%204.PNG)
 
 La conectividad de tránsito no planificada presenta los siguientes problemas:
 - Los circuitos del router de tránsito pueden saturarse porque fueron dimensionados solo para el tráfico de ese sitio y no para el tráfico que los atraviesa.
@@ -97,7 +97,7 @@ Las ACL extendidas reaccionan de forma diferente al coincidir con rutas BGP que 
 Los campos de origen coinciden con la porción de red de la ruta, y los campos de destino coinciden con la máscara de red, como se muestra en la Figura 12-5. 
 Hasta que llego la introducción de las **prefix-list**, donde antes las ACL extendidas eran el único criterio de coincidencia utilizado con BGP.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/beb580f8f8ca10746df0c2d17744d2b25cfb39bd/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20MULTI/ADV%20BGP%20MULTI%205.PNG)
 
 Demuestra el concepto de `wildcard` para la máscara de red y subred.
 
@@ -117,7 +117,7 @@ Se recomienda este método en lugar del de selección de red ACL.
 Una especificación de coincidencia de prefijo consta de dos partes: un patrón de bits de orden superior y un recuento de bits de orden superior, que determina los bits de orden superior del patrón de bits que deben coincidir. En cierta documentación, se hace referencia al patrón de bits de orden superior como la dirección o red, y al recuento de bits de orden superior como la longitud del prefijo o la longitud de la máscara.
 En la Figura 12-6, la especificación de coincidencia de prefijo muestra el patrón de bits de orden superior 192.168.0.0 y el recuento de bits de orden superior 16 convertidos a binario para mostrar dónde se encuentra el recuento de bits de orden superior. Dado que no se incluyen parámetros de longitud de coincidencia adicionales, el recuento de bits de orden superior es una coincidencia exacta.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/beb580f8f8ca10746df0c2d17744d2b25cfb39bd/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20MULTI/ADV%20BGP%20MULTI%206.PNG)
 
 La verdadera potencia y flexibilidad residen en el uso de parámetros de longitud coincidente para identificar múltiples redes con longitudes de prefijo específicas con una sola instrucción las cuales son:
 
@@ -126,14 +126,14 @@ La verdadera potencia y flexibilidad residen en el uso de parámetros de longitu
 
 Ejmplo aplicado. Donde muestra la especificación de coincidencia de prefijo con el patrón de **High-Order Bit** 10.168.0.0 y un recuento de **High-Order Bit es 13**; la longitud de coincidencia del prefijo debe ser mayor o igual a 24.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/beb580f8f8ca10746df0c2d17744d2b25cfb39bd/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20MULTI/ADV%20BGP%20MULTI%207.PNG)
 
 EXPLICACION: El prefijo 10.168.0.0/13 no cumple con el parámetro de longitud de coincidencia porque su longitud es menor que el mínimo de 24 bits, mientras que el prefijo 10.168.0.0/24 sí cumple con el parámetro de longitud de coincidencia. El prefijo 10.173.1.0/28 cumple con los requisitos porque los primeros 13 bits coinciden con el patrón de **High-Order Bit** y la longitud del prefijo se encuentra dentro del parámetro de longitud de coincidencia.
 El prefijo 10.104.0.0/24 no cumple con los requisitos porque el patrón de **High-Order Bit** no coincide con el recuento de **High-Order Bit**.
 
 La figura 12-8 muestra una especificación de coincidencia de prefijo con el patrón de **High-Order Bit** 10.0.0.0, un conteo de **High-Order Bit** de 8 y una longitud de coincidencia entre 22 y 26.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/beb580f8f8ca10746df0c2d17744d2b25cfb39bd/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20MULTI/ADV%20BGP%20MULTI%208.PNG)
 
 EXPLICACION: El prefijo 10.0.0.0/8 no coincide porque su longitud es demasiado corta. La red 10.0.0.0/24 sí es válida porque el patrón de bits coincide y la longitud del prefijo está entre 22 y 26. El prefijo 10.0.0.0/30 no coincide porque su longitud es demasiado larga. Cualquier prefijo que comience con 10 en el primer octeto y tenga una longitud entre 22 y 26 coincidirá.
 
@@ -164,7 +164,7 @@ La lógica de coincidencia de prefijos funciona exactamente igual en redes IPv6 
 
 - Las listas de prefijos de IPv6 se configuran con el comando de configuración global `ipv6 prefix-list prefix-list-name [seq sequence-number] {permit | deny} high-order-bit-pattern/highorder-bit-count [ge ge-value] [le le-value].` Ejemplo.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/beb580f8f8ca10746df0c2d17744d2b25cfb39bd/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20MULTI/ADV%20BGP%20MULTI%209.PNG)
 
 ## Expresiones regulares con (regex):
 
@@ -220,7 +220,7 @@ Un mapa de rutas utiliza el comando `syntax route-map route-map-name [permit | d
 
 Proporciona un ejemplo de Route Map para ilustrar los cuatro componentes de un mapa de rutas mostrados anteriormente. El criterio de Matching condicional se basa en los rangos de red especificados en una ACL.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/beb580f8f8ca10746df0c2d17744d2b25cfb39bd/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20RM/ADV%20BGP%20RM%201.PNG)
 
 > [!WARNING]
 > Al eliminar una instrucción `route-map` específica, incluya el número de secuencia para evitar eliminar el `route-map` completo.
@@ -244,7 +244,7 @@ Comando Match|Descripcion
 Si se configuran varias variables (ACL, prefix-lists, tags, etc.) para una secuencia de **Route map** específica, solo una variable debe coincidir para que el prefijo sea válido. La lógica booleana utiliza un operador OR para esta configuración.
 En el Ejemplo 12-4, la secuencia 10 requiere que un prefijo pase ACL-ONE o ACL-TWO. Observe que la secuencia 20 no tiene una declaración de coincidencia, por lo que todos los prefijos que no se pasen en la secuencia 10 serán válidos y se denegarán.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/beb580f8f8ca10746df0c2d17744d2b25cfb39bd/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20RM/ADV%20BGP%20RM%202.PNG)
 
 Si se configuran varias opciones de coincidencia para una **Sequence de Route Map específica**, ambas deben cumplirse para que el prefijo sea apto para esa secuencia. La lógica booleana utiliza el operador AND para esta configuración.
 En el Ejemplo 12-5, la secuencia 10 requiere que el prefijo coincida con ACL-ONE y que la métrica tenga un valor entre 500 y 600. Si el prefijo no cumple con ambas opciones de coincidencia, no cumple con las condiciones para la secuencia 10 y se deniega porque no existe otra secuencia con una acción de permiso.
@@ -258,6 +258,7 @@ En el Ejemplo 12-5, la secuencia 10 requiere que el prefijo coincida con ACL-ONE
 
 
 # Understanding BGP Path Selection: 
+
 
 
 
