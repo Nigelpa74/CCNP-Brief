@@ -150,9 +150,104 @@ Las listas de prefijos se procesan en orden secuencial descendente, y el primer 
 
 Si no se proporciona una secuencia, el número de secuencia se incrementa automáticamente en 5, basándose en el número de secuencia más alto. La primera entrada es 5. La secuenciación permite eliminar una entrada específica. Dado que las listas de prefijos no se pueden volver a secuenciar, se recomienda dejar suficiente espacio para la inserción de números de secuencia posteriormente.
 
+> [!NOTE]
+> IOS XE requiere que el `ge-value` sea mayor que el conteo de **High-Order Bit** y que el `le-value` sea mayor o igual que el `ge-value`:
+> - _high-order bit count < ge-value <= le-value_
+
+El Ejemplo 12-1 proporciona un ejemplo de lista de prefijos denominada RFC1918 para todas las redes en el rango de direcciones RFC 1918. Esta lista solo permite la existencia de prefijos /32 en el rango de red 192.168.0.0 y no en ningún otro rango de red de la lista.
+
+La secuencia 5 permite todos los prefijos /32 en el patrón de bits 192.168.0.0/16, la secuencia 10 deniega todos los prefijos /32 en cualquier patrón de bits, y las secuencias 15, 20 y 25 permiten rutas en los rangos de red adecuados. El orden de la secuencia es importante para las dos primeras entradas para garantizar que solo existan prefijos /32 en la red 192.168.0.0 de la lista de prefijos.
+
+### IPV6 Prefix List:
+
+La lógica de coincidencia de prefijos funciona exactamente igual en redes IPv6 que en redes IPv4. Lo más importante es recordar que las redes IPv6 se expresan en hexadecimal y no en decimal al identificar rangos.
+
+- Las listas de prefijos de IPv6 se configuran con el comando de configuración global `ipv6 prefix-list prefix-list-name [seq sequence-number] {permit | deny} high-order-bit-pattern/highorder-bit-count [ge ge-value] [le le-value].` Ejemplo.
+
+![Image Alt]()
+
+## Expresiones regulares con (regex):
+
+En ocasiones, el Matching condicional de prefijos de red puede resultar demasiado compleja, por lo que se prefiere identificar todas las rutas de una organización específica. En tal caso, la selección de ruta puede realizarse mediante `BGP AS_Path`.
+
+Las expresiones regulares (regex) se utilizan para analizar la gran cantidad de ASN disponibles (4 294 967 295). Se basan en modificadores de consulta para seleccionar el contenido buscado. La tabla BGP se puede analizar con expresiones regulares mediante el comando `show bgp afi safi regexp regex-pattern`.
+
+Tabla de Modificadores de consultas RegEx
+Modificador|Descripcion
+:---|:---
+_ (guión bajo) | Coincide con un espacio
+^ (acento intercalado) | Indica el inicio de una cadena
+$ (signo de dólar) | Indica el final de una cadena
+[ ] (corchetes) | Coincide con un solo carácter o con una anidación dentro de un rango
+"-" (guión) | Indica un rango de números entre corchetes
+[^] (acento intercalado entre corchetes) | Excluye los caracteres entre corchetes
+( ) (paréntesis) | Se utiliza para anidar patrones de búsqueda
+\| (barra vertical) | Proporciona la función OR a la consulta
+. (punto) | Coincide con un solo carácter, incluido un espacio
+\* (asterisco) | Coincide con cero o más caracteres o patrones
+\+ (signo más) | Coincide con una o más instancias del carácter o patrón
+\? (signo de interrogación) | Coincide con una o ninguna instancia del carácter o patrón
+
+Aprender expresiones regulares puede llevar tiempo, pero las más comunes que se usan en BGP involucran ^, $ y _.
+
+Expresion regular|Significado
+:---|:---
+`^$` | Rutas de origen local
+`permit ^200_` | Solo rutas del AS 200 vecino
+`permit _200$` | Solo rutas con origen en el AS 200
+`permit _200_` | Solo rutas que pasan por el AS 200
+`permit ^[0-9]+ [0-9]+ [0-9]+?` | Rutas con tres o menos entradas AS_Path
+
+> [!NOTE]
+> Los servidores públicos, llamados "looking glass", permiten a los usuarios iniciar sesión y ver tablas BGP. La mayoría de estos dispositivos son routers Cisco, pero algunos son de otros proveedores. Estos servidores permiten a los ingenieros de red comprobar si están publicando sus rutas a Internet según lo previsto y ofrecen un excelente método para probar expresiones regulares en la tabla BGP de Internet. Una búsqueda rápida en internet proporcionará listados de sitios web de "looking glass" y servidores de rutas. Recomendamos www.bgp4.as
+
 # Route Maps: 
 
+Los **Route Maps** ofrecen diversas funciones para diversos protocolos de enrutamiento. En su nivel más básico, pueden filtrar redes de forma muy similar a las ACL, pero también proporcionan capacidad adicional mediante la adición o modificación de atributos de red. Para influir en un protocolo de enrutamiento, se debe hacer referencia a un mapa de rutas desde dicho protocolo. Los mapas de rutas son fundamentales para BGP, ya que son el componente principal para modificar una política de enrutamiento única, individualmente para cada vecino.
 
+Un mapa de ruta consta de cuatro componentes:
+- Sequence number: Indica el orden de procesamiento del mapa de ruta.
+- Conditional matching criteria: Identifica las características del prefijo (el propio prefijo, el atributo de ruta BGP, el siguiente salto, etc.) para una secuencia específica.
+- Processing action: Permite o deniega el prefijo.
+- Optional action: Permite manipulaciones, según cómo se referencia el mapa de ruta en el enrutador. Las acciones pueden incluir la modificación, adición o eliminación de características de ruta.
+
+Un mapa de rutas utiliza el comando `syntax route-map route-map-name [permit | deny] [sequence-number]`. Las siguientes reglas se aplican a las sentencias de mapa de rutas:
+- Si no se proporciona una acción de procesamiento, se utiliza el valor predeterminado `permit`.
+- Si no se proporciona un número de secuencia, este se incrementa automáticamente en 10.
+- Si no se incluye una sentencia coincidente, se asocia una coincidencia implícita de todos los prefijos.
+- El procesamiento dentro de un mapa de rutas se detiene después de que se hayan procesado todas las acciones opcionales (si están configuradas) tras cumplir un criterio de coincidencia condicional.
+- Se asocia una denegación o eliminación implícita para los prefijos que no están asociados con una acción `permit`.
+
+Proporciona un ejemplo de Route Map para ilustrar los cuatro componentes de un mapa de rutas mostrados anteriormente. El criterio de Matching condicional se basa en los rangos de red especificados en una ACL.
+
+![Image Alt]()
+
+> [!WARNING]
+> Al eliminar una instrucción `route-map` específica, incluya el número de secuencia para evitar eliminar el `route-map` completo.
+
+## Conditional Matching:
+
+Una vez explicados los componentes y el orden de procesamiento de un mapa de rutas, esta parte explica de cómo se puede establecer el **MATCH** de un prefijo. La Tabla 12-6 muestra la sintaxis para comandos comando.
+
+Comando Match|Descripcion
+:---|:---
+`match as-path acl-number`| Selecciona prefijos según una consulta de expresiones regulares para aislar el ASN en la ruta AS del atributo de ruta BGP (PA). Las ACL de la ruta AS están numeradas del 1 al 500. Este comando permite múltiples variables de match.
+`match ip address {acl-number \| acl-name}`| Selecciona prefijos según los criterios de selección de red definidos en la ACL. Este comando permite múltiples variables de match.
+`match ip address prefix-list prefix-list-name`| Selecciona prefijos según los criterios de selección. Este comando permite múltiples variables de match.
+`match local-preference local-preference`| Selecciona prefijos según el atributo BGP "local-preference". Este comando permite múltiples variables de match.
+`match metric {1-4294967295 \| external 1-4294967295} [+- desviación]`| Selecciona prefijos según una métrica que puede ser exacta, un rango o estar dentro de una desviación aceptable.
+`match tag tag-value`| Selecciona prefijos según una etiqueta numérica (0 a 4294967295) configurada por otro enrutador. Este comando permite múltiples variables de match.
+`match community {1-500 \| community-list-name [exact]}`| Selecciona prefijos según una ACL de lista comunitaria. Las ACL de lista comunitaria están numeradas del 1 al 500. Este comando permite múltiples variables de match.
+
+### Multiple Conditional Match Conditions
+
+Si se configuran varias variables (ACL, prefix-lists, tags, etc.) para una secuencia de **Route map** específica, solo una variable debe coincidir para que el prefijo sea válido. La lógica booleana utiliza un operador OR para esta configuración.
+En el Ejemplo 12-4, la secuencia 10 requiere que un prefijo pase ACL-ONE o ACL-TWO. Observe que la secuencia 20 no tiene una declaración de coincidencia, por lo que todos los prefijos que no se pasen en la secuencia 10 serán válidos y se denegarán.
+
+![Image Alt]()
+
+Si se configuran varias opciones de coincidencia para una **Sequence de Route Map específica**, ambas deben cumplirse para que el prefijo sea apto para esa secuencia. La lógica booleana utiliza el operador AND para esta configuración.
+En el Ejemplo 12-5, la secuencia 10 requiere que el prefijo coincida con ACL-ONE y que la métrica tenga un valor entre 500 y 600. Si el prefijo no cumple con ambas opciones de coincidencia, no cumple con las condiciones para la secuencia 10 y se deniega porque no existe otra secuencia con una acción de permiso.
 
 # BGP Route Filtering and Manipulation: 
 
@@ -163,5 +258,6 @@ Si no se proporciona una secuencia, el número de secuencia se incrementa autom�
 
 
 # Understanding BGP Path Selection: 
+
 
 
