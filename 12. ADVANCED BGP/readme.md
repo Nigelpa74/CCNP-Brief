@@ -179,7 +179,7 @@ _ (guión bajo) | Coincide con un espacio
 ^ (acento intercalado) | Indica el inicio de una cadena
 $ (signo de dólar) | Indica el final de una cadena
 [ ] (corchetes) | Coincide con un solo carácter o con una anidación dentro de un rango
-"-" (guión) | Indica un rango de números entre corchetes
+\- (guión) | Indica un rango de números entre corchetes
 [^] (acento intercalado entre corchetes) | Excluye los caracteres entre corchetes
 ( ) (paréntesis) | Se utiliza para anidar patrones de búsqueda
 \| (barra vertical) | Proporciona la función OR a la consulta
@@ -258,6 +258,7 @@ En el Ejemplo 12-5, la secuencia 10 requiere que el prefijo coincida con ACL-ONE
 
 
 # Understanding BGP Path Selection: 
+
 
 
 
