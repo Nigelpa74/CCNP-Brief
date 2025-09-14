@@ -252,8 +252,8 @@ En el Ejemplo 12-5, la secuencia 10 requiere que el prefijo coincida con ACL-ONE
 Ejemplo 12-5 de mapa de ruta con opciones de Multiple Match
 ```
 route-map EXAMPLE permit 10
-match ip address ACL-ONE
-match metric 550 +- 50
+  match ip address ACL-ONE
+  match metric 550 +- 50
 ```
 
 ### Complex Matching
@@ -268,16 +268,16 @@ El prefijo 172.16.1.0/24 pasaría a la secuencia 30 con la métrica establecida 
 Example 12-6 Complex Matching Route Maps
 ````
 ip access-list standard ACL-ONE
-deny 172.16.1.0 0.0.0.255
-permit 172.16.0.0 0.0.255.255
+  deny 172.16.1.0 0.0.0.255
+  permit 172.16.0.0 0.0.255.255
 route-map EXAMPLE permit 10
-match ip address ACL-ONE
+  match ip address ACL-ONE
 !
 route-map EXAMPLE deny 20
-match ip address ACL-ONE
+  match ip address ACL-ONE
 !
 route-map EXAMPLE permit 30
-set metric 20
+  set metric 20
 ````
 > [!NOTE]
 > Los Route Map se procesan siguiendo un orden de evaluación específico: la secuencia, conditional matching criteria, la acción de procesamiento y la _acción opcional_, en ese orden. Las sentencias de denegación del componente de coincidencia se aíslan de la acción de secuencia del mapa de ruta.
@@ -302,25 +302,25 @@ El comportamiento predeterminado de **ROUTE MAP** procesa las secuencias del map
 Example 12-7 Route Map con comando `continue`
 ````
 ip access-list standard ACL-ONE
-permit 192.168.1.1 0.0.0.0
-permit 172.16.0.0 0.0.255.255
+  permit 192.168.1.1 0.0.0.0
+  permit 172.16.0.0 0.0.255.255
 !
 ip access-list standard ACL-TWO
-permit 192.168.1.1 0.0.0.0
-permit 172.31.0.0 0.0.255.255
+  permit 192.168.1.1 0.0.0.0
+  permit 172.31.0.0 0.0.255.255
 !
 route-map EXAMPLE permit 10
-match ip address ACL-ONE
-set metric 20
-continue <------------------------------------
+  match ip address ACL-ONE
+  set metric 20
+  continue <------------------------------------
 !
 route-map EXAMPLE permit 20
-match ip address ACL-TWO
-set ip next-hop 10.12.1.1
-## NO HAY CONTINUE, ENTONCES LA SECUENCIA 30 NO FUNCIONA ## <------------------------------------
+  match ip address ACL-TWO
+  set ip next-hop 10.12.1.1
+  ## NO HAY CONTINUE, ENTONCES LA SECUENCIA 30 NO FUNCIONA ## <------------------------------------
 !
 route-map EXAMPLE permit 30
-set ip next-hop 10.13.1.3
+  set ip next-hop 10.13.1.3
 ````
 > [!NOTE]
 > Comando `Continue` no es muy utilizado por agregar complejidad al querer solucionar problemas.
@@ -364,10 +364,10 @@ permit ip 192.168.0.0 0.0.255.255 host 255.255.255.255
 permit ip 100.64.0.0 0.0.255.0 host 255.255.255.128
 !
 router bgp 65100
-neighbor 10.12.1.2 remote-as 65200
-address-family ipv4
-neighbor 10.12.1.2 activate
-neighbor 10.12.1.2 distribute-list ACL-ALLOW in <------------------------------------
+  neighbor 10.12.1.2 remote-as 65200
+  address-family ipv4
+    neighbor 10.12.1.2 activate
+    neighbor 10.12.1.2 distribute-list ACL-ALLOW in <------------------------------------
 ````
 El ejemplo 12-10 muestra la tabla BGP de R1. R1 inyecta dos rutas locales en la tabla BGP (10.12.1.0/24 y 192.168.1.1/32). Las dos rutas loopback de R2 (AS 65200) y R3 (AS 65300) se permiten porque se encuentran dentro de la primera entrada ACL-ALLOW, y se aceptan dos de las rutas que coinciden con el patrón 100.64.x.0 (100.64.2.0/25 y 100.64.3.0/25). La ruta 100.64.2.192/26 se rechaza porque la longitud del prefijo no coincide con la segunda entrada ACL-ALLOW.
 ![Image Alt]()
@@ -408,23 +408,88 @@ R2
 ip as-path access-list 1 permit ^$ <------------------------------------
 !
 router bgp 65200
-neighbor 10.12.1.1 remote-as 65100
-neighbor 10.23.1.3 remote-as 65300
-address-family ipv4 unicast
-neighbor 10.12.1.1 activate
-neighbor 10.23.1.3 activate
-neighbor 10.12.1.1 filter-list 1 out <------------------------------------
-neighbor 10.23.1.3 filter-list 1 out <------------------------------------
+  neighbor 10.12.1.1 remote-as 65100
+  neighbor 10.23.1.3 remote-as 65300
+  address-family ipv4 unicast
+    neighbor 10.12.1.1 activate
+    neighbor 10.23.1.3 activate
+    neighbor 10.12.1.1 filter-list 1 out <------------------------------------
+    neighbor 10.23.1.3 filter-list 1 out <------------------------------------
 ````
+Ahora que se ha aplicado la ACL AS_Path, se pueden volver a comprobar las rutas anunciadas.
+El ejemplo 12-15 muestra las rutas que se anuncian a R1. Observe que ninguna de las rutas tiene una ACL AS_Path, **lo que confirma que solo las rutas de origen local se anuncian externamente**. Se puede consultar el ejemplo 12-13 para identificar las rutas antes de aplicar la ACL AS_Path de BGP.
+![Image Alt]()
+
+## Filtrado por Route Maps:
+
+Como se explicó anteriormente, los Route Map ofrecen una funcionalidad adicional al filtrado puro. Tambien proporcionan un método para manipular los atributos de ruta BGP. Los Route Map se aplican por vecino BGP para las rutas anunciadas o recibidas. Se puede usar un Route Map diferente para cada dirección. El Route Map se asocia a un vecino BGP mediante el comando `neighbor ip-address route-map route-map-name {in|out}` bajo la Address Family específica.
+El ejemplo 12-16 muestra la tabla BGP de R1, que se utiliza aquí para demostrar la potencia de un mapa de rutas.
+![Image Alt]()
+
+Los Route Maps también permiten múltiples pasos de procesamiento. Para demostrar este concepto, nuestro Route Map constará de cuatro pasos:
+- Denegar cualquier ruta dentro del rango de la red 192.168.0.0/16 mediante una Prefix-List.
+- Coincidir con cualquier ruta originada en el AS 65200 dentro del rango de la red 100.64.0.0/10 y establecer la preferencia local BGP en 222.
+- Coincidir con cualquier ruta originada en el AS 65200 que no coincida con el paso 2 y establecer el peso BGP en 23456.
+- Permitir el procesamiento de todas las demás rutas.
+El ejemplo 12-17 muestra la configuración de R1, donde se hace referencia a múltiples Prefix-List junto con una ACL de ruta del AS.
+
+Ejemplo 12-17 Configuración del Route Map de R1 para rutas AS 65200 entrantes:
+````
+R1
+ip prefix-list FIRST-RFC1918 permit 192.168.0.0/16 le 32 <------------------------------------
+ip as-path access-list 1 permit _65200$ <------------------------------------
+ip prefix-list SECOND-CGNAT permit 100.64.0.0/10 le 32
+!
+route-map AS65200IN deny 10
+  description Deny RFC1918 192.168.0.0/16 routes via Prefix List Matching
+  match ip address prefix-list FIRST-RFC1918
+!
+route-map AS65200IN permit 20
+  description Change local preference for AS65200 originated route in 100.64.x.x/10
+  match ip address prefix-list SECOND-CGNAT
+  match as-path 1
+  set local-preference 222
+!
+route-map AS65200IN permit 30
+  description Change the weight for AS65200 originated routes
+  match as-path 1
+  set weight 23456
+!
+route-map AS65200IN permit 40
+  description Permit all other routes un-modified
+!
+router bgp 65100
+  neighbor 10.12.1.2 remote-as 65200
+  address-family ipv4 unicast
+    neighbor 10.12.1.2 activate
+    neighbor 10.12.1.2 route-map AS65200IN in
+````
+El ejemplo 12-18 muestra la tabla BGP de R1. Se han producido las siguientes acciones:
+- Se descartaron las rutas 192.168.2.2/32 y 192.168.3.3/32. La ruta 192.168.1.1/32 es una ruta generada localmente.
+- Se modificó la preferencia local de las rutas 100.64.2.0/25 y 100.64.2.192/26 a 222 porque se originaron en AS 65200 y se encuentran dentro del rango de red 100.64.0.0/10.
+- A las rutas 10.12.1.0/24 y 10.23.1.0/24 de R2 se les asignó el peso de atributo BGP localmente significativo de 23456.
+- Se aceptaron todas las demás rutas sin modificarlas.
+![Image Alt]()
+
+> [!NOTE]
+> Se considera una buena práctica utilizar una política de ruta diferente para los prefijos entrantes y salientes para cada vecino BGP.
+
+## Borrar y Limpiar conexiones BGP:
+
+Dependiendo del cambio en la técnica de manipulación de rutas BGP, es posible que sea necesario actualizar una sesión BGP para que surta efecto. BGP admite dos métodos para borrar una sesión BGP.
+El primer método es un restablecimiento completo, que cierra la sesión BGP, elimina las rutas BGP del par y es el más disruptivo. El segundo método es un restablecimiento parcial, que invalida la caché BGP y solicita un anuncio completo a su par BGP.
+
+Los enrutadores inician un restablecimiento completo con el comando `clear ip bgp ip-address [soft]` y un restablecimiento parcial mediante la palabra clave opcional `soft`. Todas las sesiones BGP activas se pueden borrar utilizando un asterisco * en lugar de la dirección IP del par.
+
+Cuando cambia una política BGP, la tabla BGP debe procesarse de nuevo para que los vecinos puedan ser notificados en consecuencia. Las rutas recibidas por un par BGP deben procesarse de nuevo. Si la sesión BGP admite la actualización de rutas, el par vuelve a anunciar (actualiza) los prefijos al enrutador solicitante, lo que permite que la política de entrada se procese con los nuevos cambios. La actualización de rutas se negocia para cada familia de direcciones al establecer la sesión.
+
+Al realizar un reinicio soft en sesiones que admiten la actualización de rutas, se inicia una actualización de ruta. Los reinicios soft se pueden realizar para una Address-family específica con el comando `clear bgp afi safi {ip-address|*} soft [in | out]`. Los reinicios soft reducen la cantidad de rutas que deben intercambiarse si se configuran varias Address-family con un solo punto BGP.
+Los cambios en las políticas de enrutamiento de salida utilizan la palabra clave opcional `out`, y los cambios en las políticas de enrutamiento de entrada utilizan la palabra clave opcional `in`. Puede usar un * en lugar de especificar la dirección IP de un par para realizar esa acción para todos los pares BGP.
 
 # BGP Communities: 
 
-
+Las comunidades BGP proporcionan capacidad adicional para etiquetar rutas y modificar la política de enrutamiento BGP en enrutadores de subida y bajada. Las comunidades BGP se pueden añadir, eliminar o modificar selectivamente en cada atributo a medida que una ruta viaja de un enrutador a otro.
+Las comunidades BGP son un atributo de ruta BGP transitivo opcional que puede atravesar un sistema autónomo (AS) a otro. Una comunidad BGP es un número de 32 bits que se puede incluir en una ruta. Una comunidad BGP se puede mostrar como un número completo de 32 bits (0-4294967295) o como dos números de 16 bits (0-65535):(0-65535), comúnmente conocido como nuevo formato.
 
 # Understanding BGP Path Selection: 
-
-
-
-
-
 
