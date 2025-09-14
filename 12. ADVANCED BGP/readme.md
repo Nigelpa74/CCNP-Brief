@@ -348,6 +348,7 @@ IOS XE ofrece cuatro métodos para filtrar rutas entrantes o salientes para un p
 Las siguientes secciones explican cada una de estas técnicas de filtrado con más detalle. Imaginemos un escenario simple con R1 (AS 65100) que tiene un único punto eBGP con R2 (AS 65200), que a su vez puede otro punto BGP con otros sistemas autónomos (como AS 65300). La parte relevante de la topología es que R1 se relaciona con R2 y se centra en la tabla BGP de R1, como se muestra en el Ejemplo 12-8, con énfasis en el prefijo de red y la ruta del AS.
 
 Ejemplo 12-8 Tabla BGP de referencia EJEMPLO GRANDE:
+
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/96c20eb0b25dee9e71a89d1c72cf53dc19636f58/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20RFM/ADV%20BGP%20RFM%202.PNG)
 
 ## Filtrado con Listas de Distribucion:
@@ -370,6 +371,7 @@ router bgp 65100
     neighbor 10.12.1.2 distribute-list ACL-ALLOW in <------------------------------------
 ````
 El ejemplo 12-10 muestra la tabla BGP de R1. R1 inyecta dos rutas locales en la tabla BGP (10.12.1.0/24 y 192.168.1.1/32). Las dos rutas loopback de R2 (AS 65200) y R3 (AS 65300) se permiten porque se encuentran dentro de la primera entrada ACL-ALLOW, y se aceptan dos de las rutas que coinciden con el patrón 100.64.x.0 (100.64.2.0/25 y 100.64.3.0/25). La ruta 100.64.2.192/26 se rechaza porque la longitud del prefijo no coincide con la segunda entrada ACL-ALLOW.
+
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/96c20eb0b25dee9e71a89d1c72cf53dc19636f58/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20RFM/ADV%20BGP%20RFM%203.PNG)
 
 ## Filtrado por Prefix-List
@@ -389,6 +391,7 @@ R1(config-router)# address-family ipv4 unicast
 R1(config-router-af)# neighbor 10.12.1.2 prefix-list RFC1918 in          ||||
 ````
 Una vez aplicada la Prefix-List, se puede examinar la tabla BGP en el R1, como se muestra en el Ejemplo 12-12. Observe que las rutas 100.64.2.0/25, 100.64.2.192/26 y 100.64.3.0/25 se filtraron porque no cumplían con los criterios de coincidencia de la lista de prefijos. Se puede consultar el Ejemplo 12-8 para identificar las rutas antes de aplicar la lista de prefijos BGP.
+
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/96c20eb0b25dee9e71a89d1c72cf53dc19636f58/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20RFM/ADV%20BGP%20RFM%204.PNG)
 
 ## Filtrado de ACL de AS_Path:
@@ -396,6 +399,7 @@ Una vez aplicada la Prefix-List, se puede examinar la tabla BGP en el R1, como s
 La selección de rutas de un vecino BGP mediante AS_Path requiere la definición de una `lista de control de acceso AS_Path` (ACL AS_Path). Las expresiones regulares, presentadas anteriormente, son un componente del filtrado AS_Path. El ejemplo 12-13 muestra las rutas que R2 (AS 65200) anuncia a R1 (AS 65100).
 
 Muestra las rutas que R2 (AS 65200) está anunciando a R1 (AS 65100).
+
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/96c20eb0b25dee9e71a89d1c72cf53dc19636f58/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20RFM/ADV%20BGP%20RFM%205.PNG)
 
 R2 anuncia las rutas aprendidas de R3 (AS 65300) a R1. En esencia, **R2 proporciona conectividad de tránsito entre los sistemas autónomos**. Si se tratara de una conexión a Internet y R2 fuera una empresa, no querría anunciar las rutas aprendidas de otros AS. Se recomienda usar una lista de acceso AS_Path para restringir el anuncio únicamente de rutas AS 65200.
@@ -418,12 +422,14 @@ router bgp 65200
 ````
 Ahora que se ha aplicado la ACL AS_Path, se pueden volver a comprobar las rutas anunciadas.
 El ejemplo 12-15 muestra las rutas que se anuncian a R1. Observe que ninguna de las rutas tiene una ACL AS_Path, **lo que confirma que solo las rutas de origen local se anuncian externamente**. Se puede consultar el ejemplo 12-13 para identificar las rutas antes de aplicar la ACL AS_Path de BGP.
+
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/96c20eb0b25dee9e71a89d1c72cf53dc19636f58/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20RFM/ADV%20BGP%20RFM%206.PNG)
 
 ## Filtrado por Route Maps:
 
 Como se explicó anteriormente, los Route Map ofrecen una funcionalidad adicional al filtrado puro. Tambien proporcionan un método para manipular los atributos de ruta BGP. Los Route Map se aplican por vecino BGP para las rutas anunciadas o recibidas. Se puede usar un Route Map diferente para cada dirección. El Route Map se asocia a un vecino BGP mediante el comando `neighbor ip-address route-map route-map-name {in|out}` bajo la Address Family específica.
 El ejemplo 12-16 muestra la tabla BGP de R1, que se utiliza aquí para demostrar la potencia de un mapa de rutas.
+
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/96c20eb0b25dee9e71a89d1c72cf53dc19636f58/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20RFM/ADV%20BGP%20RFM%207.PNG)
 
 Los Route Maps también permiten múltiples pasos de procesamiento. Para demostrar este concepto, nuestro Route Map constará de cuatro pasos:
@@ -469,6 +475,7 @@ El ejemplo 12-18 muestra la tabla BGP de R1. Se han producido las siguientes acc
 - Se modificó la preferencia local de las rutas 100.64.2.0/25 y 100.64.2.192/26 a 222 porque se originaron en AS 65200 y se encuentran dentro del rango de red 100.64.0.0/10.
 - A las rutas 10.12.1.0/24 y 10.23.1.0/24 de R2 se les asignó el peso de atributo BGP localmente significativo de 23456.
 - Se aceptaron todas las demás rutas sin modificarlas.
+
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/96c20eb0b25dee9e71a89d1c72cf53dc19636f58/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20RFM/ADV%20BGP%20RFM%208.PNG)
 
 > [!NOTE]
@@ -492,5 +499,6 @@ Las comunidades BGP proporcionan capacidad adicional para etiquetar rutas y modi
 Las comunidades BGP son un atributo de ruta BGP transitivo opcional que puede atravesar un sistema autónomo (AS) a otro. Una comunidad BGP es un número de 32 bits que se puede incluir en una ruta. Una comunidad BGP se puede mostrar como un número completo de 32 bits (0-4294967295) o como dos números de 16 bits (0-65535):(0-65535), comúnmente conocido como nuevo formato.
 
 # Understanding BGP Path Selection: 
+
 
 
