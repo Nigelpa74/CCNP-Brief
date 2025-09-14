@@ -249,15 +249,180 @@ En el Ejemplo 12-4, la secuencia 10 requiere que un prefijo pase ACL-ONE o ACL-T
 Si se configuran varias opciones de coincidencia para una **Sequence de Route Map específica**, ambas deben cumplirse para que el prefijo sea apto para esa secuencia. La lógica booleana utiliza el operador AND para esta configuración.
 En el Ejemplo 12-5, la secuencia 10 requiere que el prefijo coincida con ACL-ONE y que la métrica tenga un valor entre 500 y 600. Si el prefijo no cumple con ambas opciones de coincidencia, no cumple con las condiciones para la secuencia 10 y se deniega porque no existe otra secuencia con una acción de permiso.
 
+Ejemplo 12-5 de mapa de ruta con opciones de Multiple Match
+```
+route-map EXAMPLE permit 10
+match ip address ACL-ONE
+match metric 550 +- 50
+```
+
+### Complex Matching
+
+Algunos ingenieros de red consideran que los mapas de rutas son demasiado complejos si **conditional matching criteria** (es decir, ACL, ACL de ruta AS o lista de prefijos) contienen una sentencia de denegación. El ejemplo 12-6 muestra una configuración donde la ACL utiliza una sentencia de denegación para el rango de red 172.16.1.0/24.
+Las configuraciones de lectura como esta deben seguir primero el orden de secuencia y después **conditional matching criteria second**. Solo después de un match se deben utilizar la acción de procesamiento y la acción opcional. El matching de una sentencia denegada en conditional match criteria excluye la ruta de esa secuencia en el mapa de rutas.
+
+El prefijo 172.16.1.0/24 es denegado por ACL-ONE, lo que implica que no hay coincidencia en las secuencias 10 y 20; por lo tanto, no se requiere la acción de procesamiento (permitir o denegar).
+La ​​secuencia 30 no contiene una cláusula de coincidencia, por lo que se permiten las rutas restantes.
+El prefijo 172.16.1.0/24 pasaría a la secuencia 30 con la métrica establecida en 20. El prefijo 172.16.2.0/24 coincidiría con ACL-ONE y pasaría a la secuencia 10.
+
+Example 12-6 Complex Matching Route Maps
+````
+ip access-list standard ACL-ONE
+deny 172.16.1.0 0.0.0.255
+permit 172.16.0.0 0.0.255.255
+route-map EXAMPLE permit 10
+match ip address ACL-ONE
+!
+route-map EXAMPLE deny 20
+match ip address ACL-ONE
+!
+route-map EXAMPLE permit 30
+set metric 20
+````
+> [!NOTE]
+> Los Route Map se procesan siguiendo un orden de evaluación específico: la secuencia, conditional matching criteria, la acción de procesamiento y la _acción opcional_, en ese orden. Las sentencias de denegación del componente de coincidencia se aíslan de la acción de secuencia del mapa de ruta.
+
+## Acciones opcionales:
+
+Accion Establecida|Descripcion
+:---|:---
+`set as-path prepend {as-number-pattern \|last-as 1-10}`|Antepone la ruta del AS para el prefijo de red con el patrón especificado o a partir de múltiples iteraciones de un AS vecino.
+`set ip next-hop {ip-address \| peer-address \|self}`|Establece la dirección IP del siguiente salto para cualquier prefijo coincidente. La manipulación dinámica de BGP utiliza las palabras clave `peer-address` o `self`.
+`set local-preference 0-4294967295`| Establece la preferencia local del PA de BGP.
+`set metric {+value \| -value \| value} (donde los parámetros de valor son 0–4294967295)`|Modifica la métrica existente o establece la métrica de una ruta.
+`set origin {igp \| incomplete}` | Establece el origen del PA de BGP.
+`set tag tag-value`| Establece una etiqueta numérica (0\–4294967295) para la identificación de redes por otros enrutadores.
+`set weight 0–65535`| Establece el peso de BGP PA.
+`set community bgp-community [additive]`| Establece las comunidades BGP PA.
+
+## Palabra clave CONTINUAR:
+
+El comportamiento predeterminado de **ROUTE MAP** procesa las secuencias del mapa de rutas en orden y tras la primera coincidencia, ejecuta la acción de procesamiento, realiza cualquier acción opcional (si es posible) y detiene el procesamiento. Esto evita que se procesen varias secuencias del mapa de rutas. Añadir la palabra clave `"continue"` a un _route map_ permite que este continúe procesando otras secuencias del mapa de rutas. El ejemplo 12-7 proporciona una configuración básica. El prefijo de red 192.168.1.1 coincide en las secuencias 10, 20 y 30. Dado que se añadió la palabra clave "continue" a la secuencia 10, la secuencia 20 se procesa, pero la secuencia 30 no, ya que no había un comando `continue` en la secuencia 20.
+
+Example 12-7 Route Map con comando `continue`
+````
+ip access-list standard ACL-ONE
+permit 192.168.1.1 0.0.0.0
+permit 172.16.0.0 0.0.255.255
+!
+ip access-list standard ACL-TWO
+permit 192.168.1.1 0.0.0.0
+permit 172.31.0.0 0.0.255.255
+!
+route-map EXAMPLE permit 10
+match ip address ACL-ONE
+set metric 20
+continue <------------------------------------
+!
+route-map EXAMPLE permit 20
+match ip address ACL-TWO
+set ip next-hop 10.12.1.1
+## NO HAY CONTINUE, ENTONCES LA SECUENCIA 30 NO FUNCIONA ## <------------------------------------
+!
+route-map EXAMPLE permit 30
+set ip next-hop 10.13.1.3
+````
+> [!NOTE]
+> Comando `Continue` no es muy utilizado por agregar complejidad al querer solucionar problemas.
+
 # BGP Route Filtering and Manipulation: 
 
+El filtrado de rutas es un método para identificar **selectivamente** las rutas anunciadas o recibidas de routers vecinos. El filtrado de rutas puede utilizarse para manipular los flujos de tráfico, reducir el uso de memoria o mejorar la seguridad. Por ejemplo, es común que los ISP implementen filtros de rutas en los puntos BGP con los clientes. Garantizar que solo se permitan las rutas del cliente en el enlace de punto BGP evita que el cliente se convierta accidentalmente en un AS de tránsito en Internet.
+La Figura 12-9 muestra la lógica completa del procesamiento de rutas BGP.
 
+![Image Alt]()
+
+> [!NOTE]
+> Tenga en cuenta que las políticas de enrutamiento se aplican en la recepción de rutas entrantes y en el anuncio de rutas salientes.
+
+IOS XE ofrece cuatro métodos para filtrar rutas entrantes o salientes para un par BGP específico. Estos métodos pueden usarse individualmente o simultáneamente con otros:
+
+- Lista de distribución: Una lista de distribución implica el filtrado de prefijos de red según una ACL estándar o extendida. Una denegación implícita se asocia a cualquier prefijo que no esta permitido.
+- Prefix list: Las especificaciones de Prefix-matching en una lista, permiten o deniegan prefijos de red de forma descendente, similar a una ACL. Una denegación implícita se asocia a cualquier prefijo que no esta permitido.
+- ACL/filtrado de rutas de AS: Los comandos Regex en una lista permiten permitir o denegar un prefijo de red según los valores actuales de la ruta de AS. Una denegación implícita se asocia a cualquier prefijo que no esta permitido.
+- Route maps: Estos proporcionan un método de conditional Matching con diversos atributos de prefijo y permiten realizar diversas acciones. Las acciones pueden ser simplemente permitir o denegar, o incluir la modificación de los atributos de la ruta BGP. Una denegación implícita se asocia a cualquier prefijo que no esta permitido.
+
+> [!NOTE]
+> Un vecino BGP no puede usar una lista de distribución y una Prefix-list al mismo tiempo en la misma dirección (inbound or outbound).
+
+Las siguientes secciones explican cada una de estas técnicas de filtrado con más detalle. Imaginemos un escenario simple con R1 (AS 65100) que tiene un único punto eBGP con R2 (AS 65200), que a su vez puede otro punto BGP con otros sistemas autónomos (como AS 65300). La parte relevante de la topología es que R1 se relaciona con R2 y se centra en la tabla BGP de R1, como se muestra en el Ejemplo 12-8, con énfasis en el prefijo de red y la ruta del AS.
+
+Ejemplo 12-8 Tabla BGP de referencia EJEMPLO GRANDE:
+![Image Alt]()
+
+## Filtrado con Listas de Distribucion:
+
+Las listas de distribución filtran rutas por base neighbor-by-neighbor, utilizando ACL estándar o extendidas. Para configurar una lista de distribución, se requiere el comando de configuración de familia de direcciones BGP `neighbor ip-address deliver-list {acl-number | acl-name} {in|out}`. Recuerde que las ACL extendidas para BGP utilizan los campos de origen para comparar la porción de red y los campos de destino para comparar la máscara de red.
+
+El ejemplo 12-9 muestra la configuración BGP de R1, que demuestra el filtrado con listas de distribución. La configuración utiliza una ACL extendida denominada ACL-ALLOW. La primera permite cualquier prefijo que comience en el rango 192.168.0.0 a 192.168.255.255 con una longitud de prefijo de solo /32 (hosts). La segunda entrada permite prefijos que contienen el patrón 100.64.x.0 con una longitud de prefijo de /25 para demostrar las capacidades de `Wildcard` de una ACL extendida con BGP. La lista de distribución se asocia entonces con la sesión BGP de R2.
+
+Ejemplo 12-9 Configuración de lista de distribución BGP
+````
+R1
+ip access-list extended ACL-ALLOW <------------------------------------
+permit ip 192.168.0.0 0.0.255.255 host 255.255.255.255
+permit ip 100.64.0.0 0.0.255.0 host 255.255.255.128
+!
+router bgp 65100
+neighbor 10.12.1.2 remote-as 65200
+address-family ipv4
+neighbor 10.12.1.2 activate
+neighbor 10.12.1.2 distribute-list ACL-ALLOW in <------------------------------------
+````
+El ejemplo 12-10 muestra la tabla BGP de R1. R1 inyecta dos rutas locales en la tabla BGP (10.12.1.0/24 y 192.168.1.1/32). Las dos rutas loopback de R2 (AS 65200) y R3 (AS 65300) se permiten porque se encuentran dentro de la primera entrada ACL-ALLOW, y se aceptan dos de las rutas que coinciden con el patrón 100.64.x.0 (100.64.2.0/25 y 100.64.3.0/25). La ruta 100.64.2.192/26 se rechaza porque la longitud del prefijo no coincide con la segunda entrada ACL-ALLOW.
+![Image Alt]()
+
+## Filtrado por Prefix-List
+
+Las listas de prefijos filtran rutas por vecino. Para configurar una prefix-list, se utiliza el comando de configuración de la familia de direcciones BGP `neighbor ip-address prefix-list prefix-list-name {in | out}`. Para demostrar el uso de una prefix-list, Se utiliza la misma lista de prefijos del Ejemplo 12-1 y se aplicará en el peering de R1 a R2 (AS 65200).
+El Ejemplo 12-11 muestra la configuración de la prefix-list y su aplicación a R2.
+````
+R1# configure terminal
+Enter configuration commands, one per line. End with CNTL/Z.
+R1(config)# ip prefix-list RFC1918 seq 5 permit 192.168.0.0/16 ge 32     ||||
+R1(config)# ip prefix-list RFC1918 seq 10 deny 0.0.0.0/0 ge 32           ||||
+R1(config)# ip prefix-list RFC1918 seq 15 permit 10.0.0.0/8 le 32        ||||
+R1(config)# ip prefix-list RFC1918 seq 20 permit 172.16.0.0/12 le 32     ||||
+R1(config)# ip prefix-list RFC1918 seq 25 permit 192.168.0.0/16 le 32    ||||
+R1(config)# router bgp 65100
+R1(config-router)# address-family ipv4 unicast
+R1(config-router-af)# neighbor 10.12.1.2 prefix-list RFC1918 in          ||||
+````
+Una vez aplicada la Prefix-List, se puede examinar la tabla BGP en el R1, como se muestra en el Ejemplo 12-12. Observe que las rutas 100.64.2.0/25, 100.64.2.192/26 y 100.64.3.0/25 se filtraron porque no cumplían con los criterios de coincidencia de la lista de prefijos. Se puede consultar el Ejemplo 12-8 para identificar las rutas antes de aplicar la lista de prefijos BGP.
+![Image Alt]()
+
+## Filtrado de ACL de AS_Path:
+
+La selección de rutas de un vecino BGP mediante AS_Path requiere la definición de una `lista de control de acceso AS_Path` (ACL AS_Path). Las expresiones regulares, presentadas anteriormente, son un componente del filtrado AS_Path. El ejemplo 12-13 muestra las rutas que R2 (AS 65200) anuncia a R1 (AS 65100).
+
+Muestra las rutas que R2 (AS 65200) está anunciando a R1 (AS 65100).
+![Image Alt]()
+
+R2 anuncia las rutas aprendidas de R3 (AS 65300) a R1. En esencia, **R2 proporciona conectividad de tránsito entre los sistemas autónomos**. Si se tratara de una conexión a Internet y R2 fuera una empresa, no querría anunciar las rutas aprendidas de otros AS. Se recomienda usar una lista de acceso AS_Path para restringir el anuncio únicamente de rutas AS 65200.
+
+El procesamiento se realiza en orden descendente secuencial, y la primera match válida se procesa con la acción de _permit or deny_ correspondiente. Existe una denegación implícita al final de la ACL de AS_Path. IOS admite hasta 500 ACL de AS_Path y utiliza el comando `ip as-path access-list acl-number {deny | permit} regex-query` para crear una ACL de AS_Path. La ACL se aplica luego con el comando `neighbor ip-address filter-list acl-number {in|out}`. El ejemplo 12-14 muestra la configuración en R2 mediante una ACL AS_Path para restringir el tráfico únicamente al tráfico de origen local, utilizando el patrón de expresión regular ^$ (consulte la Tabla Regex). Para garantizar la integridad, la ACL AS_Path se aplica a todas las vecindades eBGP.
+
+Example 12-14 AS Path Access List Configuracion
+````
+R2
+ip as-path access-list 1 permit ^$ <------------------------------------
+!
+router bgp 65200
+neighbor 10.12.1.1 remote-as 65100
+neighbor 10.23.1.3 remote-as 65300
+address-family ipv4 unicast
+neighbor 10.12.1.1 activate
+neighbor 10.23.1.3 activate
+neighbor 10.12.1.1 filter-list 1 out <------------------------------------
+neighbor 10.23.1.3 filter-list 1 out <------------------------------------
+````
 
 # BGP Communities: 
 
 
 
 # Understanding BGP Path Selection: 
+
 
 
 
