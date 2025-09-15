@@ -681,7 +681,7 @@ Esta lógica puede utilizarse para influir en la selección de rutas en BGP. Sup
 
 Una forma más elegante de garantizar que las rutas se seleccionen de forma determinista fuera de la organización es anunciar un prefijo de resumen (100.64.0.0/16) a ambos enrutadores. Posteriormente, la organización puede anunciar un Longest Match prefix al router que debería recibir tráfico de red para ese prefijo. La Figura 12-10 muestra el concepto: R1 anuncia el prefijo 100.64.1.0/24, R2 anuncia el prefijo 100.64.2.0/24 y ambos enrutadores anuncian el prefijo de red de sumarizado 100.64.0.0/16.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/81872987257b9e3d928da2d916296f66185926b5/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20UPS/ADV%20BGP%20UPS%201.png)
 
 Independientemente de la política de enrutamiento de un SP, los prefijos más específicos se anuncian solo en un router. Se proporciona redundancia mediante la publicación de la dirección sumarizada. Si R1 falla, los dispositivos utilizan la publicación de ruta de R2 de 100.64.0.0/16 para acceder a la red 100.64.1.0/24.
 
@@ -796,3 +796,4 @@ El tercer punto de decisión en el algoritmo de mejor ruta es determinar si la r
 Es un `nontransitive path attribute` que se incluye en los anuncios de un AS. Los IGP suelen utilizar la métrica de ruta más baja para identificar la ruta más corta a un destino, pero no pueden ofrecer la escalabilidad de BGP. BGP utiliza un AS para identificar un único dominio de control para una política de enrutamiento. BGP no utiliza la métrica de ruta debido a problemas de escalabilidad, combinados con la idea de que cada AS puede utilizar una política de enrutamiento diferente para calcular las métricas.
 AIGP permite a BGP mantener y calcular una métrica de ruta conceptual en entornos que utilizan múltiples AS con dominios de enrutamiento IGP únicos en cada AS. La capacidad de BGP para tomar decisiones de enrutamiento basadas en una métrica de ruta es una opción viable porque todos los AS están bajo el control de un único dominio, con políticas de enrutamiento consistentes para BGP e IGP.
 En la Figura 12-11, los AS 100, AS 200 y AS 300 están bajo el control del mismo proveedor de servicios. AIGP se ha habilitado en las sesiones BGP entre todos los enrutadores, y los IGP se redistribuyen en BGP. La métrica AIGP se publica entre AS 100, AS 200 y AS 300, lo que permite que BGP la utilice para calcular la mejor ruta entre los sistemas autónomos.
+
