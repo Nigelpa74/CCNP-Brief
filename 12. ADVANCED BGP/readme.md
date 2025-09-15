@@ -498,7 +498,301 @@ Los cambios en las políticas de enrutamiento de salida utilizan la palabra clav
 Las comunidades BGP proporcionan capacidad adicional para etiquetar rutas y modificar la política de enrutamiento BGP en enrutadores de subida y bajada. Las comunidades BGP se pueden añadir, eliminar o modificar selectivamente en cada atributo a medida que una ruta viaja de un enrutador a otro.
 Las comunidades BGP son un atributo de ruta BGP transitivo opcional que puede atravesar un sistema autónomo (AS) a otro. Una comunidad BGP es un número de 32 bits que se puede incluir en una ruta. Una comunidad BGP se puede mostrar como un número completo de 32 bits (0-4294967295) o como dos números de 16 bits (0-65535):(0-65535), comúnmente conocido como nuevo formato.
 
+Las comunidades BGP privadas siguen una convención particular: los primeros 16 bits representan el sistema autónomo (AS) de origen de la comunidad y los segundos 16 bits representan un patrón definido por dicho sistema. Un patrón de comunidad BGP privada puede variar entre organizaciones, no necesita registro y puede indicar la ubicación geográfica de un AS, así como un método de anuncio de ruta en otro.
+
+En 2006, la RFC 4360 amplió las capacidades de las comunidades BGP al proporcionar un formato extendido. Las comunidades BGP extendidas proporcionan estructura para diversas clases de información y se utilizan comúnmente para servicios VPN. La RFC 8092 admite comunidades de más de 32 bits (que quedan fuera del alcance de este libro) (INVESTIGACION FUTURA).
+
+## Wel-Known Communities: 
+
+RFC 1997 define un conjunto de comunidades globales (conocidas como comunidades bien conocidas) que se encuentran dentro del rango de comunidades 4.294.901.760 (0xFFFF0000) a 4.294.967.295 (0xFFFFFFFF).
+Todos los enrutadores capaces de enviar/recibir comunidades BGP deben implementar comunidades bien conocidas. Se presentan cuatro comunidades bien conocidas comunes:
+
+- Internet: Esta es una comunidad **estandarizada** para identificar rutas que deben anunciarse en Internet. En redes más grandes que implementan BGP en el núcleo, las rutas anunciadas deben anunciarse en Internet y deben tener esta comunidad configurada. Esto permite que los **routers BGP de borde** solo permitan el anuncio de rutas BGP con la comunidad de Internet. El filtrado no es automático, pero puede realizarse con un mapa de rutas de salida.
+- No_Advertise: Las rutas con esta comunidad no se anunciarán a ningún par BGP (iBGP o eBGP).
+- Local-AS: Las rutas con esta comunidad no se anuncian a un par eBGP, pero sí a los pares de la **confederación BGP**. Los pares de la **confederación BGP** _quedan fuera del alcance del examen_.
+- No_Export: Cuando se recibe una ruta con esta comunidad, no se anuncia a ningún par eBGP. Las rutas con esta comunidad sí se pueden anunciar a los pares iBGP.
+
+## Habilitación del soporte de la comunidad BGP:
+
+Los routers IOS XE no anuncian comunidades BGP a sus puntos por defecto. Las comunidades se habilitan individualmente con el comando de configuración de la Address-family BGP `neighbor ip-address send-community [standard | extended | both]` en la configuración de la Address-family del vecino. Si no se especifica una palabra clave, se envían comunidades `Standard` por defecto.
+Los routers IOS XE pueden mostrar las comunidades en un nuevo formato, más fácil de leer, con el comando de configuración global `ip bgp-community new-format`. El ejemplo 12-19 muestra primero la comunidad BGP en formato decimal, seguida del nuevo formato.
+
+Ejemplo 12-19 Formatos de la comunidad BGP
+```
+! Decimal Format <------------------------------------
+R3# show bgp 192.168.1.1
+! Output omitted for brevity
+BGP routing table entry for 192.168.1.1/32, version 6
+Community: 6553602 6577023 <------------------------------------
+``
+! New-Format <------------------------------------
+R3# show bgp 192.168.1.1
+! Output omitted for brevity
+BGP routing table entry for 192.168.1.1/32, version 6
+Community: 100:2 100:23423 <------------------------------------
+```
+## Conditionally matching para Comunidades BGP:
+
+Permite la selección de rutas según las comunidades BGP dentro de los atributos de ruta, lo que permite un procesamiento selectivo en los Route Map. El ejemplo 12-20 muestra la tabla BGP de R1, que ha recibido múltiples rutas de R2 (AS 65200).
+
+Ejemplo 12-20 Rutas BGP desde R2 (AS 65200)
+````
+R1# show bgp ipv4 unicast | begin Network
+Network             Next Hop    Metric   LocPrf   Weight   Path
+*> 10.1.1.0/24      0.0.0.0           0            32768   ?
+*  10.12.1.0/24     10.12.1.2        22                0   65200 ? <---------------
+*>                  0.0.0.0           0            32768   ?
+*> 10.23.1.0/24     10.12.1.2       333                0   65200 ? <---------------
+*> 192.168.1.1/32   0.0.0.0           0            32768   ?
+*> 192.168.2.2/32   10.12.1.2        22                0   65200 ? <---------------
+*> 192.168.3.3/32   10.12.1.2      3333                0   65200 65300 ?
+````
+En este ejemplo, supongamos que desea realizar una conditionally match para una comunidad específica. La tabla BGP completa se puede mostrar con el comando `show bgp afi safi detail` y, a continuación, puede seleccionar manualmente una ruta con una comunidad específica. Sin embargo, si se conoce la comunidad BGP, todas las rutas que coinciden con ella se pueden mostrar con el comando `show bgp afi safi community community`, como se muestra en el Ejemplo 12-21.
+
+Ejemplo 12-21 Visualización de las rutas BGP con una comunidad específica
+````
+R1# show bgp ipv4 unicast community 333:333 | begin Network <--------------- (community 333:333)
+    Network       Next Hop   Metric   LocPrf   Weight Path
+*>  10.23.1.0/24  10.12.1.2     333                 0 65200 ?
+````
+El ejemplo 12-22 muestra la entrada de ruta explícita para la red 10.23.1.0/24 y todos los atributos de ruta BGP. Observe que se agregan dos comunidades BGP (333:333 y 65300:333) a la ruta.
+
+Ejemplo 12-22 Visualización de atributos de ruta BGP para la red 10.23.1.0/24
+````
+R1# show ip bgp 10.23.1.0/24
+BGP routing table entry for 10.23.1.0/24, version 15
+Paths: (1 available, best #1, table default)
+  Not advertised to any peer
+  Refresh Epoch 3
+  65200
+    10.12.1.2 from 10.12.1.2 (192.168.2.2)
+      Origin incomplete, metric 333, localpref 100, valid, external, best
+      Community: 333:333 65300:333 <---------------
+      rx pathid: 0, tx pathid: 0x0
+````
+La coincidencia condicional requiere la creación de una lista de comunidades con una estructura similar a la de una ACL, que puede ser estándar o expandida, y que se puede referenciar por número o nombre.
+Las listas de comunidades estándar se numeran del 1 al 99 y coinciden con comunidades conocidas o con un número de comunidad privado (as-number:16 bit number). Las listas de comunidades expandidas se numeran del 100 al 500 y utilizan patrones de expresiones regulares.
+La sintaxis de configuración para una lista de comunidades es `ip community-list {1-500 | standard listname | expanded list-name} {permit | deny} community-pattern`. Después de definir la lista de comunidades, se referencia en el mapa de rutas con el comando `match community {1-500 | community-list-name [exact]}`.
+
+> [!NOTE]
+> Cuando varias comunidades están en la misma declaración de lista de comunidades IP, todas las comunidades para esa declaración deben existir en la ruta. Si solo se requiere una de varias comunidades, se pueden usar varias declaraciones de lista de comunidades IP.
+
+El ejemplo 12-23 demuestra la creación de una lista de comunidades BGP que coincide con la comunidad 333:333. Esta lista se utiliza en la primera secuencia de `route-map COMMUNITY-CHECK`, que deniega cualquier ruta con esa comunidad. La segunda secuencia de `route-map` permite todas las demás rutas BGP y establece el peso BGP (localmente significativo) en 111. El mapa de rutas se aplica entonces en las rutas entrantes anunciadas de R2 a R1.
+
+Ejemplo 12-23 Coincidencia condicional de comunidades BGP
+````
+R1
+ip community-list 100 permit 333:333
+!
+route-map COMMUNITY-CHECK deny 10
+  description Block Routes with Community 333:333 in it
+  match community 100
+route-map COMMUNITY-CHECK permit 20
+  description Allow routes with either community in it
+  set weight 111
+!
+router bgp 65100
+  address-family ipv4 unicast
+    neighbor 10.12.1.2 route-map COMMUNITY-CHECK in
+````
+El ejemplo 12-24 muestra la tabla BGP después de aplicar el mapa de rutas al vecino.
+La ruta 10.23.1.0/24 se descartó y todas las demás rutas aprendidas del AS 65200 tenían el peso BGP establecido en 111.
+````
+R1# show bgp ipv4 unicast | begin Network
+   Network         Next Hop   Metric  LocPrf  Weight  Path
+*> 10.1.1.0/24     0.0.0.0         0           32768  ?
+*  10.12.1.0/24    10.12.1.2      22    -------> 111 65200 ?
+*>                 0.0.0.0         0           32768 ?
+*> 192.168.1.1/32  0.0.0.0         0           32768 ?
+*> 192.168.2.2/32  10.12.1.2      22    -------> 111 65200 ?
+*> 192.168.3.3/32  10.12.1.2    3333    -------> 111 65200 65300 ?
+````
+## Configuración de comunidades BGP privadas:
+
+Una comunidad BGP privada se configura en un mapa de rutas con el comando `set community bgpcommunity [additive]`. De forma predeterminada, al configurar una comunidad, las comunidades existentes se sobrescriben, pero se pueden conservar mediante la palabra clave opcional `additive`.
+El ejemplo 12-25 muestra las entradas de la tabla BGP para la ruta 10.23.1.0/24, que tiene las comunidades BGP 333:333 y 65300:333. La ruta 10.3.3.0/24 tiene la comunidad 65300:300.
+
+Ejemplo 12-25 Visualización de las comunidades BGP para dos prefijos de red:
+````
+R1# show bgp ipv4 unicast 10.23.1.0/24
+! Output omitted for brevity
+BGP routing table entry for 10.23.1.0/24, version 15
+  65200
+    10.12.1.2 from 10.12.1.2 (192.168.2.2)
+      Origin incomplete, metric 333, localpref 100, valid, external, best
+      Community: 333:333 65300:333 <--------------------
+----------------------------------------------------------------------------
+R1# show bgp ipv4 unicast 10.3.3.0/24
+! Output omitted for brevity
+BGP routing table entry for 10.3.3.0/24, version 12
+  65200 65300 3003
+    10.12.1.2 from 10.12.1.2 (192.168.2.2)
+      Origin incomplete, metric 33, localpref 100, valid, external, best
+      Community: 65300:300 <--------------------
+````
+El ejemplo 12-26 muestra la configuración donde la comunidad BGP se establece en 10:23 para la ruta 10.23.1.0/24. No se utiliza la palabra clave `additive`, por lo que los valores de comunidad anteriores 333:333 y 65300:333 se sobrescriben con la comunidad 10:23. La ruta 10.3.3.0/24 tiene las comunidades 3:0, 3:3 y 10:10 añadidas a las comunidades existentes. El mapa de rutas se asocia entonces a R2 (AS 65200).
+
+Ejemplo 12-26 Configuración de la comunidad BGP privada
+````
+ip prefix-list PREFIX10.23.1.0 seq 5 permit 10.23.1.0/24
+ip prefix-list PREFIX10.3.3.0 seq 5 permit 10.3.3.0/24
+!
+route-map SET-COMMUNITY permit 10
+  match ip address prefix-list PREFIX10.23.1.0
+  set community 10:23
+route-map SET-COMMUNITY permit 20
+  match ip address prefix-list PREFIX10.3.3.0
+  set community 3:0 3:3 10:10 additive <--------------------
+route-map SET-COMMUNITY permit 30
+!
+router bgp 65100
+  address-family ipv4
+    neighbor 10.12.1.2 route-map SET-COMMUNITY in
+````
+Una vez aplicado el mapa de rutas y actualizadas las rutas, se pueden examinar los atributos de ruta, como se muestra en el Ejemplo 12-27. Como se anticipó, las comunidades BGP anteriores se eliminaron para la red 10.23.1.0/24, pero se mantuvieron para la red 10.3.3.0/24.
+
+Ejemplo 12-27 Verificación de cambios en la comunidad BGP
+````
+R1# show bgp ipv4 unicast 10.23.1.0/24
+! Output omitted for brevity
+BGP routing table entry for 10.23.1.0/24, version 22
+  65200
+    10.12.1.2 from 10.12.1.2 (192.168.2.2)
+      Origin incomplete, metric 333, localpref 100, valid, external, best
+      Community: 10:23 <--------------------
+----------------------------------------------------------------------------
+R1# show bgp ipv4 unicast 10.3.3.0/24
+BGP routing table entry for 10.3.3.0/24, version 20
+  65200 65300 3003
+    10.12.1.2 from 10.12.1.2 (192.168.2.2)
+      Origin incomplete, metric 33, localpref 100, valid, external, best
+      Community: 3:0 3:3 10:10 65300:300 <-------------------- (3:0 3:3 10:10)
+````
+
 # Understanding BGP Path Selection: 
 
+El algoritmo de selección de la mejor ruta de BGP influye en la forma en que el tráfico entra o sale de un sistema autónomo (AS). Algunas configuraciones de router modifican los atributos de BGP para influir en el tráfico entrante, saliente o entrante y saliente, según los requisitos de diseño de la red. Muchos ingenieros de red no comprenden la selección de la mejor ruta de BGP, lo que a menudo puede resultar en un enrutamiento deficiente. Esta sección explica la lógica que utiliza un router que utiliza BGP al reenviar paquetes.
 
+## Selección de ruta de enrutamiento utilizando Longest Match:
 
+Los enrutadores siempre seleccionan la ruta que debe tomar un paquete examinando la longitud del prefijo de una entrada de red. La ruta seleccionada para un paquete se elige en función de la longitud del prefijo, donde siempre se prefiere el de mayor longitud. Por ejemplo, /28 se prefiere a /26, y /26 a /24.
+
+Esta lógica puede utilizarse para influir en la selección de rutas en BGP. Supongamos que una organización posee el rango de red 100.64.0.0/16, pero solo necesita anunciar dos subredes (100.64.1.0/24 y 100.64.2.0/24). Podría anunciar ambos prefijos (100.64.1.0/24 y 100.64.2.0/24) desde todos sus enrutadores, pero ¿cómo puede distribuir la carga para cada subred si todo el tráfico entra en un solo enrutador (como R1)? La organización podría modificar varios atributos de ruta BGP (PA) que se anuncian externamente, pero un SP podría tener una política de enrutamiento BGP que ignore dichos atributos de ruta, lo que resultaría en una recepción aleatoria de tráfico de red.
+
+Una forma más elegante de garantizar que las rutas se seleccionen de forma determinista fuera de la organización es anunciar un prefijo de resumen (100.64.0.0/16) a ambos enrutadores. Posteriormente, la organización puede anunciar un Longest Match prefix al router que debería recibir tráfico de red para ese prefijo. La Figura 12-10 muestra el concepto: R1 anuncia el prefijo 100.64.1.0/24, R2 anuncia el prefijo 100.64.2.0/24 y ambos enrutadores anuncian el prefijo de red de sumarizado 100.64.0.0/16.
+
+![Image Alt]()
+
+Independientemente de la política de enrutamiento de un SP, los prefijos más específicos se anuncian solo en un router. Se proporciona redundancia mediante la publicación de la dirección sumarizada. Si R1 falla, los dispositivos utilizan la publicación de ruta de R2 de 100.64.0.0/16 para acceder a la red 100.64.1.0/24.
+
+> [!NOTE]
+> Asegúrese de que rutas de red sumarizadas que su organización publica se encuentren únicamente dentro del alcance de su red. Además, los proveedores de servicios no suelen aceptar rutas IPv4 con una longitud  superior a /24 (por ejemplo, /25 o /26) ni rutas IPv6 con una longitud superior a /48. Las rutas están restringidas para controlar el tamaño de la tabla de enrutamiento de Internet.
+
+En BGP, los anuncios de ruta consisten en paquetes de actualización BGP que contienen `Network Layer Reachability Information (NLRI)`. La NLRI consta de la longitud del prefijo y el prefijo. Una ruta BGP puede contener múltiples rutas a la misma red de destino. Los atributos de cada ruta influyen en su conveniencia cuando un enrutador selecciona la mejor ruta. Por defecto, un enrutador BGP anuncia solo la mejor ruta a los enrutadores vecinos. Dentro de la **Loc-RIB**, se mantienen todas las rutas y sus atributos, y se calcula la mejor ruta. Esta mejor ruta se instala en la RIB del enrutador. Si la mejor ruta ya no está disponible, el enrutador puede usar las rutas existentes para identificar rápidamente una nueva. BGP recalcula la mejor ruta para un prefijo ante cuatro posibles eventos:
+
+- Cambio en la accesibilidad del siguiente salto de BGP
+- Fallo de una interfaz conectada a un par eBGP
+- Cambio en la redistribución
+- Recepción de rutas nuevas o eliminadas para una ruta
+
+BGP instala automáticamente la primera ruta recibida como la mejor. Cuando se reciben rutas adicionales con la misma longitud de prefijo de red, las rutas más recientes se comparan con la mejor ruta actual. Si hay un empate, el procesamiento continúa hasta que se identifica una ruta ganadora.
+
+El algoritmo de mejor ruta de BGP utiliza los siguientes atributos, en el orden mostrado, para la selección de la mejor ruta:
+
+1. Peso
+2. Preferencia local
+3. Localmente originado (declaración de red, redistribución o agregación)
+4. AIGP
+5. Ruta AS_Path más corta
+6. Tipo de origen
+7. MED más baja
+8. eBGP sobre iBGP
+9. Métrica IGP más baja para el siguiente salto
+10. Se prefiere la ruta de la sesión eBGP más antigua
+11. Se prefiere la ruta que proviene del punto BGP con el RID más bajo
+12. Se prefiere la ruta con la longitud mínima de la lista de clústeres
+13. Se prefiere la ruta que proviene de la dirección vecina más baja
+
+La política de enrutamiento BGP puede variar entre organizaciones, según la manipulación de los PA BGP. Dado que algunos PA transmiten datos de un AS a otro, estos cambios también podrían afectar el enrutamiento descendente de otros SP. Otros PA solo influyen en la política de enrutamiento dentro de la organización. Los prefijos de red se ajustan condicionalmente según diversos factores, como la longitud de AS_Path, el ASN específico, las comunidades BGP u otros atributos.
+
+### Weight (peso):
+
+El peso de BGP es un atributo definido por Cisco y el primer paso para seleccionar la mejor ruta de BGP.
+El peso es un valor de 16 bits (de 0 a 65 535) asignado localmente en el enrutador; no se anuncia a otros enrutadores. Se prefiere la ruta con el mayor peso. El peso se puede configurar para rutas específicas con un mapa de rutas de entrada o para todas las rutas aprendidas de un vecino específico. El peso solo influye en el tráfico saliente de un enrutador o un sistema autónomo (AS). Dado que es el primer paso en el algoritmo de mejor ruta, debe utilizarse cuando otros atributos no deban influir en la mejor ruta para una red específica.
+
+Al examinar un prefijo de red con el comando `show bgp afi safi network`, se mostrarán todas las rutas y los atributos de ruta asociados, así como la mejor ruta seleccionada. Identificar la mejor ruta puede llevar tiempo para quienes no utilizan BGP, y las versiones más recientes de iOS XE proporcionan comandos para identificar la mejor ruta rápidamente con el comando `show bgp afi safi network bestpath`. El comando `show bgp afi safi network best-path-reason` mostrará todas las rutas y describirá por qué una es preferida o no.
+
+El ejemplo 12-28 muestra la tabla BGP para el prefijo de red 172.16.0.0/24 en R5. En la cuarta línea de la salida, el enrutador indica que existen dos rutas y que la segunda es la mejor. Al examinar la salida de cada ruta, la ruta obtenida a través del AS 200 tiene un peso de 123. La ruta a través del AS 300 no tiene dicho peso, lo que equivale a un valor de 0; por lo tanto, la ruta a través del AS 200 es la mejor. Observe que el segundo conjunto de resultados utiliza la palabra clave opcional `bestpath` y solo muestra la mejor ruta. El tercer conjunto de resultados incluye la palabra clave opcional `best-path-reason`. Este resultado indica que la primera ruta tiene un peso menor que la mejor ruta seleccionada.
+
+Ejemplo 12-28 Un ejemplo de elección de mejor ruta de BGP basada en el peso
+````
+R5# show bgp ipv4 unicast 172.16.0.0/24
+! Output omitted for brevity
+BGP routing table entry for 172.16.0.0/24, version 5
+Paths: (2 available, best #2, table default) <--------------------(best #2)
+  Not advertised to any peer
+  300 100
+    192.168.6.6 (metric 130816) from 192.168.6.6 (192.168.6.6)
+      Origin IGP, metric 0, localpref 100, valid, internal
+  200 100
+    192.168.4.4 (metric 130816) from 192.168.4.4 (192.168.4.4)
+      Origin IGP, metric 0, localpref 100, weight 123, valid, internal, best <--------------------(weight 123,best)
+----------------------------------------------------------------------------
+R5# show bgp ipv4 unicast 172.16.0.0/24 bestpath
+! Output omitted for brevity
+BGP routing table entry for 172.16.0.0/24, version 5
+Paths: (2 available, best #2, table default)
+  200 100
+    192.168.4.4 (metric 130816) from 192.168.4.4 (192.168.4.4)
+      Origin IGP, metric 0, localpref 100, weight 123, valid, internal, best
+----------------------------------------------------------------------------
+R5# show bgp ipv4 unicast 172.16.0.0/24 best-path-reason
+! Output omitted for brevity
+BGP routing table entry for 172.16.0.0/24, version 5
+Paths: (2 available, best #2, table default)
+  300 100
+    192.168.6.6 (metric 130816) from 192.168.6.6 (192.168.6.6)
+      Origin IGP, metric 0, localpref 100, valid, internal
+      Best Path Evaluation: Lower weight <-------------------- MUY BAJO
+  200 100
+    192.168.4.4 (metric 130816) from 192.168.4.4 (192.168.4.4)
+      Origin IGP, metric 0, localpref 100, weight 123, valid, internal, best
+      Best Path Evaluation: Overall best path <-------------------- EXCELENTE MAYOR PESO
+````
+
+### Preferencia local (Local preference):
+
+La preferencia local (LOCAL_PREF) es un `well-known path attribute` que se incluye en los anuncios de ruta en un AS. Este atributo es un valor de 32 bits (de 0 a 4 294 967 295) que indica la preferencia para salir del AS hacia la red de destino.
+La preferencia local no se anuncia entre pares eBGP y se utiliza normalmente para influir en la dirección del siguiente salto del tráfico saliente (es decir, al salir de un sistema autónomo). La preferencia local se puede configurar para rutas específicas mediante un `route map` o para todas las rutas recibidas de un vecino específico.
+**Se prefiere un valor alto sobre uno bajo**. Si un router BGP de borde no define la preferencia local al recibir un prefijo, se utiliza el valor predeterminado de 100 durante el cálculo de la mejor ruta y se incluye en los anuncios a otros pares iBGP. Modificar la preferencia local puede influir en la selección de ruta en otros pares iBGP sin afectar a los pares eBGP, ya que la preferencia local no se publica fuera del sistema autónomo.
+El ejemplo 12-29 muestra la tabla BGP para el prefijo de red 172.16.1.0/24 en R4. En la tercera línea de la salida, el enrutador indica que existen dos rutas y que la primera es la mejor. El peso BGP no existe, por lo que se utiliza la preferencia local para seleccionar la mejor ruta.
+La ruta obtenida a través del AS 300 es la mejor porque tiene una preferencia local de 333, mientras que la ruta a través del AS 200 tiene una preferencia local de 111.
+
+Ejemplo 12-29 Un ejemplo de elección de mejor ruta de BGP basada en preferencia local
+````
+R4# show bgp ipv4 unicast 172.16.1.0/24 best-path-reason
+! Output omitted for brevity
+  BGP routing table entry for 172.16.1.0/24, version 6
+Paths: (2 available, best #1, table default) <--------------------(best #1)
+  300 100
+    192.168.6.6 (metric 131072) from 192.168.6.6 (192.168.6.6)
+      Origin IGP, metric 0, localpref 333, valid, internal, best <--------------------(localpref 333)
+      Best Path Evaluation: Overall best path <--------------------(best)
+  200 100
+    100.64.24.2 from 100.64.24.2 (192.168.2.2)
+      Origin IGP, localpref 111, valid, external 
+      Best Path Evaluation: Lower local preference <--------------------(muybajo)
+````
+
+### Locally Originated via Network or Aggregate Advertisement (Originado localmente a través de publicidad en red o agregada): 
+
+El tercer punto de decisión en el algoritmo de mejor ruta es determinar si la ruta se originó localmente. La preferencia se da en el siguiente orden:
+- Rutas anunciadas localmente
+- Redes agregadas localmente
+- Rutas recibidas por puntos BGP.
+
+### Accumulated Interior Gateway Protocol (AIGP):
+
+Es un `nontransitive path attribute` que se incluye en los anuncios de un AS. Los IGP suelen utilizar la métrica de ruta más baja para identificar la ruta más corta a un destino, pero no pueden ofrecer la escalabilidad de BGP. BGP utiliza un AS para identificar un único dominio de control para una política de enrutamiento. BGP no utiliza la métrica de ruta debido a problemas de escalabilidad, combinados con la idea de que cada AS puede utilizar una política de enrutamiento diferente para calcular las métricas.
+AIGP permite a BGP mantener y calcular una métrica de ruta conceptual en entornos que utilizan múltiples AS con dominios de enrutamiento IGP únicos en cada AS. La capacidad de BGP para tomar decisiones de enrutamiento basadas en una métrica de ruta es una opción viable porque todos los AS están bajo el control de un único dominio, con políticas de enrutamiento consistentes para BGP e IGP.
+En la Figura 12-11, los AS 100, AS 200 y AS 300 están bajo el control del mismo proveedor de servicios. AIGP se ha habilitado en las sesiones BGP entre todos los enrutadores, y los IGP se redistribuyen en BGP. La métrica AIGP se publica entre AS 100, AS 200 y AS 300, lo que permite que BGP la utilice para calcular la mejor ruta entre los sistemas autónomos.
