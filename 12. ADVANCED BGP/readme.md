@@ -806,7 +806,7 @@ AIGP permite a BGP mantener y calcular una métrica de ruta conceptual en entorn
 
 En la Figura 12-11, los AS 100, AS 200 y AS 300 están bajo el control del mismo proveedor de servicios. AIGP se ha habilitado en las sesiones BGP entre todos los enrutadores, y los IGP se redistribuyen en BGP. La métrica AIGP se publica entre AS 100, AS 200 y AS 300, lo que permite que BGP la utilice para calcular la mejor ruta entre los sistemas autónomos.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/27c7cd32d55ab6d5892ad9818027ab7f56065e61/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20UPS/ADV%20BGP%20UPS%202.png)
 
 Las siguientes directrices se aplican a las métricas AIGP:
 - Se prefiere una ruta con una métrica AIGP a una sin ella.
@@ -934,6 +934,8 @@ R1 anuncia el prefijo de red 172.16.0.0/24 a R2 y R4.
 
 R3 prefiere la ruta de R2 en comparación con la ruta iBGP de R4 porque la métrica para alcanzar la dirección de siguiente salto es menor. R5 prefiere la ruta de R4 en comparación con la ruta iBGP de R2 porque la métrica para alcanzar la dirección de siguiente salto es menor.
 
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/27c7cd32d55ab6d5892ad9818027ab7f56065e61/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20UPS/ADV%20BGP%20UPS%203.PNG)
+
 ### Prefer the Path from the Oldest eBGP Session:
 
 BGP puede mantener tablas de enrutamiento extensas, y las sesiones inestables hacen que el cálculo de la mejor ruta de BGP se ejecute con frecuencia. BGP mantiene la estabilidad de una red al preferir la ruta de la sesión eBGP más antigua (establecida). 
@@ -985,4 +987,4 @@ Se prefiere la ruta vacina que tiene la ip mas baja.
 ```
 La Figura 12-13 muestra el concepto de elegir el router con la dirección vecina más baja. R1 anuncia el prefijo de red 172.16.0.0/24 a R2. R1 y R2 han establecido dos sesiones BGP utilizando las redes 10.12.1.0/24 y 10.12.2.0/24. R2 selecciona la ruta anunciada desde 10.12.1.1 porque es la dirección IP más baja.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/27c7cd32d55ab6d5892ad9818027ab7f56065e61/12.%20ADVANCED%20BGP/IMG/ADV%20BGP%20UPS/ADV%20BGP%20UPS%204.PNG)
