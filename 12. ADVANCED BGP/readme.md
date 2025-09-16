@@ -718,7 +718,11 @@ La política de enrutamiento BGP puede variar entre organizaciones, según la ma
 ### Weight (peso):
 
 El peso de BGP es un atributo definido por Cisco y el primer paso para seleccionar la mejor ruta de BGP.
-El peso es un valor de 16 bits (de 0 a 65 535) asignado localmente en el enrutador; no se anuncia a otros enrutadores. Se prefiere la ruta con el mayor peso. El peso se puede configurar para rutas específicas con un mapa de rutas de entrada o para todas las rutas aprendidas de un vecino específico. El peso solo influye en el tráfico saliente de un enrutador o un sistema autónomo (AS). Dado que es el primer paso en el algoritmo de mejor ruta, debe utilizarse cuando otros atributos no deban influir en la mejor ruta para una red específica.
+El peso es un valor de 16 bits (de 0 a 65 535) asignado localmente en el enrutador; no se anuncia a otros enrutadores. 
+```
+Se prefiere la ruta con el mayor peso. 
+```
+El peso se puede configurar para rutas específicas con un mapa de rutas de entrada o para todas las rutas aprendidas de un vecino específico. El peso solo influye en el tráfico saliente de un enrutador o un sistema autónomo (AS). Dado que es el primer paso en el algoritmo de mejor ruta, debe utilizarse cuando otros atributos no deban influir en la mejor ruta para una red específica.
 
 Al examinar un prefijo de red con el comando `show bgp afi safi network`, se mostrarán todas las rutas y los atributos de ruta asociados, así como la mejor ruta seleccionada. Identificar la mejor ruta puede llevar tiempo para quienes no utilizan BGP, y las versiones más recientes de iOS XE proporcionan comandos para identificar la mejor ruta rápidamente con el comando `show bgp afi safi network bestpath`. El comando `show bgp afi safi network best-path-reason` mostrará todas las rutas y describirá por qué una es preferida o no.
 
@@ -764,7 +768,11 @@ Paths: (2 available, best #2, table default)
 
 La preferencia local (LOCAL_PREF) es un `well-known path attribute` que se incluye en los anuncios de ruta en un AS. Este atributo es un valor de 32 bits (de 0 a 4 294 967 295) que indica la preferencia para salir del AS hacia la red de destino.
 La preferencia local no se anuncia entre pares eBGP y se utiliza normalmente para influir en la dirección del siguiente salto del tráfico saliente (es decir, al salir de un sistema autónomo). La preferencia local se puede configurar para rutas específicas mediante un `route map` o para todas las rutas recibidas de un vecino específico.
-**Se prefiere un valor alto sobre uno bajo**. Si un router BGP de borde no define la preferencia local al recibir un prefijo, se utiliza el valor predeterminado de 100 durante el cálculo de la mejor ruta y se incluye en los anuncios a otros pares iBGP. Modificar la preferencia local puede influir en la selección de ruta en otros pares iBGP sin afectar a los pares eBGP, ya que la preferencia local no se publica fuera del sistema autónomo.
+```
+Se prefiere un valor alto sobre uno bajo. 
+```
+Si un router BGP de borde no define la preferencia local al recibir un prefijo, se utiliza el valor predeterminado de 100 durante el cálculo de la mejor ruta y se incluye en los anuncios a otros pares iBGP. Modificar la preferencia local puede influir en la selección de ruta en otros pares iBGP sin afectar a los pares eBGP, ya que la preferencia local no se publica fuera del sistema autónomo.
+
 El ejemplo 12-29 muestra la tabla BGP para el prefijo de red 172.16.1.0/24 en R4. En la tercera línea de la salida, el enrutador indica que existen dos rutas y que la primera es la mejor. El peso BGP no existe, por lo que se utiliza la preferencia local para seleccionar la mejor ruta.
 La ruta obtenida a través del AS 300 es la mejor porque tiene una preferencia local de 333, mientras que la ruta a través del AS 200 tiene una preferencia local de 111.
 
@@ -795,5 +803,186 @@ El tercer punto de decisión en el algoritmo de mejor ruta es determinar si la r
 
 Es un `nontransitive path attribute` que se incluye en los anuncios de un AS. Los IGP suelen utilizar la métrica de ruta más baja para identificar la ruta más corta a un destino, pero no pueden ofrecer la escalabilidad de BGP. BGP utiliza un AS para identificar un único dominio de control para una política de enrutamiento. BGP no utiliza la métrica de ruta debido a problemas de escalabilidad, combinados con la idea de que cada AS puede utilizar una política de enrutamiento diferente para calcular las métricas.
 AIGP permite a BGP mantener y calcular una métrica de ruta conceptual en entornos que utilizan múltiples AS con dominios de enrutamiento IGP únicos en cada AS. La capacidad de BGP para tomar decisiones de enrutamiento basadas en una métrica de ruta es una opción viable porque todos los AS están bajo el control de un único dominio, con políticas de enrutamiento consistentes para BGP e IGP.
+
 En la Figura 12-11, los AS 100, AS 200 y AS 300 están bajo el control del mismo proveedor de servicios. AIGP se ha habilitado en las sesiones BGP entre todos los enrutadores, y los IGP se redistribuyen en BGP. La métrica AIGP se publica entre AS 100, AS 200 y AS 300, lo que permite que BGP la utilice para calcular la mejor ruta entre los sistemas autónomos.
 
+![Image Alt]()
+
+Las siguientes directrices se aplican a las métricas AIGP:
+- Se prefiere una ruta con una métrica AIGP a una sin ella.
+- Si la dirección del siguiente salto requiere una búsqueda recursiva, la ruta AIGP debe calcular una métrica derivada que incluya la distancia a la dirección del siguiente salto. Esto garantiza que se incluya el coste para el router de borde BGP. La fórmula es:
+
+`Derived AIGP metric = (Original AIGP metric + Next-hop AIGP metric)`
+
+- Si existen varias rutas AIGP y una dirección del siguiente salto contiene una métrica AIGP y la otra no, la ruta sin AIGP no se utiliza.
+- La métrica AIGP del siguiente salto se añade recursivamente si se realizan varias búsquedas.
+- Las rutas AIGP se comparan según la métrica AIGP derivada (con siguientes saltos recursivos) o la métrica AIGP real (siguiente salto no recursivo).
+```
+Se prefiere la ruta con la métrica AIGP más baja.
+```
+- Cuando R2 anuncia una ruta habilitada para AIGP que se aprendió de R1, si la dirección del siguiente salto cambia a una dirección de R2, R2 incrementa la métrica AIGP para reflejar la distancia (la métrica de la ruta IGP) entre R1 y R2.
+
+### Shortest AS Path:
+
+El siguiente factor de decisión para el algoritmo de mejor ruta de BGP es la longitud de la ruta del AS. Esta longitud suele correlacionarse con el número de saltos del AS. 
+```
+Se prefiere una ruta de AS más corta a una más larga.
+```
+Anteponer ASN a la ruta de AS la alarga, lo que la hace menos deseable en comparación con otras rutas. Normalmente, la ruta de AS se antepone con el ASN del propietario de la red.
+En general, una ruta con la ruta de AS antepuesta no se selecciona como la mejor ruta de BGP porque es más larga que el anuncio de ruta sin anteponer. El tráfico entrante se ve influenciado por la anteposición de la longitud de la ruta de AS en los anuncios a otros AS, y el tráfico saliente se ve influenciado por la anteposición de los anuncios recibidos de otros AS.
+
+El ejemplo 12-30 muestra la tabla BGP para la ruta 172.24.0.0/16 en R4. No hay ponderación establecida en ninguna de las rutas y la preferencia local es idéntica. La primera ruta tiene una longitud de ruta AS de 2 (300 100), mientras que la segunda ruta tiene una longitud de ruta AS de 4 (200 200 200 100). La primera ruta aprendida a través de AS 300 se selecciona como la mejor ruta porque tiene una longitud de ruta AS más corta.
+
+Ejemplo 12-30 Un ejemplo de elección de mejor ruta BGP basada en la longitud de la ruta AS
+```
+R4# show bgp ipv4 unicast 172.24.0.0/16 best-path-reason
+! Output omitted for brevity
+BGP routing table entry for 172.24.0.0/16, version 18
+Paths: (2 available, best #1, table default)
+  300 100 <------------------------------------------- (mejor por ser mas corto)
+    192.168.6.6 (metric 131072) from 192.168.6.6 (192.168.6.6)
+      Origin IGP, metric 0, localpref 100, valid, internal, best
+      Best Path Evaluation: Overall best path
+  200 200 200 100 <------------------------------------- (peor por ser largo)
+    100.64.24.2 from 100.64.24.2 (192.168.2.2)
+      Origin IGP, localpref 100, valid, external
+      rx pathid: 0, tx pathid: 0
+      Best Path Evaluation: Longer AS path 
+```
+
+> [!NOTE]
+> Los ASN se repiten para la segunda ruta, lo que indica que el AS 200 añadió su anuncio BGP para dirigir el tráfico de la red.
+> El intercambio de tráfico con diferentes proveedores de Internet proporciona un enrutamiento óptimo para la mayoría de las empresas porque un SP puede estar a un salto de la ruta AS de distancia (o proporcionar conectividad a otros SP de nivel 2/3), mientras que un SP diferente puede tener una ruta AS más corta hacia otros clientes.
+
+### Origin Type:
+
+El siguiente factor de decisión de la mejor ruta de BGP es el atributo well-known obligatorio de BGP denominado origen. De forma predeterminada, las redes anunciadas mediante la declaración de red se configuran con el atributo de origen IGP o i, y a las redes redistribuidas se les asigna el atributo de origen incompleto o ?. El orden de preferencia de origen es:
+
+1. IGP origen (Mejor) (i)
+2. EGP origen
+3. Incomplete origen (Peor) (?)
+
+El ejemplo 12-31 muestra la tabla BGP de R4. Observe que la ruta 172.24.0.0/24 tiene dos rutas.
+La ruta desde el AS 300 se seleccionó como la mejor porque se anunció desde un IGP, mientras que la ruta desde el AS 200 tiene un origen incompleto y se considera inferior a la ruta a través del AS 300.
+
+Ejemplo 12-31 Un ejemplo de elección de mejor ruta de BGP según el tipo de origen.
+```
+R4# show bgp ipv4 unicast
+BGP table version is 21, local router ID is 192.168.4.4
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,
+              x best-external, a additional-path, c RIB-compressed,
+              t secondary path, L long-lived-stale,
+Origin codes: i - IGP, e - EGP, ? - incomplete  <--------------------
+RPKI validation codes: V valid, I invalid, N Not found
+     Network         Next Hop     Metric   LocPrf   Weight   Path
+*>   172.16.0.0/24   10.24.1.2                           0   200 100 i
+* i  172.20.0.0/24   192.168.6.6       0     100         0   300 100 i
+*>                   10.24.1.2                           0   200 100 i
+*>i  172.24.0.0/24   192.168.6.6       0     100         0   300 100 i <-------------------- (mejor)
+*                    10.24.1.2                           0   200 100 ? <-------------------- (peor)
+```
+
+### Multi-Exit Discriminator:
+
+El siguiente factor de decisión de la mejor ruta de BGP es el atributo de ruta BGP no transitivo denominado discriminador de salida múltiple (MED). El MED utiliza un valor de 32 bits (de 0 a 4 294 967 295) denominado métrica. BGP establece el MED automáticamente en la métrica de ruta IGP durante el anuncio o la redistribución de la red. Si el MED se recibe de una sesión eBGP, puede anunciarse a otros pares iBGP, pero no debe enviarse fuera del AS que lo recibió. El propósito del MED es influir en los flujos de tráfico entrantes desde un AS diferente. 
+```
+Se prefiere un MED bajo a uno alto.
+```
+> [!NOTE]
+> Para que el MED sea un factor de decisión eficaz, las rutas que se deciden deben provenir del mismo ASN.
+
+Las directrices de la RFC 4451 establecen que se debe dar prioridad a un prefijo sin valor MED y, en esencia, debe compararse con un valor de 0. Algunas organizaciones exigen que se establezca un valor específico para MED en todos los prefijos y declaran que las rutas sin MED deben considerarse las menos preferidas. De forma predeterminada, si falta MED en un prefijo obtenido de un par eBGP, los dispositivos utilizan un valor de MED de 0 para el cálculo de la mejor ruta. Los enrutadores IOS XE anuncian un valor de MED de 0 a los pares iBGP para las rutas eBGP que no tienen MED.
+
+El ejemplo 12-32 muestra la tabla BGP para la ruta 172.16.1.0/24 en R2. Tenga en cuenta que R2 solo se empareja con AS 300 para que MED sea elegible para el proceso de selección de la mejor ruta. La primera ruta tiene una MED de 0 y la segunda de 33. Se prefiere la primera porque su MED es menor.
+
+Ejemplo 12-32 Un ejemplo de elección de mejor ruta de BGP basada en MED
+```
+R2# show bgp ipv4 unicast 172.16.1.0
+BGP routing table entry for 172.16.1.0/24, version 9
+Paths: (2 available, best #1, table default)
+  Advertised to update-groups:
+    2
+  Refresh Epoch 4
+  300
+    10.12.1.1 from 10.12.1.1 (192.168.1.1)
+      Origin IGP, metric 0, localpref 100, valid, external, best <-------------------- (metric BAJO MEJOR)
+  Refresh Epoch 14
+  300
+    10.23.1.3 from 10.23.1.3 (192.168.3.3)
+      Origin IGP, metric 33, localpref 100, valid, external <-------------------- (metric alto PEOR)
+```
+
+### eBGP over iBGP:
+
+El siguiente factor de decisión sobre la mejor ruta de BGP es si la ruta proviene de un peering iBGP, eBGP o de un sistema autónomo (sub-AS) miembro de la confederación. El orden de selección de la mejor ruta es:
+1. Peers eBGP (más deseable)
+2. Confederación miembre de AS peers
+3. Peers iBGP (menos deseable)
+
+> [!NOTE]
+> Las confederaciones BGP están fuera del alcance del examen CCNP y CCIE Enterprise Core ENCOR 350-401 y no se tratan en este libro.
+
+### Lowest IGP Metric:
+
+El siguiente paso de decisión es utilizar.
+```
+El menor costo IGP es mejor para la dirección de siguiente salto BGP
+```
+La Figura 12-12 ilustra una topología donde R2, R3, R4 y R5 se encuentran en AS 400, y el enfoque se centra en R3 y R5. AS 400 se conecta en una malla completa y establece sesiones BGP mediante interfaces Loopback 0. R2 y R4 anuncian prefijos de red con la función de siguiente salto.
+R1 anuncia el prefijo de red 172.16.0.0/24 a R2 y R4.
+
+R3 prefiere la ruta de R2 en comparación con la ruta iBGP de R4 porque la métrica para alcanzar la dirección de siguiente salto es menor. R5 prefiere la ruta de R4 en comparación con la ruta iBGP de R2 porque la métrica para alcanzar la dirección de siguiente salto es menor.
+
+### Prefer the Path from the Oldest eBGP Session:
+
+BGP puede mantener tablas de enrutamiento extensas, y las sesiones inestables hacen que el cálculo de la mejor ruta de BGP se ejecute con frecuencia. BGP mantiene la estabilidad de una red al preferir la ruta de la sesión eBGP más antigua (establecida). 
+```
+Se prefiere la sesion eBGP mas antigua
+```
+La desventaja de esta técnica es que no proporciona un método determinista para identificar la mejor ruta de BGP desde una perspectiva de diseño.
+
+### Router ID:
+
+El siguiente paso del algoritmo de mejor ruta BGP es seleccionar la mejor ruta utilizando el ID de enrutador más bajo del enrutador BGP anunciante. Si la ruta fue recibida por un reflector de ruta, el ID del originador se sustituye por el ID del enrutador. 
+```
+Se prefiere el RID mas bajo
+```
+El ejemplo 12-33 muestra un escenario donde R5 elige la ruta a través de R6 en lugar de R4 debido al ID de enrutador más alto.
+
+Ejemplo 12-33 Elección de la mejor ruta de BGP según el ID del enrutador
+```
+R5# show bgp ipv4 unicast 172.16.0.0/16 best-path-reason
+! Output omitted for brevity
+BGP routing table entry for 172.16.0.0/16, version 8
+Paths: (2 available, best #2, table default)
+  300 100
+    192.168.6.6 (metric 130816) from 192.168.6.6 (192.168.6.6)
+      Origin IGP, metric 0, localpref 100, valid, internal
+      Best Path Evaluation: Higher router ID
+  200 100 12
+    192.168.4.4 (metric 130816) from 192.168.4.4 (192.168.4.4)
+      Origin IGP, metric 0, localpref 100, valid, internal, best
+      Best Path Evaluation: Overall best path
+```
+
+### Minimum Cluster List Length:
+
+El siguiente paso en el algoritmo de mejor ruta de BGP consiste en seleccionar la mejor ruta utilizando la longitud más baja de la lista de clústeres. 
+```
+La longitud mas baja en la lista de clusteres.
+```
+La lista de clústeres es un atributo BGP no transitivo que un reflector de ruta añade (no sobrescribe) con su ID de clúster. Los reflectores de ruta utilizan el atributo ID de clúster como mecanismo para evitar bucles. El ID de clúster no se anuncia entre AS y es localmente significativo. En resumen, este paso localiza la ruta con el menor número de saltos de anuncio iBGP.
+
+> [!NOTE]
+> Los reflectores de ruta BGP quedan fuera del alcance del examen CCNP y CCIE Enterprise Core ENCOR 350-401 y no se tratan en este libro.
+
+### Lowest Neighbor Address:
+
+El último paso del algoritmo de mejor ruta BGP consiste en seleccionar la ruta que proviene de la dirección vecina BGP más baja. Este paso se limita a los emparejamientos iBGP, ya que los emparejamientos eBGP utilizan la ruta recibida más antigua como criterio de desempate.
+```
+Se prefiere la ruta vacina que tiene la ip mas baja.
+```
+La Figura 12-13 muestra el concepto de elegir el router con la dirección vecina más baja. R1 anuncia el prefijo de red 172.16.0.0/24 a R2. R1 y R2 han establecido dos sesiones BGP utilizando las redes 10.12.1.0/24 y 10.12.2.0/24. R2 selecciona la ruta anunciada desde 10.12.1.1 porque es la dirección IP más baja.
+
+![Image Alt]()
