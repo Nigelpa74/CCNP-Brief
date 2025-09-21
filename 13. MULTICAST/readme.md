@@ -108,7 +108,7 @@ Cuando un dispositivo receiver desea recibir una transmisión multicast específ
 
 IGMPv2 Utiliza el formato de mensaje que se muestra en la figura 13-7. Este mensaje se encapsula en un `paquete IP con el número de protocolo 2`. Los mensajes se envían con la opción de alerta de router IP activada, lo que indica que los paquetes deben ser examinados con mayor detenimiento, y `con un valor de tiempo de vida (TTL) de 1`. El TTL es un campo de 8 bits en la cabecera del paquete IP, establecido por el emisor y decrementado por cada router a lo largo de la ruta hasta su destino. Si el TTL llega a 0 antes de alcanzar el destino, el paquete se descarta. Los paquetes IGMP no deben reenviarse más allá del segmento de red **local**, y por ello se envían con un TTL de 1. Esto garantiza que los paquetes IGMP sean procesados ​​únicamente por el/los router(s) locales y no sean reenviados a otros routers.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/87bc6da98b3dbc414b074b77522a1a73382844eb/13.%20MULTICAST/IMG/MULTI%20IGMP/MULTI%20IGMP%201.PNG)
 
 Los campos del formato de los mensajes IGMP se definen de la siguiente manera:
 - Tipo: Este campo describe cinco tipos de mensajes IGMP utilizados por los routers y los receivers:
@@ -154,11 +154,11 @@ Para optimizar el reenvío de paquetes y minimizar la propagación de tráfico i
 
 En la figura 13-8, el conmutador SW1 comienza con una tabla de direcciones MAC vacía. Cuando la estación de trabajo A envía un paquete, el conmutador almacena su dirección MAC de origen y la interfaz en la tabla de direcciones MAC, y envía el paquete recibido a todos los puertos (excepto al puerto por el que lo recibió).
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/87bc6da98b3dbc414b074b77522a1a73382844eb/13.%20MULTICAST/IMG/MULTI%20IGMP/MULTI%20IGMP%202.PNG)
 
 Si otra estación de trabajo envía un paquete con la dirección MAC de la estación A como destino, dicho paquete ya no se retransmite a todas las estaciones, ya que su dirección MAC está registrada en la tabla de direcciones MAC, y se envía únicamente a la estación A, como se muestra en la figura 13-9.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/87bc6da98b3dbc414b074b77522a1a73382844eb/13.%20MULTICAST/IMG/MULTI%20IGMP/MULTI%20IGMP%203.PNG)
 
 En el caso del tráfico multicast, una dirección MAC multicast nunca se utiliza como dirección MAC de origen. Por defecto, los switches consideran las direcciones MAC multicast como paquetes multicast desconocidos y los envían a todos los puertos. Luego, corresponde a las estaciones de trabajo seleccionar qué paquetes procesar y cuáles descartar. Las estaciones de trabajo que no están configuradas para recibir tráfico multicast lo descartan a nivel de la tarjeta de red, ya que no están programadas para ello. El envío indiscriminado de tráfico multicast por un switch genera un uso ineficiente del ancho de banda en cada segmento de red.
 
@@ -172,11 +172,11 @@ El protocolo IGMP Snooping, definido en la RFC 4541, es el método más utilizad
 > [!NOTE]
 > Incluso con la función de supervisión IGMP activada, algunos grupos de difusión siguen transmitiéndose en todos los puertos (por ejemplo, las direcciones reservadas 224.0.0.0/24).
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/87bc6da98b3dbc414b074b77522a1a73382844eb/13.%20MULTICAST/IMG/MULTI%20IGMP/MULTI%20IGMP%204.PNG)
 
 La figura 13-11 ilustra cómo el origen envía tráfico a la dirección `239.255.1.1` `(01:00:5E:7F:01:01)`. El conmutador 1 recibe este tráfico y lo reenvía únicamente por las interfaces G0/0 y G0/2, ya que son los únicos puertos que recibieron solicitudes de membership IGMP para ese grupo. Si bien es posible configurar manualmente una entrada estática para multicast en la tabla de direcciones MAC, esta solución no es escalable, ya que no permite adaptarse a los cambios dinámicos; por lo tanto, no se recomienda su uso.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/87bc6da98b3dbc414b074b77522a1a73382844eb/13.%20MULTICAST/IMG/MULTI%20IGMP/MULTI%20IGMP%205.PNG)
 
 # Protocolo multicast independiente (PIM): 
 
@@ -194,7 +194,7 @@ Un _source tree_ es un árbol de distribución multicast en el que el origen act
 
 Una vez creado este árbol, utiliza la ruta más corta a través de la red desde la fuente hasta las hojas del árbol; por esta razón, también se le denomina shortest path tree (SPT). El estado de reenvío del SPT se representa mediante la notación (S,G), donde S representa la fuente del flujo multicast (servidor) y G la dirección del grupo multicast. Usando esta notación, el estado del SPT en el ejemplo de la figura 13-12 es (10.1.1.2, 239.1.1.1), donde la fuente multicast S es 10.1.1.2 y el grupo multicast G es 239.1.1.1, al que se unen los receivers A y B.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/87bc6da98b3dbc414b074b77522a1a73382844eb/13.%20MULTICAST/IMG/MULTI%20IGMP/MULTI%20IGMP%206.PNG)
 
 Dado que cada árbol SPT tiene su origen en la fuente S, cada fuente que envía datos a un grupo de difusión requiere un árbol SPT.
 
@@ -205,7 +205,7 @@ Un Shared tree es un árbol de distribución multicast en el que la raíz no es 
 > [!NOTE]
 > En el any-source multicast (ASM), el estado (S,G) requiere un nodo padre (*,G). Por esta razón, la figura 13-13 muestra que los routers R1 y R2 tienen el estado (*,G). En cambio, R3 y R4 aún no se han unido al árbol de origen, como se indica por la ausencia de la entrada (S,G) en su tabla de enrutamiento multicast.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/87bc6da98b3dbc414b074b77522a1a73382844eb/13.%20MULTICAST/IMG/MULTI%20IGMP/MULTI%20IGMP%207.PNG)
 
 Una de las ventajas de los **shared trees** de distribución frente a los **source trees** es que requieren menos entradas de multidifusión (por ejemplo, S,G y *,G). Por ejemplo, al añadir más fuentes a la red que envían tráfico al mismo grupo de multidifusión, el número de entradas de multidifusión para R3 y R4 permanece invariable: (*,239.1.1.1).
 
@@ -215,7 +215,7 @@ El principal inconveniente de los árboles de distribución compartida es que lo
 
 La figura 13-14 muestra una topología de referencia para ilustrar algunos conceptos de enrutamiento multicast.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/87bc6da98b3dbc414b074b77522a1a73382844eb/13.%20MULTICAST/IMG/MULTI%20IGMP/MULTI%20IGMP%208.PNG)
 
 La siguiente lista define la terminología común de PIM, ilustrada en la Figura 13-14:
 
@@ -235,5 +235,4 @@ La siguiente lista define la terminología común de PIM, ilustrada en la Figura
 - Estado de multicast: El estado de reenvío de tráfico multicast que utiliza un router para reenviar el tráfico multicast. Este estado está compuesto por las entradas de la tabla mroute (S, G, IIF, OIF, etc.).
 
 # Puntos de encuentro: Esta sección describe el propósito, la función y el funcionamiento de los puntos de encuentro en una red multicast.
-
 
