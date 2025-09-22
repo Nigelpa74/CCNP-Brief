@@ -269,13 +269,13 @@ En PIM-DM, el árbol de multidifusión se crea mediante la propagación del trá
 
 La figura 13-15 muestra el funcionamiento de la propagación y prune en modo denso. El tráfico de multidifusión se propaga por toda la red. Al recibir el tráfico de multidifusión de su vecino aguas arriba a través de su interfaz RPF, cada router lo reenvía a todos sus vecinos PIM-DM. Esto puede provocar que parte del tráfico llegue a través de una interfaz que no sea RPF, como ocurre con R3 que recibe tráfico de R2 a través de una interfaz no RPF. Los paquetes que llegan por una interfaz no RPF se descartan. 
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/c2bfe3bf9a2ab0a7843b70a88c36ef177ef30348/13.%20MULTICAST/IMG/MULTI%20PIM/MULTI%20PIM%201.PNG)
 
 Estos flujos de multidifusión no RPF son normales durante la propagación inicial del tráfico de multidifusión y se corrigen mediante el mecanismo de prune PIM-DM. Este mecanismo se utiliza para detener el tráfico no deseado. Las señales de prune (indicadas por las flechas discontinuas) se envían a través de la interfaz RPF cuando el enrutador no tiene dispositivos receptores que necesiten el tráfico de multidifusión, como ocurre con R4, que no tiene ningún receptor interesado. También se envían a través de las interfaces no RPF para detener el tráfico de multidifusión que llega por dicha interfaz, como ocurre con R3, donde el tráfico de multidifusión llega a través de una interfaz no RPF desde R2, lo que genera una señal de prune.
 
 La figura 13-16 muestra la topología resultante después de eliminar los enlaces innecesarios. Esto crea un árbol de distribución más corto (SPT) desde la fuente al receptor. Aunque el tráfico de multidifusión ya no llega a la mayoría de los enrutadores de la red, el estado (S,G) se mantiene en todos ellos. Este estado (S,G) persiste hasta que la fuente deja de transmitir.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/c2bfe3bf9a2ab0a7843b70a88c36ef177ef30348/13.%20MULTICAST/IMG/MULTI%20PIM/MULTI%20PIM%202.PNG)
 
 En PIM-DM, Prune caducan después de tres minutos. Esto provoca que el tráfico multicast se vuelva a distribuir a todos los routers, tal como ocurrió durante la distribución inicial. Este comportamiento de distribución y filtrado periódico (cada tres minutos) es normal y debe tenerse en cuenta al diseñar una red que utilice PIM-DM. PIM-DM es adecuado para redes pequeñas donde hay receptores activos en cada subred. Dado que este escenario es poco común, PIM-DM no se implementa ampliamente y no se recomienda para entornos de producción.
 
@@ -291,7 +291,7 @@ Como resultado de estas incorporaciones explícitas, se crea un estado de reenv�
 
 La figura 13-17 ilustra un origen multicast que envía tráfico multicast al FHR. Este, a su vez, envía dicho tráfico al RP, lo que permite al RP identificar el origen multicast. También muestra un receptor que envía un mensaje IGMP de incorporación al LHR para unirse al grupo multicast. El LHR envía entonces un mensaje PIM de incorporación (\*,G) al RP, creando un árbol compartido entre el RP y el LHR. El RP, a continuación, envía un mensaje PIM de incorporación (S,G) al FHR, formando un árbol de origen entre el origen y el RP. En resumen, se crean dos árboles: un SPT del FHR al RP (S,G) y un árbol compartido del RP al LHR (*,G).
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/c2bfe3bf9a2ab0a7843b70a88c36ef177ef30348/13.%20MULTICAST/IMG/MULTI%20PIM/MULTI%20PIM%203.PNG)
 
 En este punto, el tráfico multicast comienza a fluir desde la fuente hacia el RP, y desde el RP hacia el LHR, para finalmente llegar al receptor. Esta es una explicación muy simplificada de cómo PIM-SM realiza el enrutamiento multicast. Las siguientes secciones lo explican con mayor detalle.
 
@@ -322,7 +322,7 @@ PIM-SM permite al LHR cambiar del árbol compartido (RPT) a un árbol específic
 > [!NOTE]
 > El mecanismo de conmutación de PIM SPT se puede desactivar para todos los grupos o para grupos específicos.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/c2bfe3bf9a2ab0a7843b70a88c36ef177ef30348/13.%20MULTICAST/IMG/MULTI%20PIM/MULTI%20PIM%204.PNG)
 
 Si el RP no tiene ninguna otra interfaz interesada en el tráfico multicast, envía un mensaje de prune PIM hacia el FHR. Si existen routers entre el RP y el FHR, este mensaje de prune se transmitirá de router en router hasta llegar al FHR.
 
@@ -353,7 +353,7 @@ PIM-SM utiliza la función de búsqueda RPF para determinar a dónde enviar las 
 
 La topología de la izquierda en la figura 13-19 muestra un fallo en el control RPF en R3 para la entrada (S,G), ya que el paquete llega por una interfaz no RPF. La topología de la derecha muestra el tráfico multicast llegando a la interfaz correcta en R3; luego se reenvía por todas las interfaces de salida.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/c2bfe3bf9a2ab0a7843b70a88c36ef177ef30348/13.%20MULTICAST/IMG/MULTI%20PIM/MULTI%20PIM%205.PNG)
 
 ## PIM Forwarder
 
@@ -367,7 +367,7 @@ Cada router compara sus propios valores con los recibidos. Se da preferencia al 
 
 El router perdedor elimina la interfaz como si hubiera recibido una orden de eliminación, y el router ganador se convierte en el router PIM responsable del reenvío en la red.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/c2bfe3bf9a2ab0a7843b70a88c36ef177ef30348/13.%20MULTICAST/IMG/MULTI%20PIM/MULTI%20PIM%206.PNG)
 
 > [!NOTE]
 > El temporizador de _prune_ expira a los tres minutos en el router perdedor, lo que hace que este router vuelva a reenviar paquetes por la interfaz. Esto desencadena la repetición del proceso de selección. Si el router ganador dejara de estar operativo, el router perdedor asumiría la función de reenviar paquetes a ese segmento de red una vez que expire el temporizador de _prune_.
@@ -376,8 +376,9 @@ El concepto de enrutador PIM se aplica tanto a PIM-DM como a PIM-SM. Si bien PIM
 
 Con la topología que se muestra en la Figura 13-20, PIM-SM no enviaría flujos duplicados a la LAN, a diferencia de PIM-DM, debido a su funcionamiento. Por ejemplo, suponiendo que R1 es el RP, cuando R4 envía un mensaje de adhesión PIM hacia R1, lo envía a la dirección 224.0.0.13 (dirección de grupo de enrutadores PIM), y R2 y R3 lo reciben. Uno de los campos del mensaje de adhesión PIM incluye la dirección IP del vecino aguas arriba, también conocido como vecino RPF. Si R3 es el vecino RPF, solo R3 enviará un mensaje de adhesión PIM a R1. R2 no lo hará, ya que el mensaje no estaba dirigido a él. En este punto, se crea un árbol de distribución compartido entre R1, R3 y R4, sin que se produzca duplicación de tráfico.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/c2bfe3bf9a2ab0a7843b70a88c36ef177ef30348/13.%20MULTICAST/IMG/MULTI%20PIM/MULTI%20PIM%207.PNG)
 
 # Puntos de encuentro (RP rendezvous points): 
 
 En PIM-SM, es obligatorio seleccionar uno o más routers para que funcionen como _rendezvous points_ (RP). Un RP es un nodo raíz común ubicado en un punto específico del árbol de distribución compartido, tal como se describió anteriormente en este capítulo. Un RP puede configurarse de forma estática en cada router o mediante un mecanismo dinámico. Un router PIM puede configurarse para funcionar como RP de forma estática en cada router del dominio de multidifusión, o de forma dinámica mediante la configuración de Auto-RP o un router de arranque PIM (BSR), como se describe en las siguientes secciones.
+
