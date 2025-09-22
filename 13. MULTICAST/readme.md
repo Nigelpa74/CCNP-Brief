@@ -1,4 +1,4 @@
-El protocolo multicast se implementa en casi todos los tipos de red. Permite a un equipo origen enviar paquetes de datos a un grupo de equipos destino (_receivers_) de forma eficiente, optimizando el uso del ancho de banda y los recursos del sistema. Este capítulo describe la utilidad del protocolo multicast, así como los protocolos fundamentales necesarios para comprender su funcionamiento, como IGMP, PIM (modo denso/modo disperso) y los rendezvous points (RPs).
+<img width="517" height="700" alt="image" src="https://github.com/user-attachments/assets/7e4a4305-c0d2-4387-ba3d-557da3c8a7ef" />El protocolo multicast se implementa en casi todos los tipos de red. Permite a un equipo origen enviar paquetes de datos a un grupo de equipos destino (_receivers_) de forma eficiente, optimizando el uso del ancho de banda y los recursos del sistema. Este capítulo describe la utilidad del protocolo multicast, así como los protocolos fundamentales necesarios para comprender su funcionamiento, como IGMP, PIM (modo denso/modo disperso) y los rendezvous points (RPs).
 
 # Fundamentos de multicast: 
 
@@ -234,5 +234,150 @@ La siguiente lista define la terminología común de PIM, ilustrada en la Figura
 - Base de datos de información de reenvío multicast (MFIB Multicast Forwarding Information Base): Una tabla de reenvío que utiliza la MRIB para programar la información de reenvío multicast en hardware, lo que permite un procesamiento más rápido.
 - Estado de multicast: El estado de reenvío de tráfico multicast que utiliza un router para reenviar el tráfico multicast. Este estado está compuesto por las entradas de la tabla mroute (S, G, IIF, OIF, etc.).
 
-# Puntos de encuentro: Esta sección describe el propósito, la función y el funcionamiento de los puntos de encuentro en una red multicast.
+Actualmente existen cinco modos de operación de PIM:
+- PIM Dense Mode (PIM-DM)
+- PIM Sparse Mode (PIM-SM)
+- PIM Sparse Dense Mode
+- PIM Source Specific Multicast (PIM-SSM)
+- PIM Bidirectional Mode (Bidir-PIM)
 
+> [!NOTE]
+> PIM-DM y PIM-SM también se conocen comúnmente como multicast de origen arbitrario (ASM).
+
+Todos los mensajes de control de PIM utilizan el número de protocolo IP 103; pueden ser de tipo unicast (es decir, mensajes de registro y de parada de registro enviados con un TTL mayor que 1) o multicast, con un TTL de 1 a la dirección 224.0.0.13, que corresponde a todos los routers PIM. 
+
+La tabla 13-4 muestra la lista de los mensajes de control de PIM.
+Tipo|Tipo de mensaje|Destino|PIM protocolo
+:---|:---|:---|:---
+0| Hola| 224.0.0.13 (todos los routers PIM)| PIM-SM, PIM-DM, Bidir-PIM y SSM
+1| Registro| Dirección RP (unicast)| PIM-SM
+2| Detener registro| First-hop router (unicast)| PIM-SM
+3| Join/prune| 224.0.0.13 |(todos los routers PIM)| PIM-SM, Bidir-PIM y SSM
+4| Inicialización/Bootstrap| 224.0.0.13| (todos los routers PIM)| PIM-SM y Bidir-PIM
+5| Afirmación| 224.0.0.13 |(todos los routers PIM)| PIM-SM, PIM-DM y Bidir-PIM
+8| Anuncio de RP candidato| Dirección del router de inicialización (BSR Bootstrap router) (unicast a BSR)| PIM-SM y Bidir-PIM
+9| Actualización de estado| 224.0.0.13 |(todos los routers PIM)| PIM-DM
+10| Elección de DF| 224.0.0.13 |(todos los routers PIM)| Bidir-PIM
+
+Por defecto, los mensajes de saludo PIM se envían cada 30 segundos desde cada interfaz habilitada para PIM, con el fin de detectar los routers PIM vecinos en dicha interfaz. Estos mensajes se envían a la dirección de grupo de routers PIM, tal como se muestra en la tabla 13-4. Los mensajes de saludo también se utilizan para elegir un `designated router (DR)`, como se describe más adelante en este capítulo, y para negociar funcionalidades adicionales. Todos los routers PIM deben registrar la información de los mensajes de saludo recibidos de cada router PIM vecino.
+
+## PIM Dense mode (PIM en modo denso): 
+
+Los routers PIM pueden configurarse para el `PIM Dense Mode` (PIM-DM) cuando se puede suponer que los receptores de un grupo de multidifusión están presentes en todas las subredes de la red; es decir, cuando los receptores de multidifusión de un grupo están distribuidos de forma uniforme en toda la red.
+
+En PIM-DM, el árbol de multidifusión se crea mediante la propagación del tráfico a través de todas las interfaces, desde la fuente hasta todos los routers en modo denso de la red. El árbol se construye desde la raíz hacia las hojas. Al recibir el tráfico del grupo de multidifusión, cada router decide si ya tiene receptores activos que desean recibir dicho tráfico. Si los tiene, el router permanece inactivo y permite que el tráfico de multidifusión continúe. Si ningún receptor ha solicitado el flujo de multidifusión para ese grupo en el router de última conexión (LHR), el router envía un mensaje de prune hacia la fuente. De esta forma, esa rama del árbol se elimina para evitar el tráfico innecesario. El árbol resultante es un árbol de origen, ya que es único desde la fuente hasta los receptores. 
+
+La figura 13-15 muestra el funcionamiento de la propagación y prune en modo denso. El tráfico de multidifusión se propaga por toda la red. Al recibir el tráfico de multidifusión de su vecino aguas arriba a través de su interfaz RPF, cada router lo reenvía a todos sus vecinos PIM-DM. Esto puede provocar que parte del tráfico llegue a través de una interfaz que no sea RPF, como ocurre con R3 que recibe tráfico de R2 a través de una interfaz no RPF. Los paquetes que llegan por una interfaz no RPF se descartan. 
+
+![Image Alt]()
+
+Estos flujos de multidifusión no RPF son normales durante la propagación inicial del tráfico de multidifusión y se corrigen mediante el mecanismo de prune PIM-DM. Este mecanismo se utiliza para detener el tráfico no deseado. Las señales de prune (indicadas por las flechas discontinuas) se envían a través de la interfaz RPF cuando el enrutador no tiene dispositivos receptores que necesiten el tráfico de multidifusión, como ocurre con R4, que no tiene ningún receptor interesado. También se envían a través de las interfaces no RPF para detener el tráfico de multidifusión que llega por dicha interfaz, como ocurre con R3, donde el tráfico de multidifusión llega a través de una interfaz no RPF desde R2, lo que genera una señal de prune.
+
+La figura 13-16 muestra la topología resultante después de eliminar los enlaces innecesarios. Esto crea un árbol de distribución más corto (SPT) desde la fuente al receptor. Aunque el tráfico de multidifusión ya no llega a la mayoría de los enrutadores de la red, el estado (S,G) se mantiene en todos ellos. Este estado (S,G) persiste hasta que la fuente deja de transmitir.
+
+![Image Alt]()
+
+En PIM-DM, Prune caducan después de tres minutos. Esto provoca que el tráfico multicast se vuelva a distribuir a todos los routers, tal como ocurrió durante la distribución inicial. Este comportamiento de distribución y filtrado periódico (cada tres minutos) es normal y debe tenerse en cuenta al diseñar una red que utilice PIM-DM. PIM-DM es adecuado para redes pequeñas donde hay receptores activos en cada subred. Dado que este escenario es poco común, PIM-DM no se implementa ampliamente y no se recomienda para entornos de producción.
+
+## Modo disperso de PIM (PIM Sparse Mode):
+
+El protocolo PIM en modo disperso (PIM-SM) fue diseñado para redes con receptores de aplicaciones multicast distribuidos de forma dispersa, es decir, cuando los receptores de un grupo multicast están distribuidos de forma irregular en la red. Sin embargo, PIM-SM también funciona bien en redes con alta densidad de receptores. Este protocolo asume que ningún receptor está interesado en el tráfico multicast a menos que lo solicite explícitamente. Al igual que PIM-DM, PIM-SM utiliza la tabla de enrutamiento unicast para realizar las comprobaciones RPF, y no depende del protocolo de enrutamiento utilizado para poblar dicha tabla (incluidas las rutas estáticas); por lo tanto, es independiente del protocolo.
+
+### PIM Shared y Source Path Trees:
+
+IM-SM utiliza un modelo de incorporación explícita, donde los receptores envían un mensaje IGMP de incorporación a su router local, también conocido como **last hop router (LHR)**. Este mensaje provoca que el LHR envíe un mensaje PIM de incorporación en dirección a la raíz del árbol, que puede ser el RP en el caso de un shared tree (RPT) o el **first hop router (FHR)** al que está conectado el origen que envía el tráfico multicast en el caso de un árbol de origen (SPT).
+
+Como resultado de estas incorporaciones explícitas, se crea un estado de reenvío multicast, lo cual difiere significativamente del comportamiento de inundación y prune, o de la incorporación implícita de PIM-DM, donde el estado de reenvío lo determina el paquete multicast que llega al router.
+
+La figura 13-17 ilustra un origen multicast que envía tráfico multicast al FHR. Este, a su vez, envía dicho tráfico al RP, lo que permite al RP identificar el origen multicast. También muestra un receptor que envía un mensaje IGMP de incorporación al LHR para unirse al grupo multicast. El LHR envía entonces un mensaje PIM de incorporación (\*,G) al RP, creando un árbol compartido entre el RP y el LHR. El RP, a continuación, envía un mensaje PIM de incorporación (S,G) al FHR, formando un árbol de origen entre el origen y el RP. En resumen, se crean dos árboles: un SPT del FHR al RP (S,G) y un árbol compartido del RP al LHR (*,G).
+
+![Image Alt]()
+
+En este punto, el tráfico multicast comienza a fluir desde la fuente hacia el RP, y desde el RP hacia el LHR, para finalmente llegar al receptor. Esta es una explicación muy simplificada de cómo PIM-SM realiza el enrutamiento multicast. Las siguientes secciones lo explican con mayor detalle.
+
+### Shared Tree Join:
+
+La figura 13-17 muestra al receptor A, conectado al LHR, uniéndose al grupo de multidifusión G. El LHR conoce la dirección IP del RP para el grupo G y, a continuación, envía un mensaje de solicitud de adhesión PIM (\*,G) a dicho RP. Si el RP no estuviera conectado directamente, esta solicitud PIM (*,G) recorrería los nodos intermedios hasta llegar al RP, creando una rama del árbol de multidifusión que se extendería desde el RP hasta el LHR. A partir de ese momento, el tráfico de multidifusión del grupo G que llegue al RP podrá fluir a través del árbol de multidifusión hasta el receptor.
+
+### Source Registration:
+
+En la figura 13-17, tan pronto como la fuente de un grupo G envía un paquete, el FHR asociado a dicha fuente se encarga de registrarla en el RP y solicitarle que cree un árbol de distribución hacia ese router.
+
+El FHR crea una interfaz de túnel de registro PIM unidireccional que encapsula los datos de multidifusión recibidos de la fuente en un mensaje PIM-SM especial, llamado _register messagge_. Estos datos de multidifusión encapsulados se envían por unicast al RP mediante el túnel de registro PIM.
+
+Cuando el RP recibe un mensaje de registro, desencapsula el paquete de datos de multidifusión. Si no existe un árbol de distribución activo (porque no hay receptores interesados), el RP envía un mensaje de parada de registro por unicast directamente al FHR, sin utilizar el túnel de registro PIM, indicándole que deje de enviar mensajes de registro.
+
+Si existe un árbol de distribución activo para el grupo, el RP reenvía el paquete de multidifusión por dicho árbol y envía un mensaje de adhesión (S,G) hacia la red de origen S para crear un SPT (S,G). Si hay varios routers entre el RP y la fuente, se crea un estado (S,G) en todos los routers del SPT, incluido el RP. También habrá un estado (*,G) en R1 y en todos los routers entre el FHR y el RP.
+
+Una vez creado el SPT desde el router origen al RP, el tráfico de multidifusión fluye directamente desde la fuente S al RP.
+
+Cuando el RP empieza a recibir datos directamente (a través del SPT) de la fuente S, envía un mensaje de parada de registro al FHR para indicarle que puede dejar de enviar los mensajes de registro por unicast. En este punto, el tráfico de multidifusión fluye por el SPT hacia el RP y, desde allí, por el árbol de distribución (RPT) hacia el receptor.
+
+El túnel de registro PIM entre el FHR y el RP permanece activo, incluso sin tráfico de multidifusión, mientras exista una ruta RPF válida para el RP.
+
+### PIM SPT Switchover:
+
+PIM-SM permite al LHR cambiar del árbol compartido (RPT) a un árbol específico (SPT) para una fuente determinada. En los routers de Cisco, este es el comportamiento predeterminado y ocurre inmediatamente después de recibir el primer paquete multicast del RP a través del RPT, incluso si la ruta más corta a la fuente pasa por el RP. La figura 13-18 ilustra este proceso de cambio a SPT. Cuando el LHR recibe el primer paquete multicast del RP, identifica la dirección IP de la fuente. A continuación, consulta su tabla de enrutamiento unicast para determinar la ruta más corta a la fuente y envía un mensaje de adhesión (S,G) PIM a la fuente, paso a paso, hasta llegar al FHR y crear el SPT. Si la interfaz RPF del SPT difiere de la del RPT, el LHR comenzará a recibir tráfico multicast duplicado. En ese momento, cambiará la interfaz RPF a la del SPT y enviará un mensaje de prune (S,G) PIM al RP para detener el tráfico multicast duplicado que llega por el RPT. En la figura 13-18, la ruta más corta a la fuente es entre R1 y R3; si ese enlace estuviera inactivo o no existiera, la ruta más corta sería a través del RP. En este caso, también se produciría el cambio a SPT, aunque la ruta del SPT sea la misma que la del RPT.
+
+> [!NOTE]
+> El mecanismo de conmutación de PIM SPT se puede desactivar para todos los grupos o para grupos específicos.
+
+![Image Alt]()
+
+Si el RP no tiene ninguna otra interfaz interesada en el tráfico multicast, envía un mensaje de prune PIM hacia el FHR. Si existen routers entre el RP y el FHR, este mensaje de prune se transmitirá de router en router hasta llegar al FHR.
+
+### Designated Routers:
+
+Cuando existen varios routers PIM-SM en un segmento de LAN, los mensajes de saludo PIM se utilizan para elegir un _Designated router_ (DR) y evitar el envío de tráfico multicast duplicado a la LAN o al RP. Por defecto, el valor de prioridad del DR en todos los routers PIM es 1, y se puede modificar para forzar a un router específico a convertirse en DR durante el proceso de elección. Cuanto mayor sea la prioridad del DR, mejor. Si un router de la subred no admite la opción de prioridad del DR o si todos los routers tienen la misma prioridad, se utiliza la dirección IP más alta de la subred como criterio de desempate.
+
+En un FHR, el router designado encapsula en mensajes de registro unicast los paquetes multicast originados por una fuente y destinados al RP. En un LHR, el router designado envía mensajes de incorporación y prune PIM al RP para informar sobre la pertenencia a grupos de hosts y realiza la conmutación de árbol SPT.
+
+Sin DR, todos los LHR del mismo segmento de LAN podrían enviar incorporaciones PIM, lo que generaría tráfico multicast duplicado en la LAN. En el origen, si hay varios FHR en la LAN, todos envían mensajes de registro al RP simultáneamente.
+
+El tiempo de retención del DR por defecto es 3,5 veces el intervalo de saludo (105 segundos). Si no se reciben saludos en ese intervalo, se elige un nuevo DR. Para reducir el tiempo de conmutación del DR, se puede reducir el intervalo de consulta de saludo, aunque esto implica un mayor tráfico de control y mayor uso de la CPU del router.
+
+## Reverse Path Forwarding:
+
+El algoritmo de Reenvío de Ruta Inversa (RPF) se utiliza para prevenir bucles y garantizar que el tráfico multicast llegue a la interfaz correcta. Su funcionamiento es el siguiente:
+
+- Si un router recibe un paquete multicast en una interfaz que utiliza para enviar paquetes unicast al origen, se considera que ha llegado por la interfaz RPF.
+- Si el paquete llega por la interfaz RPF, el router lo reenvía por las interfaces de la lista de interfaces de salida (OIL) de la entrada de la tabla de enrutamiento multicast.
+- Si el paquete no llega por la interfaz RPF, se descarta para evitar bucles.
+
+PIM utiliza árboles de origen multicast entre el origen y el LHR, y entre el origen y el RP. También utiliza árboles compartidos multicast entre el RP y los LHR. El control RPF se realiza de forma diferente en cada caso:
+
+- Si un router PIM tiene una entrada (S,G) en la tabla de enrutamiento multicast (estado SPT), realiza el control RPF con la dirección IP del origen del paquete multicast.
+- Si un router PIM no tiene un estado de árbol de origen explícito, se considera un estado de árbol compartido. El router realiza el control RPF con la dirección del RP, que se conoce cuando los miembros se unen al grupo.
+
+PIM-SM utiliza la función de búsqueda RPF para determinar a dónde enviar las solicitudes de adhesión y exclusión. Las solicitudes de adhesión (S,G) (estado SPT) se envían hacia el origen. Las solicitudes de adhesión (*,G) (estado de árbol compartido) se envían hacia el RP.
+
+La topología de la izquierda en la figura 13-19 muestra un fallo en el control RPF en R3 para la entrada (S,G), ya que el paquete llega por una interfaz no RPF. La topología de la derecha muestra el tráfico multicast llegando a la interfaz correcta en R3; luego se reenvía por todas las interfaces de salida.
+
+![Image Alt]()
+
+## PIM Forwarder
+
+En ciertos escenarios, los paquetes multicast duplicados podrían circular por una red de acceso múltiple. El mecanismo de selección de ruta PIM evita este problema.
+
+La figura 13-20 muestra cómo los routers R2 y R3 reciben el mismo tráfico (S,G) a través de sus interfaces RPF y lo reenvían al segmento de red. Por lo tanto, R2 y R3 reciben un paquete (S,G) a través de su interfaz de salida (OIF), que coincide con la OIF de su entrada (S,G). En otras palabras, detectan un paquete multicast para un grupo (S,G) específico que entra por la misma interfaz de salida por la que también sale. Esto activa el mecanismo de selección de ruta.
+
+R2 y R3 envían mensajes de selección de ruta PIM a la red. Estos mensajes incluyen la distancia administrativa (AD) y la métrica de ruta, que se envían al origen para determinar qué router debe reenviar el tráfico multicast a ese segmento de red.
+
+Cada router compara sus propios valores con los recibidos. Se da preferencia al mensaje PIM con la menor distancia administrativa al origen. En caso de empate, se elige la métrica de ruta más baja; y, como último criterio, se utiliza la dirección IP más alta.
+
+El router perdedor elimina la interfaz como si hubiera recibido una orden de eliminación, y el router ganador se convierte en el router PIM responsable del reenvío en la red.
+
+![Image Alt]()
+
+> [!NOTE]
+> El temporizador de _prune_ expira a los tres minutos en el router perdedor, lo que hace que este router vuelva a reenviar paquetes por la interfaz. Esto desencadena la repetición del proceso de selección. Si el router ganador dejara de estar operativo, el router perdedor asumiría la función de reenviar paquetes a ese segmento de red una vez que expire el temporizador de _prune_.
+
+El concepto de enrutador PIM se aplica tanto a PIM-DM como a PIM-SM. Si bien PIM-DM lo utiliza frecuentemente, PIM-SM rara vez lo requiere, ya que los paquetes duplicados solo llegan a la LAN en caso de inconsistencias en la configuración de enrutamiento.
+
+Con la topología que se muestra en la Figura 13-20, PIM-SM no enviaría flujos duplicados a la LAN, a diferencia de PIM-DM, debido a su funcionamiento. Por ejemplo, suponiendo que R1 es el RP, cuando R4 envía un mensaje de adhesión PIM hacia R1, lo envía a la dirección 224.0.0.13 (dirección de grupo de enrutadores PIM), y R2 y R3 lo reciben. Uno de los campos del mensaje de adhesión PIM incluye la dirección IP del vecino aguas arriba, también conocido como vecino RPF. Si R3 es el vecino RPF, solo R3 enviará un mensaje de adhesión PIM a R1. R2 no lo hará, ya que el mensaje no estaba dirigido a él. En este punto, se crea un árbol de distribución compartido entre R1, R3 y R4, sin que se produzca duplicación de tráfico.
+
+![Image Alt]()
+
+# Puntos de encuentro (RP rendezvous points): 
+
+En PIM-SM, es obligatorio seleccionar uno o más routers para que funcionen como _rendezvous points_ (RP). Un RP es un nodo raíz común ubicado en un punto específico del árbol de distribución compartido, tal como se describió anteriormente en este capítulo. Un RP puede configurarse de forma estática en cada router o mediante un mecanismo dinámico. Un router PIM puede configurarse para funcionar como RP de forma estática en cada router del dominio de multidifusión, o de forma dinámica mediante la configuración de Auto-RP o un router de arranque PIM (BSR), como se describe en las siguientes secciones.
