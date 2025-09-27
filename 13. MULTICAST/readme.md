@@ -418,7 +418,7 @@ Se pueden configurar varios RP MA en la misma red para proporcionar redundancia 
 
 La figura 13-22 ilustra el mecanismo Auto-RP: el MA recibe periódicamente los anuncios de RP de Cisco para crear la caché de mapeo de grupos a RP y, posteriormente, envía esta información periódicamente a todos los routers PIM de la red mediante mensajes de descubrimiento de RP de Cisco.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/a9ed5299460119b744e0fb20263743561a923d6d/13.%20MULTICAST/IMG/MULTI%20PIM/MULTI%20PIM%208.PNG)
 
 Con Auto-RP, todos los routers aprenden automáticamente la información del RP, lo que facilita su administración y actualización. Auto-RP permite configurar servidores RP de respaldo, lo que posibilita un mecanismo de conmutación de fallos para el RP. 
 
@@ -453,4 +453,4 @@ Cada router de la red utiliza un algoritmo de hash well-known para seleccionar e
 
 La figura 13-23 ilustra el mecanismo BSR: el BSR seleccionado recibe los mensajes de anuncio de los candidatos a RP de todos los routers del dominio y, a continuación, envía mensajes de configuración con la información del RP a través de todas las interfaces PIM habilitadas, los cuales se distribuyen a todos los routers de la red.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/a9ed5299460119b744e0fb20263743561a923d6d/13.%20MULTICAST/IMG/MULTI%20PIM/MULTI%20PIM%209.PNG)
