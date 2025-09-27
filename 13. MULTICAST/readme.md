@@ -1,4 +1,4 @@
-<img width="517" height="700" alt="image" src="https://github.com/user-attachments/assets/7e4a4305-c0d2-4387-ba3d-557da3c8a7ef" />El protocolo multicast se implementa en casi todos los tipos de red. Permite a un equipo origen enviar paquetes de datos a un grupo de equipos destino (_receivers_) de forma eficiente, optimizando el uso del ancho de banda y los recursos del sistema. Este capítulo describe la utilidad del protocolo multicast, así como los protocolos fundamentales necesarios para comprender su funcionamiento, como IGMP, PIM (modo denso/modo disperso) y los rendezvous points (RPs).
+El protocolo multicast se implementa en casi todos los tipos de red. Permite a un equipo origen enviar paquetes de datos a un grupo de equipos destino (_receivers_) de forma eficiente, optimizando el uso del ancho de banda y los recursos del sistema. Este capítulo describe la utilidad del protocolo multicast, así como los protocolos fundamentales necesarios para comprender su funcionamiento, como IGMP, PIM (modo denso/modo disperso) y los rendezvous points (RPs).
 
 # Fundamentos de multicast: 
 
@@ -382,3 +382,75 @@ Con la topología que se muestra en la Figura 13-20, PIM-SM no enviaría flujos 
 
 En PIM-SM, es obligatorio seleccionar uno o más routers para que funcionen como _rendezvous points_ (RP). Un RP es un nodo raíz común ubicado en un punto específico del árbol de distribución compartido, tal como se describió anteriormente en este capítulo. Un RP puede configurarse de forma estática en cada router o mediante un mecanismo dinámico. Un router PIM puede configurarse para funcionar como RP de forma estática en cada router del dominio de multidifusión, o de forma dinámica mediante la configuración de Auto-RP o un router de arranque PIM (BSR), como se describe en las siguientes secciones.
 
+> [!NOTE]
+> BSR y Auto-RP no fueron diseñados para funcionar juntos y su implementación simultánea en la misma red puede generar complejidades innecesarias. Por lo tanto, se recomienda no utilizarlos de forma simultánea.
+
+## Static RP (rendezvous points router): 
+
+Es posible configurar de forma estática el RP para un rango de grupos multicast, configurando la dirección del RP en cada router del dominio multicast. La configuración de un RP estático es relativamente sencilla y se puede realizar con una o dos líneas de configuración en cada router. Si la red no tiene muchos RP definidos o si estos no cambian con frecuencia, este puede ser el método más simple para configurarlos. También puede ser una opción atractiva para redes pequeñas.
+
+Sin embargo, la configuración estática puede aumentar la carga administrativa en redes grandes y complejas. Todos los routers deben tener la misma dirección de RP. Esto significa que cambiar la dirección del RP requiere la reconfiguración de todos los routers. Si hay varios RP activos para diferentes grupos, todos los routers deben conocer qué RP gestiona cada grupo multicast. Para garantizar que esta información sea completa, podrían ser necesarios varios comandos de configuración. Si un RP configurado manualmente falla, no existe un procedimiento de conmutación por error para que otro router asuma la función del RP que ha fallado, y este método por sí solo no proporciona ningún tipo de equilibrio de carga.
+
+## AUTO-RP (AUTO Rendezvous Points router):
+
+Auto-RP es un mecanismo propio de Cisco que automatiza la distribución de la asignación de grupos a los puntos de encuentro (RP) en una red PIM. Sus ventajas son las siguientes:
+- Permite utilizar varios puntos de encuentro (RP) en una red para gestionar diferentes rangos de grupos.
+- Distribuye la carga de trabajo entre los diferentes puntos de encuentro (RP).
+- Simplifica la ubicación de los puntos de encuentro (RP) según la ubicación de los miembros del grupo.
+- Evita configuraciones manuales inconsistentes de los puntos de encuentro (RP), que podrían causar problemas de conectividad.
+- Se pueden utilizar varios puntos de encuentro (RP) para gestionar diferentes rangos de grupos o como redundancia entre sí.
+- El mecanismo Auto-RP funciona mediante dos componentes principales: los `candidate RPs` (C-RPs) y `RP mapping agents` (MAs)
+
+### Candidate RPs (C-RPs):
+
+Un C-RP anuncia su disponibilidad para actuar como RP mediante mensajes de anuncio de RP. Estos mensajes se envían por defecto cada 60 segundos (intervalo de anuncio de RP) al grupo de multidifusión reservado 224.0.1.39 (Cisco-RP-Announce). Los mensajes de anuncio de RP incluyen el rango de direcciones predeterminado (224.0.0.0/4), la dirección IP del C-RP y el tiempo de retención, que es tres veces el intervalo de anuncio de RP. Si hay varios C-RP, se dará prioridad al que tenga la dirección IP más alta.
+
+> [!NOTE]
+> La configuración del anuncio de RP permite especificar los grupos multicast concretos que se van a anunciar, en lugar de utilizar el rango de grupos predeterminado 224.0.0.0/4. Esto posibilita tener varios servidores RP en la red que se encarguen de distintos grupos multicast, lo cual resulta útil para el diseño de la red.
+
+### RP Mapping Agents (RP MA):
+
+Los agentes de mapeo de RP (RP MA) se unen al grupo 224.0.1.39 para recibir los anuncios de RP. Almacenan la información de estos anuncios en una caché de mapeo de grupos a RP, junto con los tiempos de retención. Si varios RP anuncian el mismo rango de grupos, se selecciona el RP con la dirección IP más alta.
+
+Los RP MA anuncian el mapeo de RP a otra dirección de grupo multicast conocida, 224.0.1.40 (Cisco-RP-Discovery). Estos mensajes se envían por defecto cada 60 segundos o cuando se detectan cambios. Los anuncios de los MA contienen los RP seleccionados y el mapeo de grupos a RP. Todos los routers con PIM habilitado se unen al grupo 224.0.1.40 y almacenan el mapeo de RP en su propia caché.
+
+Se pueden configurar varios RP MA en la misma red para proporcionar redundancia en caso de fallo. No existe un mecanismo de selección entre ellos; funcionan de forma independiente y todos anuncian la misma información de mapeo de grupos a RP a todos los routers de la red PIM.
+
+La figura 13-22 ilustra el mecanismo Auto-RP: el MA recibe periódicamente los anuncios de RP de Cisco para crear la caché de mapeo de grupos a RP y, posteriormente, envía esta información periódicamente a todos los routers PIM de la red mediante mensajes de descubrimiento de RP de Cisco.
+
+![Image Alt]()
+
+Con Auto-RP, todos los routers aprenden automáticamente la información del RP, lo que facilita su administración y actualización. Auto-RP permite configurar servidores RP de respaldo, lo que posibilita un mecanismo de conmutación de fallos para el RP. 
+
+## PIM Bootstrap Router:
+
+El mecanismo del router de arranque (BSR), descrito en la RFC 5059, es un mecanismo no propietario que proporciona un método automatizado y tolerante a fallos para el descubrimiento y la distribución de los routers de punto de encuentro (RP).
+
+PIM utiliza el BSR para descubrir e informar a todos los routers del dominio PIM sobre la información del conjunto de RP para cada prefijo de grupo. Esta función es similar a la de Auto-RP, pero el BSR se implementa de forma diferente y no es compatible con Auto-RP. El BSR es un estándar IETF que forma parte de la especificación PIM versión 2, definida en la RFC 4601.
+
+El conjunto de RP es un mapeo de grupo a RP que contiene los siguientes elementos:
+- Rango de grupo multicast
+- Prioridad del RP
+- Dirección IP del RP
+- Longitud de la máscara de hash
+- Indicador SM/Bidir
+
+Los mensajes de arranque (BSM) se originan en el BSR y son propagados por los routers intermedios. Cuando un BSM se reenvía, se envía por todas las interfaces PIM habilitadas que tienen vecinos PIM (incluida la interfaz por la que se recibió el mensaje). Los BSM utilizan la dirección de grupo de routers PIM (224.0.0.13) con un TTL de 1.
+
+Para evitar un punto único de fallo, se pueden implementar varios routers candidatos a BSR (C-BSR) en un dominio PIM. Todos los C-BSR participan en la elección del BSR enviando mensajes de arranque PIM con su propia prioridad por todas las interfaces.
+
+El C-BSR con mayor prioridad se elige como BSR y envía mensajes de arranque a todos los routers PIM del dominio. Si las prioridades de los C-BSR son iguales o si la prioridad no está configurada, se elige como BSR el C-BSR con la dirección IP más alta.
+
+### Candidate RPs:
+
+Un router configurado como candidato a RP (C-RP) recibe los mensajes de bootstrap, que contienen la dirección IP del BSR activo. Al conocer la dirección IP del BSR, el C-RP puede enviar mensajes de anuncio de candidato a RP (C-RP-Adv) directamente a este. Un mensaje C-RP-Adv incluye una lista de pares de direcciones de grupo y máscaras de red. Esto permite al C-RP especificar los rangos de grupos para los que está dispuesto a actuar como RP.
+
+El BSR activo almacena todos los anuncios C-RP recibidos en su caché de asignación de grupo a RP. Posteriormente, el BSR envía esta lista completa de C-RPs a todos los routers PIM de la red mediante mensajes de bootstrap, cada 60 segundos por defecto. Al recibir estos mensajes, los routers actualizan su propia caché de asignación de grupo a RP, lo que les permite conocer las direcciones IP de todos los C-RPs de la red.
+
+A diferencia de Auto-RP, donde el agente de asignación elige el RP activo para un rango de grupo y anuncia el resultado a la red, el BSR no elige el RP activo. Esta tarea queda a cargo de cada router individual de la red.
+
+Cada router de la red utiliza un algoritmo de hash well-known para seleccionar el RP activo para un rango de grupos específico. Dado que todos los routers ejecutan el mismo algoritmo con la misma lista de candidatos a RP, seleccionarán el mismo RP para ese rango de grupos. Se da preferencia a los candidatos a RP con menor prioridad. Si las prioridades son iguales, se selecciona como RP el candidato con la dirección IP más alta. 
+
+La figura 13-23 ilustra el mecanismo BSR: el BSR seleccionado recibe los mensajes de anuncio de los candidatos a RP de todos los routers del dominio y, a continuación, envía mensajes de configuración con la información del RP a través de todas las interfaces PIM habilitadas, los cuales se distribuyen a todos los routers de la red.
+
+![Image Alt]()
