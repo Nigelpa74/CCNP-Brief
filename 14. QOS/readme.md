@@ -87,7 +87,7 @@ El modelo IntServ fue creado para aplicaciones en tiempo real, como las de voz y
 
 La figura 14-1 ilustra cómo los hosts RSVP realizan las reservas de ancho de banda.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/0e109f4d8d93fac0d8cdbbf269cf5c0ccf2fb55d/14.%20QOS/IMG/QOS%20MOQ/QOS%20MOQ%201.JPG)
 
 En la figura 14-1, cada host del lado izquierdo (emisores) intenta establecer una reserva de ancho de banda unidireccional con cada host del lado derecho (receptores). Los emisores comienzan enviando mensajes RSVP PATH a los receptores a través del mismo camino que utilizan los paquetes de datos. Estos mensajes contienen la dirección IP del emisor, la dirección IP del receptor y el ancho de banda que se desea reservar. Esta información se almacena en el estado de ruta RSVP de cada nodo. Una vez que los mensajes RSVP PATH llegan a los receptores, estos envían mensajes de solicitud de reserva RSVP (RESV) en sentido inverso, de nodo en nodo. En cada salto, la dirección IP de destino de un mensaje RESV es la dirección IP del nodo anterior, obtenida del estado de ruta RSVP. Al atravesar cada nodo, los mensajes RSVP RESV reservan ancho de banda en cada enlace para el tráfico que fluye desde los receptores a los emisores.
 
@@ -123,16 +123,18 @@ Las políticas de servicio permiten aplicar el mismo mapa de políticas a múlti
 
 La sintaxis de los comandos y la descripción de cada uno de ellos se explican en secciones posteriores de este capítulo.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/0e109f4d8d93fac0d8cdbbf269cf5c0ccf2fb55d/14.%20QOS/IMG/QOS%20MOQ/QOS%20MOQ%202.JPG)
 
 > [!NOTE]
 > Los nombres class map y policy map son casos sensitivos. Se recomienda utilizar únicamente letras mayúsculas para el nombre, ya que facilita la lectura de la configuración.
+
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/0e109f4d8d93fac0d8cdbbf269cf5c0ccf2fb55d/14.%20QOS/IMG/QOS%20MOQ/QOS%20MOQ%203.JPG)
 
 La figura 14-2 muestra un mapa de políticas aplicado a una interfaz, pero los mapas de políticas también se pueden aplicar a otras políticas (también denominadas parent policies) para crear mapas de políticas de QoS jerárquicos (también llamados nested policy maps). El comando `service-policy policy-map-name` se utiliza para aplicar un mapa de políticas secundario dentro de un mapa de políticas principal.
 
 La figura 14-3 muestra un mapa de políticas denominado CHILD-POLICY que se aplica a la default class de otro mapa de políticas llamado PARENT-POLICY, mediante el comando `service-policy policy-map-name`. El mapa de políticas PARENT-POLICY es el que se aplica a la interfaz.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/0e109f4d8d93fac0d8cdbbf269cf5c0ccf2fb55d/14.%20QOS/IMG/QOS%20MOQ/QOS%20MOQ%204.JPG)
 
 # Clasificación y Marking: 
 
@@ -201,3 +203,4 @@ Comando|Descripcion
 
 # Policing y Shaping: 
 # Gestión y prevención de la congestión: 
+
