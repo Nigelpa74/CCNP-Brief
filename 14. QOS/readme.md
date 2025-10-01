@@ -128,8 +128,6 @@ La sintaxis de los comandos y la descripción de cada uno de ellos se explican e
 > [!NOTE]
 > Los nombres class map y policy map son casos sensitivos. Se recomienda utilizar únicamente letras mayúsculas para el nombre, ya que facilita la lectura de la configuración.
 
-![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/0e109f4d8d93fac0d8cdbbf269cf5c0ccf2fb55d/14.%20QOS/IMG/QOS%20MOQ/QOS%20MOQ%203.JPG)
-
 La figura 14-2 muestra un mapa de políticas aplicado a una interfaz, pero los mapas de políticas también se pueden aplicar a otras políticas (también denominadas parent policies) para crear mapas de políticas de QoS jerárquicos (también llamados nested policy maps). El comando `service-policy policy-map-name` se utiliza para aplicar un mapa de políticas secundario dentro de un mapa de políticas principal.
 
 La figura 14-3 muestra un mapa de políticas denominado CHILD-POLICY que se aplica a la default class de otro mapa de políticas llamado PARENT-POLICY, mediante el comando `service-policy policy-map-name`. El mapa de políticas PARENT-POLICY es el que se aplica a la interfaz.
@@ -203,4 +201,5 @@ Comando|Descripcion
 
 # Policing y Shaping: 
 # Gestión y prevención de la congestión: 
+
 
