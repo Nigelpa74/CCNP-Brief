@@ -251,7 +251,7 @@ En las redes empresariales, los descriptores de tráfico más utilizados para la
 
 El estándar 802.1Q es una especificación de IEEE para la implementación de VLAN en redes conmutadas de capa 2. Esta especificación define dos campos de 2 bytes: el Tag Protocol Identifier (TPID) y Tag Control Information (TCI), que se insertan en el marco Ethernet, después del campo de dirección de origen, tal como se muestra en la figura 14-4.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%201.JPG)
 
 El valor TPID es un campo de 16 bits que tiene asignado el valor 0x8100 y que identifica el paquete como un paquete etiquetado según el estándar 802.1Q.
 
@@ -292,7 +292,7 @@ Al viajar desde su origen a su destino, un paquete puede atravesar enlaces tronc
 
 La figura 14-5 ilustra el campo ToS/DiffServ en el encabezado IPv4.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%202.JPG)
 
 El campo ToS, definido en la RFC 791, es un campo de 8 bits, donde solo los 3 primeros bits, denominados IP Precedence (IPP), se utilizan para la clasificación del tráfico, mientras que los restantes permanecen sin usar. Los valores de IPP, que van de 0 a 7, permiten clasificar el tráfico en hasta seis clases de servicio; los valores 6 y 7 están reservados para uso interno de red.
 
@@ -317,7 +317,7 @@ El RFC 2474 declaró obsoleto el campo ToS al introducir el campo DS, y el Class
 
 La figura 14-6 ilustra el funcionamiento del selector de clase PHB.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%203.JPG)
 
 Los paquetes con mayor  IP Precedence deben reenviarse más rápidamente que los paquetes con menor IP Precedence.
 
@@ -329,7 +329,7 @@ Existen ocho clases CS, desde CS0 hasta CS7, que corresponden directamente con l
 
 El reenvío predeterminado (DF) y Class Selector 0 (CS0) proporcionan un servicio de best-effort y utilizan el valor DS 000000. La figura 14-7 ilustra el DF PHB.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%204.JPG)
 
 El reenvío por defecto best-effort también se aplica a los paquetes que no pueden clasificarse mediante un mecanismo de QoS como _queuing, shaping, o policing_. Esto suele ocurrir cuando la política de QoS del nodo está incompleta o cuando los valores DSCP no se ajustan a los definidos para las clases de servicio CS, AF y EF.
 
@@ -341,7 +341,7 @@ Existen cuatro clases AF definidas según el estándar: AF1, AF2, AF3 y AF4. El 
 
 La tabla 14-5 muestra cómo se asigna una IP Precedence a cada clase AF (en la columna «Valor de clase AF») y las tres probabilidades de pérdida de paquetes: baja, media y alta.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%205.JPG)
 
 El nombre AF (AFxy) está compuesto por el valor de IP Precedence AF en decimal (x) y el valor de Drop Probability en decimal (y). Por ejemplo, AF41 combina la IP Precedence 4 con una Drop Probability 1.
 
@@ -384,6 +384,8 @@ Para garantizar una experiencia de QoS escalable y de end-to-end, los paquetes d
 Por ejemplo, en una red de campus con telefonía IP y dispositivos finales, los teléfonos IP etiquetan por defecto el tráfico de voz con un valor CoS de 5 y un valor DSCP de 46 (EF), mientras que el tráfico entrante de un dispositivo final (como un PC) conectado al puerto del switch se reetiqueta con un valor CoS de 0 y un valor DSCP de 0. Aunque el dispositivo final envíe paquetes etiquetados con un valor CoS o DSCP específico, el comportamiento predeterminado de los teléfonos IP de Cisco es no confiar en el dispositivo final y restablecer los valores CoS y DSCP a 0 antes de enviar los paquetes al switch. Cuando el teléfono IP envía tráfico de voz y datos al switch, este puede clasificar el tráfico de voz como de mayor prioridad gracias a las etiquetas CoS y DSCP de alta prioridad.
 
 Para garantizar la escalabilidad, la clasificación de los límites de confianza debe realizarse lo más cerca posible del dispositivo final. La figura 14-9 ilustra los límites de confianza en diferentes puntos de una red de campus, donde los puntos 1 y 2 son óptimos, y el punto 3 es aceptable solo si el switch de acceso no puede realizar la clasificación.
+
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%206.JPG)
 
 ## Configuración de marcación basada en clases
 
@@ -439,5 +441,6 @@ Al crear una nueva red WLAN, la política de QoS predeterminada es "Silver", que
 
 # Policing y Shaping: 
 # Gestión y prevención de la congestión: 
+
 
 
