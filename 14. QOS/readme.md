@@ -26,7 +26,7 @@ El ancho de banda disponible en el camino de datos desde el origen al destino es
 
 ## Latencia y Jitter
 
-La _latencia de red_, también conocida como retardo de extremo a extremo, es el tiempo que tardan los paquetes en recorrer la red desde el origen hasta el destino. La Recomendación G.114 de la UIT establece que, independientemente del tipo de aplicación, la latencia de red no debería superar los 400 ms, y para el tráfico en tiempo real, debería ser inferior a 150 ms. Sin embargo, la UIT y Cisco han demostrado que la calidad del tráfico en tiempo real no se ve afectada significativamente hasta que la latencia de red supera los 200 ms. Para poder implementar estas recomendaciones, es importante comprender las causas de la latencia de red. Esta latencia puede dividirse en latencia fija y latencia variable:
+La _latencia de red_, también conocida como retardo de end-to-end, es el tiempo que tardan los paquetes en recorrer la red desde el origen hasta el destino. La Recomendación G.114 de la UIT establece que, independientemente del tipo de aplicación, la latencia de red no debería superar los 400 ms, y para el tráfico en tiempo real, debería ser inferior a 150 ms. Sin embargo, la UIT y Cisco han demostrado que la calidad del tráfico en tiempo real no se ve afectada significativamente hasta que la latencia de red supera los 200 ms. Para poder implementar estas recomendaciones, es importante comprender las causas de la latencia de red. Esta latencia puede dividirse en latencia fija y latencia variable:
 
 - Retardo de propagación (fijo)
 - Retardo de serialización (fijo)
@@ -83,7 +83,7 @@ Existen tres modelos de implementación de QoS:
 - Servicios integrados (IntServ): Las aplicaciones solicitan a la red la reserva de ancho de banda y especifican que requieren un tratamiento QoS específico.
 - Servicios diferenciados (DiffServ): La red identifica las clases de tráfico que requieren un tratamiento QoS específico.
 
-El modelo IntServ fue creado para aplicaciones en tiempo real, como las de voz y vídeo, que requieren garantías de ancho de banda, latencia y pérdida de paquetes para asegurar un nivel de servicio predecible y confiable. En este modelo, las aplicaciones notifican a la red sus requisitos para reservar los recursos de extremo a extremo (como el ancho de banda) necesarios para garantizar una buena experiencia de usuario. IntServ utiliza el `Resource Reservation Protocol` (RSVP) para reservar recursos en toda la red para una aplicación específica y para implementar el `call admission control` (CAC), garantizando que ningún otro tráfico IP pueda utilizar el ancho de banda reservado. El ancho de banda reservado por una aplicación que no se está utilizando se desperdicia. Para proporcionar una calidad de servicio (QoS) de extremo a extremo, todos los nodos, incluidos los terminales que ejecutan las aplicaciones, deben soportar, configurar y mantener el estado de la ruta RSVP para cada flujo. Este es el principal inconveniente de IntServ, ya que dificulta su escalabilidad en redes grandes con miles o millones de flujos, debido al gran número de flujos RSVP que habría que gestionar. 
+El modelo IntServ fue creado para aplicaciones en tiempo real, como las de voz y vídeo, que requieren garantías de ancho de banda, latencia y pérdida de paquetes para asegurar un nivel de servicio predecible y confiable. En este modelo, las aplicaciones notifican a la red sus requisitos para reservar los recursos de end-to-end (como el ancho de banda) necesarios para garantizar una buena experiencia de usuario. IntServ utiliza el `Resource Reservation Protocol` (RSVP) para reservar recursos en toda la red para una aplicación específica y para implementar el `call admission control` (CAC), garantizando que ningún otro tráfico IP pueda utilizar el ancho de banda reservado. El ancho de banda reservado por una aplicación que no se está utilizando se desperdicia. Para proporcionar una calidad de servicio (QoS) de end-to-end, todos los nodos, incluidos los terminales que ejecutan las aplicaciones, deben soportar, configurar y mantener el estado de la ruta RSVP para cada flujo. Este es el principal inconveniente de IntServ, ya que dificulta su escalabilidad en redes grandes con miles o millones de flujos, debido al gran número de flujos RSVP que habría que gestionar. 
 
 La figura 14-1 ilustra cómo los hosts RSVP realizan las reservas de ancho de banda.
 
@@ -93,7 +93,7 @@ En la figura 14-1, cada host del lado izquierdo (emisores) intenta establecer un
 
 Si se requieren reservas de ancho de banda en el sentido inverso, los hosts del lado derecho deben seguir el mismo procedimiento de envío de mensajes RSVP PATH, lo que duplica el estado RSVP en cada dispositivo de red. Esto demuestra cómo el estado RSVP puede aumentar rápidamente a medida que más hosts reservan ancho de banda. Además de los problemas de escalabilidad, la distancia entre los hosts puede provocar largas demoras en la reserva de ancho de banda.
 
-DiffServ fue diseñado para superar las limitaciones de los modelos de mejor esfuerzo e IntServ. Este modelo no requiere un protocolo de señalización ni mantiene el estado de flujo RSVP en cada nodo, lo que lo hace altamente escalable. Las características de calidad de servicio (como ancho de banda y latencia) se gestionan de nodo a nodo mediante políticas de calidad de servicio definidas independientemente en cada dispositivo de la red. DiffServ no se considera una solución de calidad de servicio de extremo a extremo, ya que no garantiza la calidad de servicio en toda la ruta.
+DiffServ fue diseñado para superar las limitaciones de los modelos de mejor esfuerzo e IntServ. Este modelo no requiere un protocolo de señalización ni mantiene el estado de flujo RSVP en cada nodo, lo que lo hace altamente escalable. Las características de calidad de servicio (como ancho de banda y latencia) se gestionan de nodo a nodo mediante políticas de calidad de servicio definidas independientemente en cada dispositivo de la red. DiffServ no se considera una solución de calidad de servicio de end-to-end, ya que no garantiza la calidad de servicio en toda la ruta.
 
 DiffServ clasifica el tráfico IP según las necesidades empresariales y lo etiqueta para asignar a cada clase un nivel de servicio diferente. Al atravesar la red, cada dispositivo identifica la clase del paquete según su etiqueta y lo procesa en consecuencia. DiffServ permite seleccionar diversos niveles de servicio. Por ejemplo, el tráfico de voz por IP es muy sensible a la latencia y la fluctuación, por lo que debe tener siempre prioridad sobre otros tipos de tráfico. El correo electrónico, en cambio, puede tolerar mayor latencia y podría recibir un servicio de mejor esfuerzo, mientras que el tráfico no crítico, como el de YouTube, podría tener un límite de velocidad o incluso bloquearse. El modelo DiffServ es el más popular y el más implementado para la gestión de la calidad de servicio, y se describe con detalle en este capítulo.
 
@@ -102,9 +102,9 @@ DiffServ clasifica el tráfico IP según las necesidades empresariales y lo etiq
 Modular QoS CLI (MQC) es el enfoque de Cisco para implementar la QoS en los routers de Cisco. MQC proporciona un marco de CLI modular para crear políticas de QoS que permiten clasificar el tráfico y realizar acciones de QoS, como marcación, control de tráfico, modelado de tráfico, gestión de congestión y prevención de congestión. Las políticas MQC se implementan mediante los siguientes tres componentes:
 
 - Mapas de clases: Estos definen los criterios de clasificación del tráfico, identificando el tipo de tráfico que requiere tratamiento de QoS (por ejemplo, tráfico de voz). Normalmente se requieren varios mapas de clases para identificar todos los tipos de tráfico que deben clasificarse. Se definen mediante el comando `class-map [match-any | match-all] class-map-name`, y cada mapa de clases puede incluir uno o más comandos de `match` para la clasificación del tráfico.
-- Mapas de políticas: Estos definen las acciones de QoS para cada clase de tráfico. Cada mapa de políticas puede incluir una o más clases de tráfico, y cada clase puede tener una o más acciones de QoS. Se configuran mediante el comando `policy-map policy-map-name`.
+- Mapas de políticas: Estos definen las acciones de QoS para cada clase de tráfico. Cada policy map puede incluir una o más clases de tráfico, y cada clase puede tener una o más acciones de QoS. Se configuran mediante el comando `policy-map policy-map-name`.
 - Políticas de servicio: Estas se utilizan para aplicar los mapas de políticas a las interfaces, en dirección de entrada y/o salida. Se aplican con el comando `servicepolicy {input | output} policy-map-name`, y la misma política se puede reutilizar en varias interfaces.
-Un mapa de políticas consta de dos elementos principales:
+Un policy map consta de dos elementos principales:
 - Una clase de tráfico para clasificar el tráfico, identificada con el comando `class class-map-name`
 - La(s) acción(es) de QoS a aplicar al tráfico que coincide con la clase de tráfico
 
@@ -115,11 +115,11 @@ Dado que los mapas de políticas utilizan clases de tráfico para aplicar las ac
 - Class-based shaping
 - Class-based marking
   
-Todo tráfico que no coincida con ninguna de las clases de tráfico definidas por el usuario en el mapa de políticas se considera tráfico no clasificado. Este tráfico se asigna a una clase predeterminada, denominada `class-default`, que se configura automáticamente. El tráfico no clasificado suele ser tráfico de mejor esfuerzo que no requiere garantías de QoS; sin embargo, si es necesario, también se pueden aplicar acciones de QoS basadas en clases a esta clase predeterminada.
+Todo tráfico que no coincida con ninguna de las clases de tráfico definidas por el usuario en el policy map se considera tráfico no clasificado. Este tráfico se asigna a una clase predeterminada, denominada `class-default`, que se configura automáticamente. El tráfico no clasificado suele ser tráfico de mejor esfuerzo que no requiere garantías de QoS; sin embargo, si es necesario, también se pueden aplicar acciones de QoS basadas en clases a esta clase predeterminada.
 
 Los mapas de políticas no tienen efecto hasta que se aplican a una interfaz, ya sea en dirección de entrada o de salida, mediante el comando `service-policy {input | output} policy-map-name`.
 
-Las políticas de servicio permiten aplicar el mismo mapa de políticas a múltiples interfaces. También se pueden utilizar para aplicar un mapa de políticas de entrada _AND/OR_ uno de salida a una única interfaz. La figura 14-2 muestra un ejemplo del marco de trabajo MQC. 
+Las políticas de servicio permiten aplicar el mismo policy map a múltiples interfaces. También se pueden utilizar para aplicar un policy map de entrada _AND/OR_ uno de salida a una única interfaz. La figura 14-2 muestra un ejemplo del marco de trabajo MQC. 
 
 La sintaxis de los comandos y la descripción de cada uno de ellos se explican en secciones posteriores de este capítulo.
 
@@ -128,9 +128,9 @@ La sintaxis de los comandos y la descripción de cada uno de ellos se explican e
 > [!NOTE]
 > Los nombres class map y policy map son casos sensitivos. Se recomienda utilizar únicamente letras mayúsculas para el nombre, ya que facilita la lectura de la configuración.
 
-La figura 14-2 muestra un mapa de políticas aplicado a una interfaz, pero los mapas de políticas también se pueden aplicar a otras políticas (también denominadas parent policies) para crear mapas de políticas de QoS jerárquicos (también llamados nested policy maps). El comando `service-policy policy-map-name` se utiliza para aplicar un mapa de políticas secundario dentro de un mapa de políticas principal.
+La figura 14-2 muestra un policy map aplicado a una interfaz, pero los mapas de políticas también se pueden aplicar a otras políticas (también denominadas parent policies) para crear mapas de políticas de QoS jerárquicos (también llamados nested policy maps). El comando `service-policy policy-map-name` se utiliza para aplicar un policy map secundario dentro de un policy map principal.
 
-La figura 14-3 muestra un mapa de políticas denominado CHILD-POLICY que se aplica a la default class de otro mapa de políticas llamado PARENT-POLICY, mediante el comando `service-policy policy-map-name`. El mapa de políticas PARENT-POLICY es el que se aplica a la interfaz.
+La figura 14-3 muestra un policy map denominado CHILD-POLICY que se aplica a la default class de otro policy map llamado PARENT-POLICY, mediante el comando `service-policy policy-map-name`. El policy map PARENT-POLICY es el que se aplica a la interfaz.
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/0e109f4d8d93fac0d8cdbbf269cf5c0ccf2fb55d/14.%20QOS/IMG/QOS%20MOQ/QOS%20MOQ%204.JPG)
 
@@ -276,7 +276,7 @@ PCP Valor/Prioridad|Acronimo|Tipo de trafico
 6 | IC| Internetwork control
 7 (nivel más alto) | NC| Network control
 
-Una desventaja del uso de la marcación CoS es que los paquetes pierden esta información al atravesar un enlace que no cumple con el estándar 802.1Q o una red de capa 3. Por ello, es recomendable marcar los paquetes con otros indicadores de capa superior para preservar la información de priorización de extremo a extremo. Esto se suele lograr mediante la asignación de un valor CoS a otro indicador. Por ejemplo, los niveles de prioridad CoS corresponden directamente a los valores de **type of service (ToS)** de IPv4, por lo que se pueden asignar directamente.
+Una desventaja del uso de la marcación CoS es que los paquetes pierden esta información al atravesar un enlace que no cumple con el estándar 802.1Q o una red de capa 3. Por ello, es recomendable marcar los paquetes con otros indicadores de capa superior para preservar la información de priorización de end-to-end. Esto se suele lograr mediante la asignación de un valor CoS a otro indicador. Por ejemplo, los niveles de prioridad CoS corresponden directamente a los valores de **type of service (ToS)** de IPv4, por lo que se pueden asignar directamente.
 
 #### Indicador de paquete descartable (DEI Drop Eligible Indicator):
 
@@ -372,6 +372,72 @@ EF| 101 110| 46|| 5
 CS6 |110 000 |48|| 6
 CS7| 111 000 |56|| 7
 
+## Clase de tráfico de baja prioridad (Scavenger class):
+
+La scavenger class está diseñada para ofrecer un servicio con prioridad inferior al de calidad óptima. Las aplicaciones asignadas a esta clase aportan poco o ningún valor a los objetivos empresariales de la organización y suelen ser aplicaciones de entretenimiento. Entre ellas se incluyen aplicaciones peer-to-peer (como los clientes de torrent), juegos (por ejemplo, Minecraft, Fortnite) y aplicaciones de vídeo (por ejemplo, YouTube, Vimeo, Netflix). Este tipo de aplicaciones suelen tener un límite de velocidad de transmisión muy bajo o se bloquean por completo. 
+
+Una característica particular de esta clase es que tiene una prioridad inferior a la del tráfico de calidad óptima. El tráfico de calidad óptima utiliza un código de prioridad (DSCP) de 000000 (CS0). Dado que no existen valores DSCP negativos, se decidió utilizar CS1 como marcador para el tráfico de baja prioridad. Este uso está definido en la RFC 4594.
+
+## Límites de confianza (Trust Boundary)
+Para garantizar una experiencia de QoS escalable y de end-to-end, los paquetes deben etiquetarse en el dispositivo final o lo más cerca posible de este. Cuando un dispositivo final etiqueta un paquete con un valor CoS o DSCP, el puerto del switch al que está conectado puede configurarse para aceptar o rechazar dichos valores. Si el switch acepta los valores, significa que confía en el dispositivo final y no necesita reetiquetar ni reclasificar los paquetes recibidos. Si el switch no confía en el dispositivo final, rechaza la etiqueta y reetiqueta los paquetes recibidos con el valor CoS o DSCP apropiado.
+
+Por ejemplo, en una red de campus con telefonía IP y dispositivos finales, los teléfonos IP etiquetan por defecto el tráfico de voz con un valor CoS de 5 y un valor DSCP de 46 (EF), mientras que el tráfico entrante de un dispositivo final (como un PC) conectado al puerto del switch se reetiqueta con un valor CoS de 0 y un valor DSCP de 0. Aunque el dispositivo final envíe paquetes etiquetados con un valor CoS o DSCP específico, el comportamiento predeterminado de los teléfonos IP de Cisco es no confiar en el dispositivo final y restablecer los valores CoS y DSCP a 0 antes de enviar los paquetes al switch. Cuando el teléfono IP envía tráfico de voz y datos al switch, este puede clasificar el tráfico de voz como de mayor prioridad gracias a las etiquetas CoS y DSCP de alta prioridad.
+
+Para garantizar la escalabilidad, la clasificación de los límites de confianza debe realizarse lo más cerca posible del dispositivo final. La figura 14-9 ilustra los límites de confianza en diferentes puntos de una red de campus, donde los puntos 1 y 2 son óptimos, y el punto 3 es aceptable solo si el switch de acceso no puede realizar la clasificación.
+
+## Configuración de marcación basada en clases
+
+La marcación basada en clases mediante MQC se puede realizar de dos maneras:
+
+1. Mediante el comando `set` dentro de una clase de tráfico de un policy map.
+2. Marcando el tráfico que supera un umbral configurado mediante el comando `police` en un policy map.
+
+En esta sección, solo se aborda la opción del comando `set`. La marcación mediante control de tráfico se explica en la sección “Policing and Shaping".
+
+La tabla 14-7 muestra los comandos `set` que se utilizan para la configuración de marcación basada en clases. Se admiten varios comandos `set` dentro de una misma clase de tráfico.
+
+Tabla 14-7: Comandos y descripciones del Class-Based Marking `set`:
+Comando|Descripcion
+:---|:---
+`set qos-group <id_grupo_QoS>` | Marca el tráfico clasificado con un ID de grupo QoS interno
+`set cos <valor_CoS>` | Marca el valor CoS de la capa 2
+`set [ip] precedence <valor_precedencia_IP>` | Marca el valor de prioridad para paquetes IPv4 e IPv6
+`set [ip] dscp <valor_DSCP>` | Marca el valor DSCP para paquetes IPv4 e IPv6
+
+El ejemplo 14-2 muestra un policy map de entrada que utiliza el comando `set` para realizar el marcado del tráfico entrante.
+
+Ejemplo 14-2: Ejemplo de política de marcado de tráfico entrante
+````
+policy-map INBOUND-MARKING-POLICY
+  class VOIP-TELEPHONY
+    set dscp ef
+  class VIDEO
+    set dscp af31
+  class CONFERENCING
+    set dscp af41
+    set cos 4
+  class class-default
+    set dscp default
+    set cos 0
+````
+
+## Ejemplo práctico: QoS en redes inalámbricas
+
+Una red inalámbrica puede configurarse para aprovechar los mecanismos de QoS descritos en este capítulo. Por ejemplo, el wireless LAN controller (WLC) se sitúa en la frontera entre las redes inalámbricas y cableadas, lo que lo convierte en un punto ideal para implementar la gestión de QoS. El tráfico que entra y sale del WLC puede clasificarse y etiquetarse para que se procese adecuadamente durante su transmisión por el aire y a través de la red cableada.
+
+La QoS en redes inalámbricas se puede configurar de forma específica para cada red LAN inalámbrica (WLAN), utilizando las cuatro categorías de tráfico que se muestran en la tabla 14-8. Cabe destacar que los nombres de las categorías son descriptivos y se corresponden con valores específicos de 802.1p y DSCP.
+
+Tabla 14-8: Categorías y marcadores de la política de QoS para redes inalámbricas
+QoS Category| Traffic Type| 802.1p Tag| DSCP Value
+:---|:---|:---|:---
+Platinum| Voice| 5| 46 (EF)
+Gold| Video| 4| 34 (AF41)
+Silver| Best effort (default)| 0| 0
+Bronze| Background| 1| 10| (AF11)
+
+Al crear una nueva red WLAN, la política de QoS predeterminada es "Silver", que garantiza un servicio de calidad estándar. En la figura 14-10, se ha creado una WLAN denominada "voice" para el tráfico de voz, por lo que su política de QoS se ha configurado en "Platinum". De esta manera, el tráfico de voz inalámbrico se clasifica para minimizar la latencia y la fluctuación, y se etiqueta con un valor CoS 802.1p de 5 y un valor DSCP de 46 (EF).
+
 # Policing y Shaping: 
 # Gestión y prevención de la congestión: 
+
 
