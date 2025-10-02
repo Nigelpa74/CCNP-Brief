@@ -199,7 +199,179 @@ Comando|Descripcion
 `match protocol rtp [audio \| video \| payloadtype payload-string]`| Identifica correspondencia RTP según el tipo de carga útil de audio o vídeo, o según un tipo de carga útil más específico.
 `match protocol peer-to-peer-application`|Identifica aplicaciones peer-to-peer (P2P) como Soulseek, BitTorrent y Skype.
 
+El ejemplo 14-1 muestra varios mapas de clasificación, cada uno con diferentes comandos de coincidencia. El VOIPTELEPHONY class map está configurado con la opción **match-all** (operación lógica AND), mientras que el CONTROL class map está configurado con la opción **match-any** (operación lógica OR). Para que el VOIP-TELEPHONY class map sea matched, el paquete analizado debe tener la marca DSCP EF y, además, debe estar permitido por la ACL VOICE-TRAFFIC. Para que haga match con CONTROL class map, el paquete analizado debe coincidir con alguno de los valores DSCP especificados en la lista o estar permitido por la ACL CALL-CONTROL. Los maps class que se utilizan se muestran con el comando **match protocol** muestranndo como clasificar el tráfico mediante NBAR2.
+
+Ejemplo 14-1: Ejemplo de class-map
+````
+ip access-list extended VOICE-TRAFFIC
+  10 permit udp any any range 16384 32767
+  20 permit udp any range 16384 32767 any
+
+ip access-list extended CALL-CONTROL
+  10 permit tcp any any eq 1719
+  20 permit tcp any eq 1719 any
+
+class-map match-all VOIP-TELEPHONY
+  match dscp ef
+  match access-group name VOICE-TRAFFIC
+
+class-map match-any CONTROL
+  match dscp cs3 af31 af32 af33
+  match access-group name CALL-CONTROL
+
+class-map match-any HTTP-VIDEO
+  match protocol http mime "video/*"
+
+class-map match-any P2P
+  match protocol bittorrent
+  match protocol soulseek
+
+class-map match-all RTP-AUDIO
+  match protocol rtp audio
+
+class-map match-all HTTP-WEB-IMAGES
+  match protocol http url "*.jpeg|*.jpg"
+````
+
+## Marking de paquetes
+
+El marcado de paquetes es un mecanismo de QoS que permite identificar un paquete mediante la modificación de un campo en su cabecera, utilizando un descriptor de tráfico. Esto facilita la diferenciación de dicho paquete respecto a otros durante la aplicación de otros mecanismos de QoS (como la reasignación de prioridad, el control de tráfico, la gestión de colas o la prevención de congestión). Los siguientes descriptores de tráfico se utilizan para el marcado:
+
+- Interno: Grupos de QoS
+- Capa 2: Bits de clase de servicio (CoS) 802.1Q/p
+- Capa 2.5: Bits experimentales (EXP) de MPLS
+- Capa 3: Differentiated Services Code Points (DSCP) e IP Precedence (IPP)
+
+> [!NOTE]
+> Los grupos de QoS se utilizan para etiquetar los paquetes al recibirlos y procesarlos internamente en el router, y se eliminan automáticamente cuando los paquetes salen del mismo. Se utilizan únicamente en casos especiales en los que los descriptores de tráfico marcados o recibidos en una interfaz de entrada no serían visibles para la clasificación de paquetes en las interfaces de salida debido a la encapsulación o desencapsulación.
+
+En las redes empresariales, los descriptores de tráfico más utilizados para la clasificación del tráfico incluyen los descriptores de capa 2 y capa 3 mencionados en la lista anterior. Ambos se describen en las siguientes secciones.
+
+### Marking de capa 2
+
+El estándar 802.1Q es una especificación de IEEE para la implementación de VLAN en redes conmutadas de capa 2. Esta especificación define dos campos de 2 bytes: el Tag Protocol Identifier (TPID) y Tag Control Information (TCI), que se insertan en el marco Ethernet, después del campo de dirección de origen, tal como se muestra en la figura 14-4.
+
+![Image Alt]()
+
+El valor TPID es un campo de 16 bits que tiene asignado el valor 0x8100 y que identifica el paquete como un paquete etiquetado según el estándar 802.1Q.
+
+El campo TCI consta de 16 bits y está compuesto por los siguientes tres subcampos:
+- Campo de Priority Code Point (PCP) (3 bits)
+- Campo de Drop Eligible Indicator (DEI) (1 bit)
+- Campo de VLAN Identifier (VLAN ID) (12 bits)
+
+#### Priority Code Point (PCP)
+
+Las especificaciones del campo PCP de 3 bits están definidas en la norma IEEE 802.1p. Este campo se utiliza para identificar los paquetes según su nivel de calidad de servicio (QoS). La marcación QoS permite asignar a cada trama Ethernet de capa 2 uno de los ocho niveles de prioridad (del 0 al 7), siendo 0 la prioridad más baja y 7 la más alta. La tabla 14-4 muestra la definición estándar de la norma IEEE 802.1p para cada nivel de QoS.
+
+Tabla 14-4 Definiciones de CoS de IEEE 802.1p
+PCP Valor/Prioridad|Acronimo|Tipo de trafico
+:---|:---|:---
+0 (nivel más bajo) | BK| Background
+1 (predeterminado) | BE| Best effort
+2 | EE| Excellent effort
+3 | CA| Critical applications
+4 | VI| Vídeo con latencia y jitter < 100 ms
+5 | VO| Voz con latencia y jitter < 10 ms
+6 | IC| Internetwork control
+7 (nivel más alto) | NC| Network control
+
+Una desventaja del uso de la marcación CoS es que los paquetes pierden esta información al atravesar un enlace que no cumple con el estándar 802.1Q o una red de capa 3. Por ello, es recomendable marcar los paquetes con otros indicadores de capa superior para preservar la información de priorización de extremo a extremo. Esto se suele lograr mediante la asignación de un valor CoS a otro indicador. Por ejemplo, los niveles de prioridad CoS corresponden directamente a los valores de **type of service (ToS)** de IPv4, por lo que se pueden asignar directamente.
+
+#### Indicador de paquete descartable (DEI Drop Eligible Indicator):
+
+El campo DEI es de 1 bit y puede usarse de forma independiente o junto con PCP para indicar qué paquetes pueden descartarse en caso de congestión. Por defecto, su valor es 0 (paquete no descartable); se puede establecer en 1 para indicar que el paquete es descartable.
+
+#### Identificador de VLAN (VLAN ID)
+
+El campo VLAN ID es de 12 bits y define la VLAN utilizada por 802.1Q. Al ser de 12 bits, limita el número de VLANs soportadas por 802.1Q a 4096, lo cual puede resultar insuficiente para redes empresariales grandes o de proveedores de servicios.
+
+### Marcación de capa 3
+
+Al viajar desde su origen a su destino, un paquete puede atravesar enlaces troncales no 802.1Q o enlaces no Ethernet que no soportan el campo CoS. La marcación en capa 3 proporciona una información de priorización más persistente, que se conserva de end-to-end.
+
+La figura 14-5 ilustra el campo ToS/DiffServ en el encabezado IPv4.
+
+![Image Alt]()
+
+El campo ToS, definido en la RFC 791, es un campo de 8 bits, donde solo los 3 primeros bits, denominados IP Precedence (IPP), se utilizan para la clasificación del tráfico, mientras que los restantes permanecen sin usar. Los valores de IPP, que van de 0 a 7, permiten clasificar el tráfico en hasta seis clases de servicio; los valores 6 y 7 están reservados para uso interno de red.
+
+La RFC 2474 redefinió los campos ToS de IPv4 y Clase de tráfico de IPv6 como un campo DiffServ de 8 bits (DS field). Este campo utiliza los mismos 8 bits que antes se utilizaban para los campos ToS de IPv4 y Clase de tráfico de IPv6, lo que garantiza la compatibilidad con la IP Precedence. El campo DS consta de un campo Differentiated Services Code Point (DSCP) de 6 bits, que permite clasificar el tráfico en hasta 64 valores (0 a 63), y un campo Explicit Congestion Notification (ECN) de 2 bits.
+
+## DSCP Per-Hop Behaviors:
+
+Los paquetes se clasifican y marcan para recibir un comportamiento de reenvío específico en cada nodo de la red a lo largo de su ruta hacia el destino (es decir, prioridad, retraso o descarte). El campo DS se utiliza para marcar los paquetes según su clasificación en DiffServ Behavior Aggregates (BAs). Una DiffServ BA es un conjunto de paquetes con el mismo valor DiffServ que atraviesan un enlace en una dirección determinada. El **Per-hop behavior (PHB)**  es el comportamiento de reenvío observable externamente (tratamiento de reenvío) aplicado en un DiffServ-compliant node a un conjunto de paquetes con el mismo valor DiffServ que atraviesan un enlace en una dirección determinada (BA DiffServ).
+
+En otras palabras, el PHB consiste en priorizar, retrasar o descartar un conjunto de paquetes mediante uno o varios mecanismos de QoS, en función del valor DSCP. Una BA DiffServ puede incluir varias aplicaciones, por ejemplo, SSH, Telnet y SNMP, todas agrupadas y marcadas con el mismo valor DSCP. De esta manera, el núcleo de la red realiza un PHB simple, basado en las BA DiffServ, mientras que el borde de la red realiza la clasificación, la marcación, el control de tráfico y la conformación. Esto hace que el modelo de QoS DiffServ sea altamente escalable.
+
+Se han definido y caracterizado cuatro tipos de PHB para uso general:
+
+- Class Selector (CS) PHB: Los 3 primeros bits del campo DSCP se utilizan como bits CS. Estos bits permiten la compatibilidad descendente de DSCP con la Precedencia IP, ya que esta última utiliza los mismos 3 bits para determinar la clase.
+- Default Forwarding (DF) PHB: Se utiliza para el servicio de best-effort.
+- Assured Forwarding (AF) PHB: Se utiliza para el servicio de ancho de banda garantizado.
+- Expedited Forwarding (EF) PHB: Se utiliza para el servicio de baja latencia.
+
+### Class Selector (CS) PHB:
+
+El RFC 2474 declaró obsoleto el campo ToS al introducir el campo DS, y el Class Selector(CS) PHB se definió para garantizar la compatibilidad con versiones anteriores de DSCP y IP Precedence.
+
+La figura 14-6 ilustra el funcionamiento del selector de clase PHB.
+
+![Image Alt]()
+
+Los paquetes con mayor  IP Precedence deben reenviarse más rápidamente que los paquetes con menor IP Precedence.
+
+Los tres últimos bits del DSCP (bits 2 a 4), cuando están en 0, identifican un selector de clase PHB, pero los bits 5 a 7 del selector de clase son los que determinan la IP Precedence. Los dispositivos que son non-DiffServ-compliant y que realizan la clasificación basada en la IP Precedence ignoran los bits 2 a 4.
+
+Existen ocho clases CS, desde CS0 hasta CS7, que corresponden directamente con los ocho valores de IP Precedence.
+
+### Default Forwarding (DF) PHB:
+
+El reenvío predeterminado (DF) y Class Selector 0 (CS0) proporcionan un servicio de best-effort y utilizan el valor DS 000000. La figura 14-7 ilustra el DF PHB.
+
+![Image Alt]()
+
+El reenvío por defecto best-effort también se aplica a los paquetes que no pueden clasificarse mediante un mecanismo de QoS como _queuing, shaping, o policing_. Esto suele ocurrir cuando la política de QoS del nodo está incompleta o cuando los valores DSCP no se ajustan a los definidos para las clases de servicio CS, AF y EF.
+
+### Assured Forwarding (AF) PHB:
+
+La clase de servicio AF garantiza un ancho de banda mínimo y permite el acceso a ancho de banda adicional, si está disponible. Los paquetes que requieren la clase de servicio AF tienen una estructura DSCP de la forma aaadd0, donde aaa representa el valor binario de la clase AF (bits 5, 6 y 7), y dd (bits 2, 3 y 4) representa la Drop Probability (el bit 2 no se utiliza y siempre está en 0). La figura 14-8 ilustra la clase de servicio AF.
+
+Existen cuatro clases AF definidas según el estándar: AF1, AF2, AF3 y AF4. El número de la clase AF no determina la prioridad; por ejemplo, la clase AF4 no recibe ningún tratamiento preferencial respecto a la clase AF1. Cada clase debe tratarse de forma independiente y asignarse a una cola diferente.
+
+La tabla 14-5 muestra cómo se asigna una IP Precedence a cada clase AF (en la columna «Valor de clase AF») y las tres probabilidades de pérdida de paquetes: baja, media y alta.
+
+![Image Alt]()
+
+El nombre AF (AFxy) está compuesto por el valor de IP Precedence AF en decimal (x) y el valor de Drop Probability en decimal (y). Por ejemplo, AF41 combina la IP Precedence 4 con una Drop Probability 1.
+
+Para convertir rápidamente el nombre AF en un valor DSCP decimal, utilice la fórmula 8x + 2y. Por ejemplo, el valor DSCP para AF41 es 8(4) + 2(1) = 34.
+
+Tabla 14-5: Valores AF PHB con sus equivalentes decimales y binarios
+DSCP Class|Valor DSCP Bin|Valor Decimal Dec|Drop Probability|Valor equivalente de IP Precedence
+:---|:---|:---|:---|:---
+DF (CS0)| 000 000| 0||0
+CS1| 001 000| 8 ||1
+AF11| 001 010| 10| Low| 1
+AF12| 001 100| 12| Medium| 1
+AF13| 001 110| 14| High |1
+CS2| 010 000| 16|| 2
+AF21|010 010| 18| Low |2
+AF22| 010 100 |20| Medium| 2
+AF23 |010 110| 22| High| 2
+CS3| 011 000| 24|| 3
+AF31| 011 010| 26| Low| 3
+AF32| 011 100| 28| Medium| 3
+AF33| 011 110| 30| High| 3
+CS4| 100 000| 32|| 4
+AF41| 100 010 |34| Low| 4
+AF42| 100 100| 36| Medium| 4
+AF43| 100 110| 38| High| 4
+CS5| 101 000| 40|| 5
+EF| 101 110| 46|| 5
+CS6 |110 000 |48|| 6
+CS7| 111 000 |56|| 7
+
 # Policing y Shaping: 
 # Gestión y prevención de la congestión: 
-
 
