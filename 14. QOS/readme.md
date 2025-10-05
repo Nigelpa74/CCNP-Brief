@@ -564,7 +564,7 @@ Keyword| Description
 <table>
     </tr>
     <tr>
-        <th rowspan="7">CPU</th>
+        <th rowspan="7">`action`</th>
         <th colspan="1">Kernel</th>
     </tr>
     <tr>
@@ -572,48 +572,6 @@ Keyword| Description
         <td>&#9989;</td>
         <td>&#10060;</td>
         <td>&#9989;</td>
-    </tr>
-    <tr>
-        <td>&#9989;</td>
-        <td>&#9989;</td>
-        <td>&#10060;</td>
-    </tr>
-    <tr>
-        <td>&#10060;</td>
-        <td>&#10060;</td>
-        <td>&#9989;</td>
-    </tr>
-    <tr>
-        <td>&#10060;</td>
-        <td>&#9989;</td>
-        <td>&#10060;</td>
-    </tr>
-    <tr>
-        <td>&#9989;</td>
-        <td>&#10060;</td>
-        <td>&#9989;</td>
-    </tr>
-    <tr>
-        <td>&#9989;</td>
-        <td>&#9989;</td>
-        <td>&#10060;</td>
-    </tr>
-    <tr>
-        <td>&#9989;</td>
-        <td>&#10060;</td>
-        <td>&#9989;</td>
-    </tr>
-    <tr>
-        <td>&#9989;</td>
-        <td>&#9989;</td>
-        <td>&#10060;</td>
-    </tr>
-    <tr>
-        <td>&#9989;</td>
-        <td>&#10060;</td>
-        <td>&#9989;</td>
-    </tr>
-    <tr>
         <td>&#9989;</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
@@ -621,6 +579,7 @@ Keyword| Description
 </table>
 
 # Gestión y prevención de la congestión: 
+
 
 
 
