@@ -439,7 +439,7 @@ Bronze| Background| 1| 10| (AF11)
 
 Al crear una nueva red WLAN, la política de QoS predeterminada es "Silver", que garantiza un servicio de calidad estándar. En la figura 14-10, se ha creado una WLAN denominada "voice" para el tráfico de voz, por lo que su política de QoS se ha configurado en "Platinum". De esta manera, el tráfico de voz inalámbrico se clasifica para minimizar la latencia y la fluctuación, y se etiqueta con un valor CoS 802.1p de 5 y un valor DSCP de 46 (EF).
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/7c0c27d413baaa0c93e8590c5b6eb1517cfa994a/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%207.JPG)
 
 # Policing y Shaping: 
 
@@ -451,7 +451,7 @@ Al crear una nueva red WLAN, la política de QoS predeterminada es "Silver", que
 
 La Figura 14-11 ilustra la diferencia entre la policing y el shaping en el tráfico. Los _policers_ descartan o remarcan el exceso de tráfico, mientras que los _shapers_ lo almacenan en búfer y lo retrasan.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/7c0c27d413baaa0c93e8590c5b6eb1517cfa994a/14.%20QOS/IMG/QOS%20POL/QOS%20POL%201.JPG)
 
 ## Ubicación de Policadores y Modeladores en la Red
 
@@ -494,7 +494,7 @@ Los algoritmos de contenedor de tokens pueden utilizar uno o varios contenedores
 
 La Figura 14-12 ilustra el concepto del algoritmo de contenedor de tokens único.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/7c0c27d413baaa0c93e8590c5b6eb1517cfa994a/14.%20QOS/IMG/QOS%20POL/QOS%20POL%202.JPG)
 
 Para comprender con más detalle el funcionamiento de los algoritmos de depósito de tokens único, supongamos que una interfaz de 1 Gbps está configurada con un regulador definido con un CIR de 120 Mbps y un Bc de 12 Mb. El valor de Tc no se puede definir explícitamente en IOS, pero se puede calcular de la siguiente manera:
 ````
@@ -531,7 +531,7 @@ Intervalo de tiempo a la velocidad de línea = (12 000 000 bits / 1 000 000�
 ````
 La Figura 14-13 ilustra cómo El Bc (1000 paquetes de 1500 bytes cada uno, o 12 Mb) se envía en cada intervalo de Tc. Tras el envío del Bc, hay un retraso entre paquetes de 88 ms (100 ms menos 12 ms) dentro del Tc, donde no se transmiten datos.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/7c0c27d413baaa0c93e8590c5b6eb1517cfa994a/14.%20QOS/IMG/QOS%20POL/QOS%20POL%203.JPG)
 
 Los valores recomendados para el tiempo de respuesta (Tc) varían de 8 ms a 125 ms. Se requieren tiempos de respuesta más cortos, como de 8 ms a 10 ms, para reducir el retardo entre paquetes en el tráfico en tiempo real, como el de voz. No se recomiendan tiempos de respuesta superiores a 125 ms para la mayoría de las redes, ya que el retardo entre paquetes es demasiado grande.
 
@@ -605,7 +605,7 @@ Los primeros policadores implementados utilizan un modelo de dos colores de tasa
 
 La Figura 14-14 ilustra las diferentes acciones que puede realizar el policador de dos colores de tasa única. La sección sobre la línea punteada a la izquierda de la figura representa el tráfico que superó el CIR y se marcó descendentemente. La sección sobre la línea punteada a la derecha de la figura representa el tráfico que superó el CIR y se descartó.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/7c0c27d413baaa0c93e8590c5b6eb1517cfa994a/14.%20QOS/IMG/QOS%20POL/QOS%20POL%204.JPG)
 
 El Ejemplo 14-3 muestra la configuración de un mapa de políticas bicolor de velocidad única con dos clases de tráfico. El tráfico que coincide con la clase de tráfico VOIP-TELEFONÍA se controla a un CIR de 50 Mbps, y el tráfico que coincide con la clase de tráfico VIDEO se controla a 25 Mbps.
 El tráfico de ambas clases que cumple con el CIR se transmite; el tráfico excedente de la clase de tráfico VOIP-TELEFONÍA se descarta, y el tráfico excedente de la clase de tráfico VIDEO se reduce y se transmite con el valor DSCP AF21.
@@ -650,7 +650,7 @@ Con el mecanismo de `dos baldes tokens`, el tráfico se puede clasificar en tres
 
 La Figura 14-15 ilustra las diferentes acciones que puede realizar un `single-rate three-color policer`. La sección debajo de la línea punteada recta, a la izquierda de la figura, representa el tráfico que cumple con el CIR; la sección justo encima de la línea punteada recta, representa el tráfico que excede el límite y se reduce; y la sección superior, el tráfico que infringe el CIR, que también se reduce. Las tasas de tráfico que excede el límite y que infringe el CIR varían porque dependen de tokens aleatorios que se transfieren del contenedor Bc al contenedor Be. La sección justo encima de la línea punteada recta, a la derecha de la figura, representa el tráfico que excedió el CIR y se redujo; y la sección superior, el tráfico que infringió el CIR y se descartó.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/7c0c27d413baaa0c93e8590c5b6eb1517cfa994a/14.%20QOS/IMG/QOS%20POL/QOS%20POL%205.JPG)
 
 El single-rate three-color marker/policer utiliza los siguientes parámetros para medir el flujo de tráfico:
 - Committed Information Rate (CIR):  La tasa controlada.
@@ -664,7 +664,7 @@ La Figura 14-16 ilustra el flujo lógico del algoritmo de marcador/policiador tr
 
 El algoritmo de dos cubos del policiador tricolor de tasa única genera menos retransmisiones TCP y es más eficiente en el uso del ancho de banda. Es el policiador ideal para usar con las clases AF (AFx1, AFx2 y AFx3). Usar un policiador tricolor solo tiene sentido si las acciones realizadas para cada color difieren. Si las acciones para dos o más colores son las mismas (por ejemplo, cumplir y superar ambas transmisiones sin remarcar), se recomienda el policiador bicolor de tasa única para simplificar las cosas.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/7c0c27d413baaa0c93e8590c5b6eb1517cfa994a/14.%20QOS/IMG/QOS%20POL/QOS%20POL%206.JPG)
 
 El Ejemplo 14-5 muestra la configuración de single-rate three-color policy map con una clase de tráfico. El tráfico que coincide con la clase de tráfico VOIP-TELEFONÍA es policed a un CIR de 50 Mbps; el tráfico que cumple con el CIR se remarca y se transmite con DSCP AF31; el tráfico que excede la velocidad se marca y se transmite con DSCP AF32, y todo el tráfico que infringe la normativa se descarta.
 
@@ -694,13 +694,14 @@ El two-rate three-color marker/policer esta basado en RFC 2698 y es similar al s
 
 La Figura 14-17 ilustra cómo el tráfico infractor que excede la PIR puede marcarse (a la izquierda de la figura) o descartarse (a la derecha de la figura). Compare la Figura 14-17 con la Figura 14-16 para ver la diferencia entre el regulador de tres colores de dos velocidades y el regulador de tres colores de una sola velocidad.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/7c0c27d413baaa0c93e8590c5b6eb1517cfa994a/14.%20QOS/IMG/QOS%20POL/QOS%20POL%207.JPG)
 
 El two-rate three-color marker/policer utiliza los siguientes parámetros para medir el flujo de tráfico:
 - Committed Information Rate (CIR): La tasa controlada.
 - Peak Information Rate (PIR): La tasa máxima de tráfico permitida. La PIR debe ser igual o mayor que la CIR.
 
 # Gestión y prevención de la congestión: 
+
 
 
 
