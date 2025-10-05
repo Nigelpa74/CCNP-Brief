@@ -564,8 +564,8 @@ Keyword| Description
 <table>
     </tr>
     <tr>
-        <th rowspan="2">CPU</th>
-        <th colspan="3">Kernel</th>
+        <th rowspan="7">CPU</th>
+        <th colspan="1">Kernel</th>
     </tr>
     <tr>
         <td>x86</td>
@@ -574,55 +574,46 @@ Keyword| Description
         <td>&#9989;</td>
     </tr>
     <tr>
-        <td>ARM</td>
         <td>&#9989;</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
     </tr>
     <tr>
-        <td>x86</td>
         <td>&#10060;</td>
         <td>&#10060;</td>
         <td>&#9989;</td>
     </tr>
     <tr>
-        <td>ARM</td>
         <td>&#10060;</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
     </tr>
     <tr>
-        <td>x86</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
         <td>&#9989;</td>
     </tr>
     <tr>
-        <td>ARM</td>
         <td>&#9989;</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
     </tr>
     <tr>
-        <td>x86</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
         <td>&#9989;</td>
     </tr>
     <tr>
-        <td>ARM</td>
         <td>&#9989;</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
     </tr>
     <tr>
-        <td>x86</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
         <td>&#9989;</td>
     </tr>
     <tr>
-        <td>ARM</td>
         <td>&#9989;</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
@@ -630,6 +621,7 @@ Keyword| Description
 </table>
 
 # Gestión y prevención de la congestión: 
+
 
 
 
