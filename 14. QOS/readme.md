@@ -558,27 +558,150 @@ Keyword| Description
 `conform-action`|Palabra clave opcional para especificar la acción que se realizará con los paquetes que conforman con el CIR. La acción predeterminada es transmitir.
 `exceed-action`| Palabra clave opcional para especificar la acción a tomar en paquetes que exceden el CIR. La acción predeterminada es descartar.
 `violate-action` | Palabra clave opcional para especificar la acción a tomar en paquetes que exceden los tamaños de `normal y maximum burst sizes`. La acción predeterminada es descartar.
-`action`|La acción a tomar con los paquetes; algunos ejemplos incluyen: 
-- `drop`: Descarta el paquete (predeterminado para acciones de exceder e infringir). - `transmit`: Transmite el paquete (predeterminado para acción de conformidad). - `set-dscp-transmit dscp-value`: Marca y transmite el paquete con el valor DSCP especificado. - `set-prec-transmit precedence-value`: Marca y transmite el paquete con el valor de precedencia especificado. - `set-cos-transmit cos-value`: Marca y transmite el paquete con el valor de CoS especificado. - `set-qos-transmit` `qos-group-value`: Marca el paquete con el valor `qos-group value` especificado. Esta opción solo es válida en mapas de políticas entrantes.
 
 <table>
+  <thead>
+    <tr>
+      <th>Keyword</th>
+      <th>Descripción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="7">action</td>
+      <td>La acción a tomar con los paquetes; algunos ejemplos incluyen: </td>
     </tr>
     <tr>
-        <th rowspan="7">`action`</th>
-        <th colspan="1">Kernel</th>
+      <td>- drop: Descarta el paquete (predeterminado para acciones de exceder e infringir)</td>
     </tr>
     <tr>
-        <td>x86</td>
-        <td>&#9989;</td>
-        <td>&#10060;</td>
-        <td>&#9989;</td>
-        <td>&#9989;</td>
-        <td>&#9989;</td>
-        <td>&#10060;</td>
+      <td>- transmit: Transmite el paquete (predeterminado para acción de conformidad)</td>
     </tr>
+    <tr>
+      <td>- set-dscp-transmit dscp-value: Marca y transmite el paquete con el valor DSCP especificado.</td>
+    </tr>
+    <tr>
+      <td>- set-prec-transmit precedence-value: Marca y transmite el paquete con el valor de precedencia especificado.</td>
+    </tr>
+    <tr>
+      <td>- set-cos-transmit cos-value: Marca y transmite el paquete con el valor de CoS especificado.</td>
+    </tr>
+    <tr>
+      <td>- set-qos-transmit (qos-group-value): Marca el paquete con el valor `qos-group value` especificado. Esta opción solo es válida en mapas de políticas entrantes.</td>
+    </tr>
+  </tbody>
 </table>
 
+## Tipos de "Policers"
+Existen diferentes algoritmos de policing, entre ellos:
+
+- Single-rate two-color marker/policer
+- Single-rate three-color marker/policer (srTCM)
+- Two-rate three-color marker/policer (trTCM)
+
+### Single-rate two-color marker/policer
+
+Los primeros policadores implementados utilizan un modelo de dos colores de tasa única basado en el algoritmo de cubo de token único. Para este tipo de policador, el tráfico puede cumplir o superar el CIR. Se pueden realizar acciones de marcado descendente o descarte para cada uno de los dos estados.
+
+La Figura 14-14 ilustra las diferentes acciones que puede realizar el policador de dos colores de tasa única. La sección sobre la línea punteada a la izquierda de la figura representa el tráfico que superó el CIR y se marcó descendentemente. La sección sobre la línea punteada a la derecha de la figura representa el tráfico que superó el CIR y se descartó.
+
+![Image Alt]()
+
+El Ejemplo 14-3 muestra la configuración de un mapa de políticas bicolor de velocidad única con dos clases de tráfico. El tráfico que coincide con la clase de tráfico VOIP-TELEFONÍA se controla a un CIR de 50 Mbps, y el tráfico que coincide con la clase de tráfico VIDEO se controla a 25 Mbps.
+El tráfico de ambas clases que cumple con el CIR se transmite; el tráfico excedente de la clase de tráfico VOIP-TELEFONÍA se descarta, y el tráfico excedente de la clase de tráfico VIDEO se reduce y se transmite con el valor DSCP AF21.
+
+Example 14-3 Single-Rate Two-Color Marker/Policer Ejemplo:
+````
+policy-map OUTBOUND-POLICY
+  class VOIP-TELEPHONY
+    police 50000000 conform-action transmit exceed-action drop
+  class VIDEO
+    police 25000000 conform-action transmit exceed-action set-dscp-transmit af21
+interface GigabitEthernet1
+  service-policy output OUTBOUND-POLICY
+````
+En el Ejemplo 14-3, no se especificaron las palabras clave opcionales `cir, bc y be` para los comandos police. Para ver los valores predeterminados, se utiliza el comando `show policy-map policy-map-name`. El Ejemplo 14-4 muestra la salida del comando `show policy-map policy-map-name` para `OUTBOUND-POLICY`. Para la clase `VOIP-TELEPHONY`, el valor predeterminado de `Bc` es 50 000 000/32 (1 562 500 bytes), y para la clase `VIDEO`, el valor predeterminado de `Bc` es 25 000 000/32 (781 250). No hay `Be`, ya que los single-rate two-color markers/policers(single token bucket algorithms) no permiten el exceso de bursting. El exceso de bursting se explica en la sección Single-Rate Three-Color Markers/Policers (srTCM)" de este capítulo.
+
+Ejemplo 14-4 Verificación de los valores predeterminados de CIR, Bc y Be
+````
+router# show policy-map OUTBOUND-POLICY
+  Policy Map OUTBOUND-POLICY
+    Class VOIP-TELEPHONY
+      police cir 50000000 bc 1562500 <--------------------Default: 50 000 000/32 (1 562 500 bytes)
+        conform-action transmit
+        exceed-action drop
+    Class VIDEO
+      police cir 25000000 bc 781250 <--------------------
+        conform-action transmit
+        exceed-action set-dscp-transmit af21
+router#
+````
+### Single-Rate Three-Color Markers/Policers (srTCM):
+
+Los algoritmos de control de tráfico de tres colores y velocidad única se basan en la RFC 2697. Este tipo de control utiliza dos contenedores de tokens, y el tráfico puede clasificarse como conforme, excedido o infringido con el CIR. Se realizan acciones de marcado descendente o descarte para cada uno de los tres estados del tráfico.
+
+El primer contenedor de tokens funciona de forma similar al `single-rate two-color system`; la diferencia radica en que, si quedan tokens en el contenedor después de cada período debido a baja o nula actividad, en lugar de descartar los tokens sobrantes (desbordamiento), el algoritmo los coloca en un segundo contenedor para usarlos posteriormente en bursts temporales que puedan exceder el CIR. Los tokens colocados en este segundo contenedor se denominan `bursts de exceso` (Be), y Be es el número máximo de bits que pueden exceder el `tamaño de bursts` (Bc).
+
+Con el mecanismo de `dos baldes tokens`, el tráfico se puede clasificar en tres colores o estados, como se indica a continuación:
+
+- Conforme: El tráfico por debajo de Bc se clasifica como conforme y en verde. El tráfico conforme suele transmitirse y, opcionalmente, puede volver a marcarse.
+- Excedente: El tráfico por encima de Bc, pero por debajo de Be, se clasifica como excedente y en amarillo. El tráfico excedente puede descartarse o marcarse y transmitirse.
+- Infracción: El tráfico por encima de Be se clasifica como infractor y en rojo. Este tipo de tráfico suele descartarse, pero opcionalmente puede marcarse y transmitirse.
+
+La Figura 14-15 ilustra las diferentes acciones que puede realizar un `single-rate three-color policer`. La sección debajo de la línea punteada recta, a la izquierda de la figura, representa el tráfico que cumple con el CIR; la sección justo encima de la línea punteada recta, representa el tráfico que excede el límite y se reduce; y la sección superior, el tráfico que infringe el CIR, que también se reduce. Las tasas de tráfico que excede el límite y que infringe el CIR varían porque dependen de tokens aleatorios que se transfieren del contenedor Bc al contenedor Be. La sección justo encima de la línea punteada recta, a la derecha de la figura, representa el tráfico que excedió el CIR y se redujo; y la sección superior, el tráfico que infringió el CIR y se descartó.
+
+![Image Alt]()
+
+El single-rate three-color marker/policer utiliza los siguientes parámetros para medir el flujo de tráfico:
+- Committed Information Rate (CIR):  La tasa controlada.
+- Committed Burst Size (Bc): El tamaño máximo del contenedor de tokens CIR, medido en bytes. Denominado Committed Burst Size (CBS) en RFC 2697.
+- Excess Burst Size (Be): El tamaño máximo del contenedor de tokens excedente, medido en bytes. Denominado Tamaño de Ráfaga Excesivo (EBS) en RFC 2697.
+- Bc Bucket Token Count (Tc): El número de tokens en el contenedor Bc. No debe confundirse con el intervalo de tiempo comprometido Tc.
+- Be Bucket Token Count (Te): El número de tokens en el contenedor Be.
+- Incoming Packet Length (B): La longitud del paquete entrante, en bits.
+
+La Figura 14-16 ilustra el flujo lógico del algoritmo de marcador/policiador tricolor de tasa única y dos cubos de tokens.
+
+El algoritmo de dos cubos del policiador tricolor de tasa única genera menos retransmisiones TCP y es más eficiente en el uso del ancho de banda. Es el policiador ideal para usar con las clases AF (AFx1, AFx2 y AFx3). Usar un policiador tricolor solo tiene sentido si las acciones realizadas para cada color difieren. Si las acciones para dos o más colores son las mismas (por ejemplo, cumplir y superar ambas transmisiones sin remarcar), se recomienda el policiador bicolor de tasa única para simplificar las cosas.
+
+![Image Alt]()
+
+El Ejemplo 14-5 muestra la configuración de single-rate three-color policy map con una clase de tráfico. El tráfico que coincide con la clase de tráfico VOIP-TELEFONÍA es policed a un CIR de 50 Mbps; el tráfico que cumple con el CIR se remarca y se transmite con DSCP AF31; el tráfico que excede la velocidad se marca y se transmite con DSCP AF32, y todo el tráfico que infringe la normativa se descarta.
+
+Ejemplo 14-5 Single-Rate Three-Color Marker/Policer Ejemplo
+````
+policy-map OUTBOUND-POLICY
+  class VOIP-TELEPHONY
+    police 50000000 conform-action set-dscp-transmit af31 exceed-action set-dscp-transmit af32 violate-action drop <-----
+
+interface GigabitEthernet1
+  service-policy output OUTBOUND-POLICY
+````
+El ejemplo 14-6 muestra la salida del comando `show policy-map policy-map-name` para OUTBOUND-POLICY. Para la clase VOIP-TELEPHONY, no se especificaron los valores Bc y Be; por lo tanto, el valor predeterminado de Bc es 50 000 000/32 (1 562 500 bytes) y el valor predeterminado de Be es el valor Bc.
+
+Ejemplo 14-6: Verificación de los valores predeterminados de Be y Bc
+````
+router# show policy-map OUTBOUND-POLICY
+  Policy Map OUTBOUND-POLICY
+    Class VOIP-TELEPHONY
+      police cir 50000000 bc 1562500 be 1562500
+        conform-action set-dscp-transmit af31
+        exceed-action set-dscp-transmit af32
+        violate-action drop
+````
+### Two-Rate Three-Color Markers/Policers (trTCM)
+El two-rate three-color marker/policer esta basado en RFC 2698 y es similar al singlerate three-color policer. La diferencia radica en que single-rate three-color policers dependen del exceso de tokens del contenedor Bc, lo que introduce cierto nivel de variabilidad e imprevisibilidad en los flujos de tráfico. Los two-rate three-color marker/policers solucionan este problema utilizando dos tasas distintas: la CIR y la Tasa de Información Máxima (PIR). El two-rate three-color marker/policers permite un exceso de tasa sostenido basado en la PIR, lo que permite diferentes acciones para el tráfico que excede los diferentes valores de ráfaga; por ejemplo, el tráfico infractor puede descartarse a una tasa definida, algo que no es posible con el single-rate three-color policer.
+
+La Figura 14-17 ilustra cómo el tráfico infractor que excede la PIR puede marcarse (a la izquierda de la figura) o descartarse (a la derecha de la figura). Compare la Figura 14-17 con la Figura 14-16 para ver la diferencia entre el regulador de tres colores de dos velocidades y el regulador de tres colores de una sola velocidad.
+
+![Image Alt]()
+
+El two-rate three-color marker/policer utiliza los siguientes parámetros para medir el flujo de tráfico:
+- Committed Information Rate (CIR): La tasa controlada.
+- Peak Information Rate (PIR): La tasa máxima de tráfico permitida. La PIR debe ser igual o mayor que la CIR.
+
 # Gestión y prevención de la congestión: 
+
 
 
 
