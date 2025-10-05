@@ -568,9 +568,6 @@ Keyword| Description
         <th colspan="3">Kernel</th>
     </tr>
     <tr>
-        <th>I2_S</th>
-    </tr>
-    <tr>
         <td>x86</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
@@ -633,6 +630,7 @@ Keyword| Description
 </table>
 
 # Gestión y prevención de la congestión: 
+
 
 
 
