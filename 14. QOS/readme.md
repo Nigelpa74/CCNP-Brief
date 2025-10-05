@@ -564,19 +564,13 @@ Keyword| Description
 <table>
     </tr>
     <tr>
-        <th rowspan="2">Model</th>
-        <th rowspan="2">Parameters</th>
         <th rowspan="2">CPU</th>
         <th colspan="3">Kernel</th>
     </tr>
     <tr>
         <th>I2_S</th>
-        <th>TL1</th>
-        <th>TL2</th>
     </tr>
     <tr>
-        <td rowspan="2"><a href="https://huggingface.co/1bitLLM/bitnet_b1_58-large">bitnet_b1_58-large</a></td>
-        <td rowspan="2">0.7B</td>
         <td>x86</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
@@ -589,8 +583,6 @@ Keyword| Description
         <td>&#10060;</td>
     </tr>
     <tr>
-        <td rowspan="2"><a href="https://huggingface.co/1bitLLM/bitnet_b1_58-3B">bitnet_b1_58-3B</a></td>
-        <td rowspan="2">3.3B</td>
         <td>x86</td>
         <td>&#10060;</td>
         <td>&#10060;</td>
@@ -603,8 +595,6 @@ Keyword| Description
         <td>&#10060;</td>
     </tr>
     <tr>
-        <td rowspan="2"><a href="https://huggingface.co/HF1BitLLM/Llama3-8B-1.58-100B-tokens">Llama3-8B-1.58-100B-tokens</a></td>
-        <td rowspan="2">8.0B</td>
         <td>x86</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
@@ -617,8 +607,6 @@ Keyword| Description
         <td>&#10060;</td>
     </tr>
     <tr>
-        <td rowspan="2"><a href="https://huggingface.co/collections/tiiuae/falcon3-67605ae03578be86e4e87026">Falcon3 Family</a></td>
-        <td rowspan="2">1B-10B</td>
         <td>x86</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
@@ -631,8 +619,6 @@ Keyword| Description
         <td>&#10060;</td>
     </tr>
     <tr>
-        <td rowspan="2"><a href="https://huggingface.co/collections/tiiuae/falcon-edge-series-6804fd13344d6d8a8fa71130">Falcon-E Family</a></td>
-        <td rowspan="2">1B-3B</td>
         <td>x86</td>
         <td>&#9989;</td>
         <td>&#10060;</td>
@@ -647,6 +633,7 @@ Keyword| Description
 </table>
 
 # Gestión y prevención de la congestión: 
+
 
 
 
