@@ -439,8 +439,215 @@ Bronze| Background| 1| 10| (AF11)
 
 Al crear una nueva red WLAN, la política de QoS predeterminada es "Silver", que garantiza un servicio de calidad estándar. En la figura 14-10, se ha creado una WLAN denominada "voice" para el tráfico de voz, por lo que su política de QoS se ha configurado en "Platinum". De esta manera, el tráfico de voz inalámbrico se clasifica para minimizar la latencia y la fluctuación, y se etiqueta con un valor CoS 802.1p de 5 y un valor DSCP de 46 (EF).
 
+![Image Alt]()
+
 # Policing y Shaping: 
+
+**Traffic policers and shapers** son mecanismos de QoS que acondicionan el tráfico y se utilizan para controlar el flujo de tráfico, pero difieren en su implementación:
+
+- `Policers`: Transmiten o remarcan el tráfico entrante o saliente que se ajusta a la tasa de tráfico deseada, y descartan o remarcan el tráfico entrante o saliente que la supera.
+
+- `Shapers`: Almacenan y retrasan las tasas de tráfico de salida que alcanzan un pico momentáneo por encima de la tasa deseada hasta que la tasa de tráfico de salida cae por debajo de la tasa de tráfico definida. Si la tasa de tráfico de salida es inferior a la tasa deseada, el tráfico se envía inmediatamente.
+
+La Figura 14-11 ilustra la diferencia entre la policing y el shaping en el tráfico. Los _policers_ descartan o remarcan el exceso de tráfico, mientras que los _shapers_ lo almacenan en búfer y lo retrasan.
+
+![Image Alt]()
+
+## Ubicación de Policadores y Modeladores en la Red
+
+Los policer para el tráfico entrante se implementan de forma óptima en el borde de la red para evitar que el tráfico desperdicie valioso ancho de banda en el núcleo. Los policers para el tráfico saliente se implementan de forma óptima en el borde de la red o en las interfaces orientadas al núcleo de los dispositivos de borde de la red. Una desventaja del policer es que provoca retransmisiones de TCP al descartar el tráfico.
+
+Los shaper se utilizan para el tráfico de salida y suelen implementarse en redes empresariales en interfaces orientadas a proveedores de servicios (SP). El policador es útil cuando los SP controlan el tráfico entrante o cuando no lo hacen, pero tienen un SLA de velocidad máxima de tráfico que, de incumplirse, podría generar sanciones económicas. El policador amortigua y retrasa el tráfico en lugar de descartarlo, lo que genera menos retransmisiones de TCP en comparación con el policer.
+
+## Markdown:
+
+Cuando se excede la tasa de tráfico deseada, un agente de control puede tomar una de las siguientes acciones:
+
+- Descartar el tráfico.
+- Marcar el exceso de tráfico con una prioridad más baja.
+
+Marcar el exceso de tráfico implica volver a marcar los paquetes con un valor de clase de prioridad más baja; por ejemplo, el exceso de tráfico marcado con AFx1 debe marcarse con AFx2 (o AFx3 si se utiliza un agente de control de dos tasas). Después de marcar el tráfico, se deben configurar en toda la red mecanismos para evitar la congestión, como `weighted random early detection` (WRED) basada en DSCP, para descartar AFx3 de forma más agresiva que AFx2 y AFx2 de forma más agresiva que AFx1.
+
+## Algoritmos de Token Bucket
+
+Los controladores y modeladores de Cisco IOS se basan en algoritmos de token bucket. Las siguientes definiciones explican su funcionamiento:
+
+- Tasa de Información Comprometida (Committed Information Rate-CIR): La tasa de tráfico controlada, en bits por segundo (bps), definida en el contrato de tráfico.
+- Intervalo de Tiempo Comprometido (Committed Time Interval-Tc): El intervalo de tiempo, en milisegundos (ms), durante el cual se envía la **committed burst** (Bc).
+````
+El Tc se calcula con la fórmula: Tc = (Bc [bits] / CIR [bps]) × 1000.
+````
+- Tamaño de Ráfaga Comprometida (Committed Burst Size -Bc): El tamaño máximo del token bucket de CIR, medido en bytes, y la cantidad máxima de tráfico que se puede enviar dentro de un Tc.
+````
+El Bc se calcula con la fórmula: Bc = CIR (Tc / 1000).
+````
+- Token: Un solo token representa 1 byte u 8 bits.
+
+- Token bucket: Un contenedor que acumula tokens hasta alcanzar un número máximo predefinido (como el Bc cuando se utiliza un solo contenedor); estos tokens se añaden al contenedor a una tasa fija (CIR). Se comprueba que cada paquete cumpla con la tasa definida y se extraen tokens del contenedor en una cantidad igual a su tamaño; por ejemplo, si el tamaño del paquete es de 1500 bytes, se extraen 12 000 bits (1500 × 8) del contenedor. Si no hay suficientes tokens en el contenedor para enviar el paquete, el mecanismo de acondicionamiento de tráfico puede realizar una de las siguientes acciones:
+- Almacenar los paquetes en búfer mientras se espera que se acumulen suficientes tokens en el contenedor (traffic shaping).
+- Descartar los paquetes (traffic policing).
+- Marca el tamaño de los paquetes (traffic markdown).
+
+Se recomienda que el valor de Bc sea mayor o igual al tamaño del paquete IP más grande posible en un flujo de tráfico. De lo contrario, nunca habrá suficientes tokens en el contenedor de tokens para paquetes más grandes, y estos siempre superarán la tasa definida. Si el contenedor alcanza su capacidad máxima, los tokens recién añadidos se descartan. Los tokens descartados no están disponibles para su uso en paquetes futuros.
+
+Los algoritmos de contenedor de tokens pueden utilizar uno o varios contenedores de tokens. En los algoritmos de contenedor de tokens único, la tasa de tráfico medida puede ajustarse o superar la tasa de tráfico definida. La tasa de tráfico medida se ajusta si hay suficientes tokens en el contenedor de tokens para transmitir el tráfico. La tasa de tráfico medida se supera si no hay suficientes tokens en el contenedor de tokens para transmitir el tráfico.
+
+La Figura 14-12 ilustra el concepto del algoritmo de contenedor de tokens único.
+
+![Image Alt]()
+
+Para comprender con más detalle el funcionamiento de los algoritmos de depósito de tokens único, supongamos que una interfaz de 1 Gbps está configurada con un regulador definido con un CIR de 120 Mbps y un Bc de 12 Mb. El valor de Tc no se puede definir explícitamente en IOS, pero se puede calcular de la siguiente manera:
+````
+Tc = (Bc [bits] / CIR [bps]) × 1000
+Tc = (12 Mb / 120 Mbps) × 1000
+Tc = (12,000,000 bits / 120,000,000 bps) × 1000 = 100 ms
+````
+Cuando se conoce el valor de Tc, el número de Tc por segundo se puede calcular de la siguiente manera:
+````
+Tcs per second = 1000 / Tc
+Tcs per second = 1000 ms / 100 ms = 10 Tcs
+````
+Si el algoritmo de token procesa un flujo continuo de paquetes de 1500 bytes (12 000 bits), los paquetes dentro de cada Tc (100 ms) solo pueden ocupar un Bc de 12 Mb. El número de paquetes que cumplen con la velocidad de tráfico y que pueden transmitirse se calcula de la siguiente manera:
+````
+Número de paquetes que conforman con cada Tc = Bc / tamaño del paquete en bits (redondeado hacia abajo)
+Número de paquetes que conforman con cada Tc = 12 000 000 bits / 12 000 bits = 1000 paquetes
+````
+Cualquier paquete adicional que supere los 1000 se descartará o se marcará.
+Para calcular cuántos paquetes se enviarían por segundo, se puede utilizar la siguiente fórmula:
+````
+Paquetes por segundo = Número de paquetes que conforman cada Tc × Tcs por segundo
+Paquetes por segundo = 1000 paquetes × 10 intervalos = 10 000 paquetes
+````
+Para calcular el CIR de los 10 000 paquetes, se puede utilizar la siguiente fórmula:
+````
+CIR = Paquetes por segundo × Tamaño del paquete en bits
+CIR = 10 000 paquetes por segundo × 12 000 bits = 120 000 000 bps = 120 Mbps
+````
+Para calcular el intervalo de tiempo que tardarían en enviarse los 1000 paquetes a la velocidad de línea de la interfaz, se puede utilizar la siguiente fórmula:
+````
+Intervalo de tiempo a la velocidad de línea = (Bc [bits] / Velocidad de interfaz [bps]) × 1000
+Intervalo de tiempo a la velocidad de línea = (12 Mb / 1 Gbps) × 1000
+Intervalo de tiempo a la velocidad de línea = (12 000 000 bits / 1 000 000 000 bps) × 1000 = 12 ms
+````
+La Figura 14-13 ilustra cómo El Bc (1000 paquetes de 1500 bytes cada uno, o 12 Mb) se envía en cada intervalo de Tc. Tras el envío del Bc, hay un retraso entre paquetes de 88 ms (100 ms menos 12 ms) dentro del Tc, donde no se transmiten datos.
+
+![Image Alt]()
+
+Los valores recomendados para el tiempo de respuesta (Tc) varían de 8 ms a 125 ms. Se requieren tiempos de respuesta más cortos, como de 8 ms a 10 ms, para reducir el retardo entre paquetes en el tráfico en tiempo real, como el de voz. No se recomiendan tiempos de respuesta superiores a 125 ms para la mayoría de las redes, ya que el retardo entre paquetes es demasiado grande.
+
+## Class-Based Policing Configuration:
+
+El comando "police" de una clase de tráfico de un policy map se utiliza para el control basado en clases.
+Con este control, el tráfico clasificado de entrada o salida puede limitarse, marcarse o descartarse. La sintaxis del comando "police" es la siguiente:
+````
+police [cir] cir-in-bps [bc] committed-burst-size-in-bytes
+                        [be] excess-burst-size-in-bytes [conform-action
+                        action] [exceed-action action] [violate-action action]
+````
+La Tabla 14-9 enumera las palabras clave del comando `police` y su descripción.
+
+Tabla 14-9 Palabras clave del comando `police` y descripciones de palabras clave
+Keyword| Description
+:---|:---
+`cir` |Palabra clave opcional para especificar explícitamente la tasa CIR promedio
+`cir-in-bps` | Tasa CIR promedio en bits por segundo.La CIR se puede configurar con los valores de sufijo k (kbps), m (Mbps) y g (Gbps). Los valores de sufijo admiten puntos decimales.
+`bc`| Palabra clave opcional para especificar explícitamente el tamaño de committed Burst Size.
+`committed-burst-sizein-bytes`|Tamaño de Bc opcional en bytes. El valor predeterminado es 1500 bytes o la tasa CIR configurada dividida entre 32 (CIR/32); el número mayor se elige como tamaño de Bc.
+`be` |Palabra clave opcional para especificar explícitamente el tamaño de excess burst (Be).
+`excess-burst-size-inbytes`|Tamaño opcional de `Be` en bytes. El valor predeterminado es Bc.
+`conform-action`|Palabra clave opcional para especificar la acción que se realizará con los paquetes que conforman con el CIR. La acción predeterminada es transmitir.
+`exceed-action`| Palabra clave opcional para especificar la acción a tomar en paquetes que exceden el CIR. La acción predeterminada es descartar.
+`violate-action` | Palabra clave opcional para especificar la acción a tomar en paquetes que exceden los tamaños de `normal y maximum burst sizes`. La acción predeterminada es descartar.
+`action`|La acción a tomar con los paquetes; algunos ejemplos incluyen: 
+- `drop`: Descarta el paquete (predeterminado para acciones de exceder e infringir). - `transmit`: Transmite el paquete (predeterminado para acción de conformidad). - `set-dscp-transmit dscp-value`: Marca y transmite el paquete con el valor DSCP especificado. - `set-prec-transmit precedence-value`: Marca y transmite el paquete con el valor de precedencia especificado. - `set-cos-transmit cos-value`: Marca y transmite el paquete con el valor de CoS especificado. - `set-qos-transmit` `qos-group-value`: Marca el paquete con el valor `qos-group value` especificado. Esta opción solo es válida en mapas de políticas entrantes.
+
+<table>
+    </tr>
+    <tr>
+        <th rowspan="2">Model</th>
+        <th rowspan="2">Parameters</th>
+        <th rowspan="2">CPU</th>
+        <th colspan="3">Kernel</th>
+    </tr>
+    <tr>
+        <th>I2_S</th>
+        <th>TL1</th>
+        <th>TL2</th>
+    </tr>
+    <tr>
+        <td rowspan="2"><a href="https://huggingface.co/1bitLLM/bitnet_b1_58-large">bitnet_b1_58-large</a></td>
+        <td rowspan="2">0.7B</td>
+        <td>x86</td>
+        <td>&#9989;</td>
+        <td>&#10060;</td>
+        <td>&#9989;</td>
+    </tr>
+    <tr>
+        <td>ARM</td>
+        <td>&#9989;</td>
+        <td>&#9989;</td>
+        <td>&#10060;</td>
+    </tr>
+    <tr>
+        <td rowspan="2"><a href="https://huggingface.co/1bitLLM/bitnet_b1_58-3B">bitnet_b1_58-3B</a></td>
+        <td rowspan="2">3.3B</td>
+        <td>x86</td>
+        <td>&#10060;</td>
+        <td>&#10060;</td>
+        <td>&#9989;</td>
+    </tr>
+    <tr>
+        <td>ARM</td>
+        <td>&#10060;</td>
+        <td>&#9989;</td>
+        <td>&#10060;</td>
+    </tr>
+    <tr>
+        <td rowspan="2"><a href="https://huggingface.co/HF1BitLLM/Llama3-8B-1.58-100B-tokens">Llama3-8B-1.58-100B-tokens</a></td>
+        <td rowspan="2">8.0B</td>
+        <td>x86</td>
+        <td>&#9989;</td>
+        <td>&#10060;</td>
+        <td>&#9989;</td>
+    </tr>
+    <tr>
+        <td>ARM</td>
+        <td>&#9989;</td>
+        <td>&#9989;</td>
+        <td>&#10060;</td>
+    </tr>
+    <tr>
+        <td rowspan="2"><a href="https://huggingface.co/collections/tiiuae/falcon3-67605ae03578be86e4e87026">Falcon3 Family</a></td>
+        <td rowspan="2">1B-10B</td>
+        <td>x86</td>
+        <td>&#9989;</td>
+        <td>&#10060;</td>
+        <td>&#9989;</td>
+    </tr>
+    <tr>
+        <td>ARM</td>
+        <td>&#9989;</td>
+        <td>&#9989;</td>
+        <td>&#10060;</td>
+    </tr>
+    <tr>
+        <td rowspan="2"><a href="https://huggingface.co/collections/tiiuae/falcon-edge-series-6804fd13344d6d8a8fa71130">Falcon-E Family</a></td>
+        <td rowspan="2">1B-3B</td>
+        <td>x86</td>
+        <td>&#9989;</td>
+        <td>&#10060;</td>
+        <td>&#9989;</td>
+    </tr>
+    <tr>
+        <td>ARM</td>
+        <td>&#9989;</td>
+        <td>&#9989;</td>
+        <td>&#10060;</td>
+    </tr>
+</table>
+
 # Gestión y prevención de la congestión: 
+
 
 
 
