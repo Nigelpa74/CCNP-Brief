@@ -251,7 +251,7 @@ En las redes empresariales, los descriptores de tráfico más utilizados para la
 
 El estándar 802.1Q es una especificación de IEEE para la implementación de VLAN en redes conmutadas de capa 2. Esta especificación define dos campos de 2 bytes: el Tag Protocol Identifier (TPID) y Tag Control Information (TCI), que se insertan en el marco Ethernet, después del campo de dirección de origen, tal como se muestra en la figura 14-4.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%201.JPG)
 
 El valor TPID es un campo de 16 bits que tiene asignado el valor 0x8100 y que identifica el paquete como un paquete etiquetado según el estándar 802.1Q.
 
@@ -292,7 +292,7 @@ Al viajar desde su origen a su destino, un paquete puede atravesar enlaces tronc
 
 La figura 14-5 ilustra el campo ToS/DiffServ en el encabezado IPv4.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%202.JPG)
 
 El campo ToS, definido en la RFC 791, es un campo de 8 bits, donde solo los 3 primeros bits, denominados IP Precedence (IPP), se utilizan para la clasificación del tráfico, mientras que los restantes permanecen sin usar. Los valores de IPP, que van de 0 a 7, permiten clasificar el tráfico en hasta seis clases de servicio; los valores 6 y 7 están reservados para uso interno de red.
 
@@ -317,7 +317,7 @@ El RFC 2474 declaró obsoleto el campo ToS al introducir el campo DS, y el Class
 
 La figura 14-6 ilustra el funcionamiento del selector de clase PHB.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%203.JPG)
 
 Los paquetes con mayor  IP Precedence deben reenviarse más rápidamente que los paquetes con menor IP Precedence.
 
@@ -329,7 +329,7 @@ Existen ocho clases CS, desde CS0 hasta CS7, que corresponden directamente con l
 
 El reenvío predeterminado (DF) y Class Selector 0 (CS0) proporcionan un servicio de best-effort y utilizan el valor DS 000000. La figura 14-7 ilustra el DF PHB.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%204.JPG)
 
 El reenvío por defecto best-effort también se aplica a los paquetes que no pueden clasificarse mediante un mecanismo de QoS como _queuing, shaping, o policing_. Esto suele ocurrir cuando la política de QoS del nodo está incompleta o cuando los valores DSCP no se ajustan a los definidos para las clases de servicio CS, AF y EF.
 
@@ -341,7 +341,7 @@ Existen cuatro clases AF definidas según el estándar: AF1, AF2, AF3 y AF4. El 
 
 La tabla 14-5 muestra cómo se asigna una IP Precedence a cada clase AF (en la columna «Valor de clase AF») y las tres probabilidades de pérdida de paquetes: baja, media y alta.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%205.JPG)
 
 El nombre AF (AFxy) está compuesto por el valor de IP Precedence AF en decimal (x) y el valor de Drop Probability en decimal (y). Por ejemplo, AF41 combina la IP Precedence 4 con una Drop Probability 1.
 
@@ -384,6 +384,8 @@ Para garantizar una experiencia de QoS escalable y de end-to-end, los paquetes d
 Por ejemplo, en una red de campus con telefonía IP y dispositivos finales, los teléfonos IP etiquetan por defecto el tráfico de voz con un valor CoS de 5 y un valor DSCP de 46 (EF), mientras que el tráfico entrante de un dispositivo final (como un PC) conectado al puerto del switch se reetiqueta con un valor CoS de 0 y un valor DSCP de 0. Aunque el dispositivo final envíe paquetes etiquetados con un valor CoS o DSCP específico, el comportamiento predeterminado de los teléfonos IP de Cisco es no confiar en el dispositivo final y restablecer los valores CoS y DSCP a 0 antes de enviar los paquetes al switch. Cuando el teléfono IP envía tráfico de voz y datos al switch, este puede clasificar el tráfico de voz como de mayor prioridad gracias a las etiquetas CoS y DSCP de alta prioridad.
 
 Para garantizar la escalabilidad, la clasificación de los límites de confianza debe realizarse lo más cerca posible del dispositivo final. La figura 14-9 ilustra los límites de confianza en diferentes puntos de una red de campus, donde los puntos 1 y 2 son óptimos, y el punto 3 es aceptable solo si el switch de acceso no puede realizar la clasificación.
+
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/b70467a4b8f9d8e0158cf3f6c7e56055e4d68baf/14.%20QOS/IMG/QOS%20MARK/QOS%20MARK%206.JPG)
 
 ## Configuración de marcación basada en clases
 
@@ -437,7 +439,274 @@ Bronze| Background| 1| 10| (AF11)
 
 Al crear una nueva red WLAN, la política de QoS predeterminada es "Silver", que garantiza un servicio de calidad estándar. En la figura 14-10, se ha creado una WLAN denominada "voice" para el tráfico de voz, por lo que su política de QoS se ha configurado en "Platinum". De esta manera, el tráfico de voz inalámbrico se clasifica para minimizar la latencia y la fluctuación, y se etiqueta con un valor CoS 802.1p de 5 y un valor DSCP de 46 (EF).
 
+![Image Alt]()
+
 # Policing y Shaping: 
+
+**Traffic policers and shapers** son mecanismos de QoS que acondicionan el tráfico y se utilizan para controlar el flujo de tráfico, pero difieren en su implementación:
+
+- `Policers`: Transmiten o remarcan el tráfico entrante o saliente que se ajusta a la tasa de tráfico deseada, y descartan o remarcan el tráfico entrante o saliente que la supera.
+
+- `Shapers`: Almacenan y retrasan las tasas de tráfico de salida que alcanzan un pico momentáneo por encima de la tasa deseada hasta que la tasa de tráfico de salida cae por debajo de la tasa de tráfico definida. Si la tasa de tráfico de salida es inferior a la tasa deseada, el tráfico se envía inmediatamente.
+
+La Figura 14-11 ilustra la diferencia entre la policing y el shaping en el tráfico. Los _policers_ descartan o remarcan el exceso de tráfico, mientras que los _shapers_ lo almacenan en búfer y lo retrasan.
+
+![Image Alt]()
+
+## Ubicación de Policadores y Modeladores en la Red
+
+Los policer para el tráfico entrante se implementan de forma óptima en el borde de la red para evitar que el tráfico desperdicie valioso ancho de banda en el núcleo. Los policers para el tráfico saliente se implementan de forma óptima en el borde de la red o en las interfaces orientadas al núcleo de los dispositivos de borde de la red. Una desventaja del policer es que provoca retransmisiones de TCP al descartar el tráfico.
+
+Los shaper se utilizan para el tráfico de salida y suelen implementarse en redes empresariales en interfaces orientadas a proveedores de servicios (SP). El policador es útil cuando los SP controlan el tráfico entrante o cuando no lo hacen, pero tienen un SLA de velocidad máxima de tráfico que, de incumplirse, podría generar sanciones económicas. El policador amortigua y retrasa el tráfico en lugar de descartarlo, lo que genera menos retransmisiones de TCP en comparación con el policer.
+
+## Markdown:
+
+Cuando se excede la tasa de tráfico deseada, un agente de control puede tomar una de las siguientes acciones:
+
+- Descartar el tráfico.
+- Marcar el exceso de tráfico con una prioridad más baja.
+
+Marcar el exceso de tráfico implica volver a marcar los paquetes con un valor de clase de prioridad más baja; por ejemplo, el exceso de tráfico marcado con AFx1 debe marcarse con AFx2 (o AFx3 si se utiliza un agente de control de dos tasas). Después de marcar el tráfico, se deben configurar en toda la red mecanismos para evitar la congestión, como `weighted random early detection` (WRED) basada en DSCP, para descartar AFx3 de forma más agresiva que AFx2 y AFx2 de forma más agresiva que AFx1.
+
+## Algoritmos de Token Bucket
+
+Los controladores y modeladores de Cisco IOS se basan en algoritmos de token bucket. Las siguientes definiciones explican su funcionamiento:
+
+- Tasa de Información Comprometida (Committed Information Rate-CIR): La tasa de tráfico controlada, en bits por segundo (bps), definida en el contrato de tráfico.
+- Intervalo de Tiempo Comprometido (Committed Time Interval-Tc): El intervalo de tiempo, en milisegundos (ms), durante el cual se envía la **committed burst** (Bc).
+````
+El Tc se calcula con la fórmula: Tc = (Bc [bits] / CIR [bps]) × 1000.
+````
+- Tamaño de Ráfaga Comprometida (Committed Burst Size -Bc): El tamaño máximo del token bucket de CIR, medido en bytes, y la cantidad máxima de tráfico que se puede enviar dentro de un Tc.
+````
+El Bc se calcula con la fórmula: Bc = CIR (Tc / 1000).
+````
+- Token: Un solo token representa 1 byte u 8 bits.
+
+- Token bucket: Un contenedor que acumula tokens hasta alcanzar un número máximo predefinido (como el Bc cuando se utiliza un solo contenedor); estos tokens se añaden al contenedor a una tasa fija (CIR). Se comprueba que cada paquete cumpla con la tasa definida y se extraen tokens del contenedor en una cantidad igual a su tamaño; por ejemplo, si el tamaño del paquete es de 1500 bytes, se extraen 12 000 bits (1500 × 8) del contenedor. Si no hay suficientes tokens en el contenedor para enviar el paquete, el mecanismo de acondicionamiento de tráfico puede realizar una de las siguientes acciones:
+- Almacenar los paquetes en búfer mientras se espera que se acumulen suficientes tokens en el contenedor (traffic shaping).
+- Descartar los paquetes (traffic policing).
+- Marca el tamaño de los paquetes (traffic markdown).
+
+Se recomienda que el valor de Bc sea mayor o igual al tamaño del paquete IP más grande posible en un flujo de tráfico. De lo contrario, nunca habrá suficientes tokens en el contenedor de tokens para paquetes más grandes, y estos siempre superarán la tasa definida. Si el contenedor alcanza su capacidad máxima, los tokens recién añadidos se descartan. Los tokens descartados no están disponibles para su uso en paquetes futuros.
+
+Los algoritmos de contenedor de tokens pueden utilizar uno o varios contenedores de tokens. En los algoritmos de contenedor de tokens único, la tasa de tráfico medida puede ajustarse o superar la tasa de tráfico definida. La tasa de tráfico medida se ajusta si hay suficientes tokens en el contenedor de tokens para transmitir el tráfico. La tasa de tráfico medida se supera si no hay suficientes tokens en el contenedor de tokens para transmitir el tráfico.
+
+La Figura 14-12 ilustra el concepto del algoritmo de contenedor de tokens único.
+
+![Image Alt]()
+
+Para comprender con más detalle el funcionamiento de los algoritmos de depósito de tokens único, supongamos que una interfaz de 1 Gbps está configurada con un regulador definido con un CIR de 120 Mbps y un Bc de 12 Mb. El valor de Tc no se puede definir explícitamente en IOS, pero se puede calcular de la siguiente manera:
+````
+Tc = (Bc [bits] / CIR [bps]) × 1000
+Tc = (12 Mb / 120 Mbps) × 1000
+Tc = (12,000,000 bits / 120,000,000 bps) × 1000 = 100 ms
+````
+Cuando se conoce el valor de Tc, el número de Tc por segundo se puede calcular de la siguiente manera:
+````
+Tcs per second = 1000 / Tc
+Tcs per second = 1000 ms / 100 ms = 10 Tcs
+````
+Si el algoritmo de token procesa un flujo continuo de paquetes de 1500 bytes (12 000 bits), los paquetes dentro de cada Tc (100 ms) solo pueden ocupar un Bc de 12 Mb. El número de paquetes que cumplen con la velocidad de tráfico y que pueden transmitirse se calcula de la siguiente manera:
+````
+Número de paquetes que conforman con cada Tc = Bc / tamaño del paquete en bits (redondeado hacia abajo)
+Número de paquetes que conforman con cada Tc = 12 000 000 bits / 12 000 bits = 1000 paquetes
+````
+Cualquier paquete adicional que supere los 1000 se descartará o se marcará.
+Para calcular cuántos paquetes se enviarían por segundo, se puede utilizar la siguiente fórmula:
+````
+Paquetes por segundo = Número de paquetes que conforman cada Tc × Tcs por segundo
+Paquetes por segundo = 1000 paquetes × 10 intervalos = 10 000 paquetes
+````
+Para calcular el CIR de los 10 000 paquetes, se puede utilizar la siguiente fórmula:
+````
+CIR = Paquetes por segundo × Tamaño del paquete en bits
+CIR = 10 000 paquetes por segundo × 12 000 bits = 120 000 000 bps = 120 Mbps
+````
+Para calcular el intervalo de tiempo que tardarían en enviarse los 1000 paquetes a la velocidad de línea de la interfaz, se puede utilizar la siguiente fórmula:
+````
+Intervalo de tiempo a la velocidad de línea = (Bc [bits] / Velocidad de interfaz [bps]) × 1000
+Intervalo de tiempo a la velocidad de línea = (12 Mb / 1 Gbps) × 1000
+Intervalo de tiempo a la velocidad de línea = (12 000 000 bits / 1 000 000 000 bps) × 1000 = 12 ms
+````
+La Figura 14-13 ilustra cómo El Bc (1000 paquetes de 1500 bytes cada uno, o 12 Mb) se envía en cada intervalo de Tc. Tras el envío del Bc, hay un retraso entre paquetes de 88 ms (100 ms menos 12 ms) dentro del Tc, donde no se transmiten datos.
+
+![Image Alt]()
+
+Los valores recomendados para el tiempo de respuesta (Tc) varían de 8 ms a 125 ms. Se requieren tiempos de respuesta más cortos, como de 8 ms a 10 ms, para reducir el retardo entre paquetes en el tráfico en tiempo real, como el de voz. No se recomiendan tiempos de respuesta superiores a 125 ms para la mayoría de las redes, ya que el retardo entre paquetes es demasiado grande.
+
+## Class-Based Policing Configuration:
+
+El comando "police" de una clase de tráfico de un policy map se utiliza para el control basado en clases.
+Con este control, el tráfico clasificado de entrada o salida puede limitarse, marcarse o descartarse. La sintaxis del comando "police" es la siguiente:
+````
+police [cir] cir-in-bps [bc] committed-burst-size-in-bytes
+                        [be] excess-burst-size-in-bytes [conform-action
+                        action] [exceed-action action] [violate-action action]
+````
+La Tabla 14-9 enumera las palabras clave del comando `police` y su descripción.
+
+Tabla 14-9 Palabras clave del comando `police` y descripciones de palabras clave
+Keyword| Description
+:---|:---
+`cir` |Palabra clave opcional para especificar explícitamente la tasa CIR promedio
+`cir-in-bps` | Tasa CIR promedio en bits por segundo.La CIR se puede configurar con los valores de sufijo k (kbps), m (Mbps) y g (Gbps). Los valores de sufijo admiten puntos decimales.
+`bc`| Palabra clave opcional para especificar explícitamente el tamaño de committed Burst Size.
+`committed-burst-sizein-bytes`|Tamaño de Bc opcional en bytes. El valor predeterminado es 1500 bytes o la tasa CIR configurada dividida entre 32 (CIR/32); el número mayor se elige como tamaño de Bc.
+`be` |Palabra clave opcional para especificar explícitamente el tamaño de excess burst (Be).
+`excess-burst-size-inbytes`|Tamaño opcional de `Be` en bytes. El valor predeterminado es Bc.
+`conform-action`|Palabra clave opcional para especificar la acción que se realizará con los paquetes que conforman con el CIR. La acción predeterminada es transmitir.
+`exceed-action`| Palabra clave opcional para especificar la acción a tomar en paquetes que exceden el CIR. La acción predeterminada es descartar.
+`violate-action` | Palabra clave opcional para especificar la acción a tomar en paquetes que exceden los tamaños de `normal y maximum burst sizes`. La acción predeterminada es descartar.
+
+<table>
+  <thead>
+    <tr>
+      <th>Keyword</th>
+      <th>Descripción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="7">action</td>
+      <td>La acción a tomar con los paquetes; algunos ejemplos incluyen: </td>
+    </tr>
+    <tr>
+      <td>- drop: Descarta el paquete (predeterminado para acciones de exceder e infringir)</td>
+    </tr>
+    <tr>
+      <td>- transmit: Transmite el paquete (predeterminado para acción de conformidad)</td>
+    </tr>
+    <tr>
+      <td>- set-dscp-transmit dscp-value: Marca y transmite el paquete con el valor DSCP especificado.</td>
+    </tr>
+    <tr>
+      <td>- set-prec-transmit precedence-value: Marca y transmite el paquete con el valor de precedencia especificado.</td>
+    </tr>
+    <tr>
+      <td>- set-cos-transmit cos-value: Marca y transmite el paquete con el valor de CoS especificado.</td>
+    </tr>
+    <tr>
+      <td>- set-qos-transmit (qos-group-value): Marca el paquete con el valor `qos-group value` especificado. Esta opción solo es válida en mapas de políticas entrantes.</td>
+    </tr>
+  </tbody>
+</table>
+
+## Tipos de "Policers"
+Existen diferentes algoritmos de policing, entre ellos:
+
+- Single-rate two-color marker/policer
+- Single-rate three-color marker/policer (srTCM)
+- Two-rate three-color marker/policer (trTCM)
+
+### Single-rate two-color marker/policer
+
+Los primeros policadores implementados utilizan un modelo de dos colores de tasa única basado en el algoritmo de cubo de token único. Para este tipo de policador, el tráfico puede cumplir o superar el CIR. Se pueden realizar acciones de marcado descendente o descarte para cada uno de los dos estados.
+
+La Figura 14-14 ilustra las diferentes acciones que puede realizar el policador de dos colores de tasa única. La sección sobre la línea punteada a la izquierda de la figura representa el tráfico que superó el CIR y se marcó descendentemente. La sección sobre la línea punteada a la derecha de la figura representa el tráfico que superó el CIR y se descartó.
+
+![Image Alt]()
+
+El Ejemplo 14-3 muestra la configuración de un mapa de políticas bicolor de velocidad única con dos clases de tráfico. El tráfico que coincide con la clase de tráfico VOIP-TELEFONÍA se controla a un CIR de 50 Mbps, y el tráfico que coincide con la clase de tráfico VIDEO se controla a 25 Mbps.
+El tráfico de ambas clases que cumple con el CIR se transmite; el tráfico excedente de la clase de tráfico VOIP-TELEFONÍA se descarta, y el tráfico excedente de la clase de tráfico VIDEO se reduce y se transmite con el valor DSCP AF21.
+
+Example 14-3 Single-Rate Two-Color Marker/Policer Ejemplo:
+````
+policy-map OUTBOUND-POLICY
+  class VOIP-TELEPHONY
+    police 50000000 conform-action transmit exceed-action drop
+  class VIDEO
+    police 25000000 conform-action transmit exceed-action set-dscp-transmit af21
+interface GigabitEthernet1
+  service-policy output OUTBOUND-POLICY
+````
+En el Ejemplo 14-3, no se especificaron las palabras clave opcionales `cir, bc y be` para los comandos police. Para ver los valores predeterminados, se utiliza el comando `show policy-map policy-map-name`. El Ejemplo 14-4 muestra la salida del comando `show policy-map policy-map-name` para `OUTBOUND-POLICY`. Para la clase `VOIP-TELEPHONY`, el valor predeterminado de `Bc` es 50 000 000/32 (1 562 500 bytes), y para la clase `VIDEO`, el valor predeterminado de `Bc` es 25 000 000/32 (781 250). No hay `Be`, ya que los single-rate two-color markers/policers(single token bucket algorithms) no permiten el exceso de bursting. El exceso de bursting se explica en la sección Single-Rate Three-Color Markers/Policers (srTCM)" de este capítulo.
+
+Ejemplo 14-4 Verificación de los valores predeterminados de CIR, Bc y Be
+````
+router# show policy-map OUTBOUND-POLICY
+  Policy Map OUTBOUND-POLICY
+    Class VOIP-TELEPHONY
+      police cir 50000000 bc 1562500 <--------------------Default: 50 000 000/32 (1 562 500 bytes)
+        conform-action transmit
+        exceed-action drop
+    Class VIDEO
+      police cir 25000000 bc 781250 <--------------------
+        conform-action transmit
+        exceed-action set-dscp-transmit af21
+router#
+````
+### Single-Rate Three-Color Markers/Policers (srTCM):
+
+Los algoritmos de control de tráfico de tres colores y velocidad única se basan en la RFC 2697. Este tipo de control utiliza dos contenedores de tokens, y el tráfico puede clasificarse como conforme, excedido o infringido con el CIR. Se realizan acciones de marcado descendente o descarte para cada uno de los tres estados del tráfico.
+
+El primer contenedor de tokens funciona de forma similar al `single-rate two-color system`; la diferencia radica en que, si quedan tokens en el contenedor después de cada período debido a baja o nula actividad, en lugar de descartar los tokens sobrantes (desbordamiento), el algoritmo los coloca en un segundo contenedor para usarlos posteriormente en bursts temporales que puedan exceder el CIR. Los tokens colocados en este segundo contenedor se denominan `bursts de exceso` (Be), y Be es el número máximo de bits que pueden exceder el `tamaño de bursts` (Bc).
+
+Con el mecanismo de `dos baldes tokens`, el tráfico se puede clasificar en tres colores o estados, como se indica a continuación:
+
+- Conforme: El tráfico por debajo de Bc se clasifica como conforme y en verde. El tráfico conforme suele transmitirse y, opcionalmente, puede volver a marcarse.
+- Excedente: El tráfico por encima de Bc, pero por debajo de Be, se clasifica como excedente y en amarillo. El tráfico excedente puede descartarse o marcarse y transmitirse.
+- Infracción: El tráfico por encima de Be se clasifica como infractor y en rojo. Este tipo de tráfico suele descartarse, pero opcionalmente puede marcarse y transmitirse.
+
+La Figura 14-15 ilustra las diferentes acciones que puede realizar un `single-rate three-color policer`. La sección debajo de la línea punteada recta, a la izquierda de la figura, representa el tráfico que cumple con el CIR; la sección justo encima de la línea punteada recta, representa el tráfico que excede el límite y se reduce; y la sección superior, el tráfico que infringe el CIR, que también se reduce. Las tasas de tráfico que excede el límite y que infringe el CIR varían porque dependen de tokens aleatorios que se transfieren del contenedor Bc al contenedor Be. La sección justo encima de la línea punteada recta, a la derecha de la figura, representa el tráfico que excedió el CIR y se redujo; y la sección superior, el tráfico que infringió el CIR y se descartó.
+
+![Image Alt]()
+
+El single-rate three-color marker/policer utiliza los siguientes parámetros para medir el flujo de tráfico:
+- Committed Information Rate (CIR):  La tasa controlada.
+- Committed Burst Size (Bc): El tamaño máximo del contenedor de tokens CIR, medido en bytes. Denominado Committed Burst Size (CBS) en RFC 2697.
+- Excess Burst Size (Be): El tamaño máximo del contenedor de tokens excedente, medido en bytes. Denominado Tamaño de Ráfaga Excesivo (EBS) en RFC 2697.
+- Bc Bucket Token Count (Tc): El número de tokens en el contenedor Bc. No debe confundirse con el intervalo de tiempo comprometido Tc.
+- Be Bucket Token Count (Te): El número de tokens en el contenedor Be.
+- Incoming Packet Length (B): La longitud del paquete entrante, en bits.
+
+La Figura 14-16 ilustra el flujo lógico del algoritmo de marcador/policiador tricolor de tasa única y dos cubos de tokens.
+
+El algoritmo de dos cubos del policiador tricolor de tasa única genera menos retransmisiones TCP y es más eficiente en el uso del ancho de banda. Es el policiador ideal para usar con las clases AF (AFx1, AFx2 y AFx3). Usar un policiador tricolor solo tiene sentido si las acciones realizadas para cada color difieren. Si las acciones para dos o más colores son las mismas (por ejemplo, cumplir y superar ambas transmisiones sin remarcar), se recomienda el policiador bicolor de tasa única para simplificar las cosas.
+
+![Image Alt]()
+
+El Ejemplo 14-5 muestra la configuración de single-rate three-color policy map con una clase de tráfico. El tráfico que coincide con la clase de tráfico VOIP-TELEFONÍA es policed a un CIR de 50 Mbps; el tráfico que cumple con el CIR se remarca y se transmite con DSCP AF31; el tráfico que excede la velocidad se marca y se transmite con DSCP AF32, y todo el tráfico que infringe la normativa se descarta.
+
+Ejemplo 14-5 Single-Rate Three-Color Marker/Policer Ejemplo
+````
+policy-map OUTBOUND-POLICY
+  class VOIP-TELEPHONY
+    police 50000000 conform-action set-dscp-transmit af31 exceed-action set-dscp-transmit af32 violate-action drop <-----
+
+interface GigabitEthernet1
+  service-policy output OUTBOUND-POLICY
+````
+El ejemplo 14-6 muestra la salida del comando `show policy-map policy-map-name` para OUTBOUND-POLICY. Para la clase VOIP-TELEPHONY, no se especificaron los valores Bc y Be; por lo tanto, el valor predeterminado de Bc es 50 000 000/32 (1 562 500 bytes) y el valor predeterminado de Be es el valor Bc.
+
+Ejemplo 14-6: Verificación de los valores predeterminados de Be y Bc
+````
+router# show policy-map OUTBOUND-POLICY
+  Policy Map OUTBOUND-POLICY
+    Class VOIP-TELEPHONY
+      police cir 50000000 bc 1562500 be 1562500
+        conform-action set-dscp-transmit af31
+        exceed-action set-dscp-transmit af32
+        violate-action drop
+````
+### Two-Rate Three-Color Markers/Policers (trTCM)
+El two-rate three-color marker/policer esta basado en RFC 2698 y es similar al singlerate three-color policer. La diferencia radica en que single-rate three-color policers dependen del exceso de tokens del contenedor Bc, lo que introduce cierto nivel de variabilidad e imprevisibilidad en los flujos de tráfico. Los two-rate three-color marker/policers solucionan este problema utilizando dos tasas distintas: la CIR y la Tasa de Información Máxima (PIR). El two-rate three-color marker/policers permite un exceso de tasa sostenido basado en la PIR, lo que permite diferentes acciones para el tráfico que excede los diferentes valores de ráfaga; por ejemplo, el tráfico infractor puede descartarse a una tasa definida, algo que no es posible con el single-rate three-color policer.
+
+La Figura 14-17 ilustra cómo el tráfico infractor que excede la PIR puede marcarse (a la izquierda de la figura) o descartarse (a la derecha de la figura). Compare la Figura 14-17 con la Figura 14-16 para ver la diferencia entre el regulador de tres colores de dos velocidades y el regulador de tres colores de una sola velocidad.
+
+![Image Alt]()
+
+El two-rate three-color marker/policer utiliza los siguientes parámetros para medir el flujo de tráfico:
+- Committed Information Rate (CIR): La tasa controlada.
+- Peak Information Rate (PIR): La tasa máxima de tráfico permitida. La PIR debe ser igual o mayor que la CIR.
+
 # Gestión y prevención de la congestión: 
+
+
+
+
+
+
+
 
 
