@@ -699,15 +699,149 @@ La Figura 14-17 ilustra cómo el tráfico infractor que excede la PIR puede marc
 El two-rate three-color marker/policer utiliza los siguientes parámetros para medir el flujo de tráfico:
 - Committed Information Rate (CIR): La tasa controlada.
 - Peak Information Rate (PIR): La tasa máxima de tráfico permitida. La PIR debe ser igual o mayor que la CIR.
+- Committed Burst Size (Bc): El tamaño máximo del segundo depósito de tokens, medido en bytes. Denominado _Committed Burst Size (CBS)_ en la RFC 2698.
+- Peak Burst Size (Be): El tamaño máximo del depósito de tokens PIR, medido en bytes. Denominado _Peak Burst Size (PBS)_ en la RFC 2698. Be debe ser igual o mayor que Bc.
+- Bc Bucket Token Count (Tc): El número de tokens en el depósito Bc. No debe confundirse con el intervalo de tiempo comprometido Tc.
+- Bp Bucket Token Count (Tp): El número de tokens en el depósito Bp.
+- Incoming Packet Length (B): La longitud del paquete entrante, en bits.
+
+El two-rate three-color policer también utiliza _dos contenedores de tokens_, pero su lógica varía con respecto al single-rate three-color policer. En lugar de transferir tokens no utilizados del contenedor Bc al contenedor Be, este regulador tiene dos contenedores separados que se llenan con dos tasas de tokens distintas. El contenedor Be se llena con los tokens PIR y el contenedor Bc, con los tokens CIR. En este modelo, Be representa el límite máximo de tráfico que se puede enviar durante un intervalo de subsegundo.
+
+La lógica varía aún más, ya que la comprobación inicial consiste en verificar si el tráfico se encuentra dentro del PIR. Solo entonces se compara el tráfico con el CIR. En otras palabras, primero se comprueba una condición de violación, luego una condición de exceso y, finalmente, una condición de conformidad, lo cual es inverso a la lógica de single-rate three-color policer. La Figura 14-18 ilustra el algoritmo del contenedor de tokens para el two-rate three-color marker/policer. Compárelo con el algoritmo del token bucket del single-rate three-color marker/policer de la Figura 14-16 para ver las diferencias entre ambos.
+
+Para configurar el police de dos tasas, además del CIR, es necesario especificar el PIR. El PIR se configura con la palabra clave `pir` en el comando `police` de la siguiente manera:
+````
+police [cir] cir-in-bps [bc] committed-burst-size-in-bytes pir pir-in-bps
+                        [be] excess-burst-size-in-bytes [conform-action
+                        action] [exceed-action action] [violate-action action]
+````
+Si no se especifica `Bc` en el comando de `police`, el valor predeterminado es 1500 bytes o la tasa CIR configurada dividida entre 32 (CIR/32); el valor mayor se elige como tamaño de Bc. Si no se especifica Be, el valor predeterminado es 1500 bytes o la tasa PIR configurada dividida entre 32 (PIR/32); el valor mayor se elige como tamaño de `Be`.
+
+El Ejemplo 14-7 muestra la configuración de un _Two-Rate Three-Color (trTCM) policy map_ con una clase de tráfico. Para las políticas trTCM, primero se comprueba la condición de violación; por lo tanto, el tráfico que coincida con la clase VOIP-TELEPHONY y que viole el PIR de 100 Mbps se descartará; el tráfico que supere el CIR de 50 Mbps se reduce y se transmite con DSCP AF31; y el tráfico que cumple con el CIR se transmite tal cual.
+
+![Image Alt]()
+
+Ejemplo 14-7 Two-Rate Three-Color Marker/Policer Ejemplo
+````
+policy-map OUTBOUND-POLICY
+  class VOIP-TELEPHONY
+    police cir 50000000 pir 100000000 conform-action transmit exceed-action set-dscp-transmit af31 violate-action drop <-----
+````
+El ejemplo 14-8 muestra la salida del comando `show policy-map policy-map-name` para OUTBOUND-POLICY. Para la clase VOIP-TELEPHONY, no se especificó el valor Bc; por lo tanto, el valor predeterminado es 50 000 000/32 (1 562 500 bytes). El valor Be tampoco se especificó; por lo tanto, el valor predeterminado es 100 000 000/32 (3 125 000).
+
+Ejemplo 14-8 Verificación de los valores predeterminados de Bc y Be
+````
+router# show policy-map OUTBOUND-POLICY
+  Policy Map OUTBOUND-POLICY
+    Class VOIP-TELEPHONY
+      police cir 50000000 bc 1562500 pir 100000000 be 3125000 <------------
+        conform-action transmit
+        exceed-action set-dscp-transmit af31
+        violate-action drop
+router#
+````
 
 # Gestión y prevención de la congestión: 
 
+Esta sección explora los algoritmos de colas utilizados para la gestión de la congestión, así como las técnicas de descarte de paquetes que pueden emplearse para evitarla. Estas herramientas permiten gestionar el tráfico excesivo durante periodos de congestión.
 
+## Manejo de la congestión:
 
+El manejo de la congestión implica una combinación de `queuing y scheduling`. Las Queuing (también conocidas como _buffering_) consisten en el almacenamiento temporal del exceso de paquetes. Queuing se activan cuando una interfaz de salida experimenta congestión y se desactivan cuando esta desaparece.
+El algoritmo de queuing detecta la congestión cuando una cola de hardware de Capa 1 presente en las interfaces físicas, conocida como transmit ring (Tx-ring o TxQ), está llena. Cuando el Tx-ring deja de estar lleno, indica que no hay congestión en la interfaz y se desactivan las colas. La congestión puede ocurrir por una de estas dos razones:
 
+- La interfaz de entrada tiene una velocidad mayor que la interfaz de salida; por ejemplo, cuando los paquetes se reciben en una interfaz de entrada de 100 Gbps y se transmiten desde una interfaz de salida de 10 Gbps.
+- Múltiples interfaces de entrada o ingreso reenvían paquetes a una única interfaz de salida o salida cuya velocidad es inferior a la suma de las velocidades de las interfaces de entrada o ingreso. Por ejemplo, cuando se reciben paquetes simultáneamente en veinte interfaces de entrada de 10 Gbps (lo que suma un total de 200 Gbps) y se transmiten desde una única interfaz de salida de 100 Gbps.
 
+Cuando se produce congestión, las colas se llenan y los paquetes pueden reordenarse mediante algunos algoritmos de queuing para que los paquetes de mayor prioridad salgan de la interfaz de salida antes que los de menor prioridad. En este punto, un algoritmo de scheduling decide qué paquete transmitir a continuación. La scheduling siempre está activa, independientemente de si la interfaz está congestionada.
 
+Existen muchos algoritmos de queuing, pero la mayoría no son adecuados para las redes multimedia modernas que transportan tráfico de voz y vídeo de alta definición, ya que fueron diseñados antes de la aparición de estos tipos de tráfico. Los algoritmos de queuing heredados que anteceden a la arquitectura MQC incluyen los siguientes:
 
+- First-in, first-out queuing (FIFO): FIFO implica una sola cola donde el primer paquete que se coloca en la cola de la interfaz de salida es el primero en salir de la interfaz (primero en llegar, primero en ser atendido). En la cola FIFO, todo el tráfico pertenece a la misma clase.
+- Round robin: Con round robin, las colas se atienden secuencialmente, una tras otra, y cada cola procesa solo un paquete. Con round robin, ninguna cola se queda sin recursos, ya que cada cola tiene la oportunidad de enviar un paquete en cada ronda. Ninguna cola tiene prioridad sobre las demás, y si el tamaño de los paquetes de todas las colas es aproximadamente el mismo, el ancho de banda de la interfaz se comparte equitativamente entre las colas round robin. Una limitación de round robin es que no incluye un mecanismo para priorizar el tráfico.
+- Weighted round robin (WRR): WRR se desarrolló para proporcionar capacidades de priorización para round robin. Permite asignar un peso a cada cola y, en función de ese peso, cada cola recibe una parte del ancho de banda de la interfaz que no es necesariamente igual a la de las demás colas.
+- Custom queuing (CQ): CQ es una implementación de Cisco de WRR que implica un conjunto de 16 colas con un programador round-robin y colas FIFO dentro de cada cola. Cada cola se puede personalizar con una parte del ancho de banda del enlace para cada tipo de tráfico seleccionado. Si un tipo de tráfico no utiliza el ancho de banda reservado para él, otros tipos de tráfico podrían utilizar el ancho de banda no utilizado. CQ causa grandes retrasos y también presenta los mismos problemas que FIFO dentro de cada una de las 16 colas que utiliza para la clasificación del tráfico.
+- Priority queuing (PQ): Con PQ, se atienden cuatro colas de un conjunto (alta, media, normal y baja) en estricto orden de prioridad, con colas FIFO dentro de cada cola. La cola de alta prioridad siempre se atiende primero, y las colas de menor prioridad solo se atienden cuando todas las colas de mayor prioridad están vacías. Por ejemplo, la cola media se atiende solo cuando la cola de alta prioridad está vacía. La cola normal se atiende solo cuando las colas alta y media están vacías; finalmente, la cola baja se atiende solo cuando todas las demás colas están vacías. En cualquier momento, si llega un paquete a una cola superior, el paquete de esta se procesa antes que cualquier paquete de las colas de nivel inferior. Por esta razón, si las colas de mayor prioridad se atienden continuamente, las de menor prioridad se agotan.
+- Weighted fair queuing (WFQ): El algoritmo WFQ divide automáticamente el ancho de banda de la interfaz entre el número de flujos (ponderado por la `IP Precedence`) para asignar el ancho de banda de forma justa entre todos los flujos. Este método proporciona un mejor servicio para flujos en tiempo real de alta prioridad, pero no puede proporcionar una garantía de ancho de banda fijo para ningún flujo en particular.
 
+Los algoritmos de colas actuales recomendados para redes multimedia (y compatibles con MQC) combinan las mejores características de los algoritmos heredados. Estos algoritmos proporcionan ancho de banda de tráfico en tiempo real, sensible al retardo y garantías de retardo, sin sobrecargar otros tipos de tráfico. Los algoritmos de colas recomendados incluyen los siguientes:
 
+- Class-based weighted fair queuing (CBWFQ): CBWFQ permite la creación de hasta 256 colas, que atienden hasta 256 clases de tráfico. Cada cola se atiende según el ancho de banda asignado a esa clase. Amplía la funcionalidad de WFQ para ofrecer compatibilidad con clases de tráfico definidas por el usuario. Con CBWFQ, la clasificación de paquetes se basa en descriptores de tráfico como marcas de QoS, protocolos, ACL e interfaces de entrada. Una vez que un paquete se clasifica como perteneciente a una clase específica, es posible asignarle ancho de banda, peso, límite de cola y límite máximo de paquetes. El ancho de banda asignado a una clase es el ancho de banda mínimo entregado a la clase durante la congestión. El límite de cola para esa clase es el número máximo de paquetes que se pueden almacenar en el búfer de la cola de la clase. Una vez que una cola alcanza el límite configurado, se descartan los paquetes sobrantes. CBWFQ por sí solo no ofrece garantía de latencia y solo es adecuado para tráfico de datos no en tiempo real.
+- Low-latency queuing (LLQ): LLQ es CBWFQ combinado con priority queuing (PQ), y fue desarrollado para satisfacer los requisitos del tráfico en tiempo real, como la voz.
+El tráfico asignado a la cola de prioridad estricta se atiende hasta su ancho de banda asignado antes que otras colas CBWFQ. Todo el tráfico en tiempo real debe configurarse para ser atendido por la cola de prioridad. Se pueden definir múltiples clases de tráfico en tiempo real y otorgar garantías de ancho de banda independientes a cada una, pero una única cola de prioridad programa todo el tráfico combinado. Si una clase de tráfico no utiliza el ancho de banda asignado, este se comparte entre las demás clases.
+Este algoritmo es adecuado para combinaciones de tráfico en tiempo real y no en tiempo real. Proporciona garantías tanto de latencia como de ancho de banda para el tráfico en tiempo real de alta prioridad. En caso de congestión, el tráfico en tiempo real que excede el ancho de banda asignado es controlado por un agente de control de congestión para garantizar que el tráfico no prioritario no se vea afectado.
 
+La Figura 14-19 ilustra la arquitectura de CBWFQ en combinación con LLQ.
+
+CBWFQ, en combinación con LLQ, crea colas en las que se clasifican las clases de tráfico.
+Las colas de CBWFQ se programan con un programador CBWFQ que garantiza el ancho de banda para cada clase. LLQ crea una cola de alta prioridad que siempre se atiende primero. En momentos de congestión, las clases prioritarias de LLQ se controlan para evitar que el PQ sobrecargue las clases no prioritarias de CBWFQ (como ocurre con el PQ tradicional). Al configurar LLQ, la tasa de control debe especificarse como una cantidad fija de ancho de banda o como un porcentaje del ancho de banda de la interfaz.
+
+LLQ permite asignar dos clases de tráfico diferentes para aplicar distintas tasas de control a distintos tipos de tráfico de alta prioridad. Por ejemplo, el tráfico de voz podría controlarse a 10 Mbps durante momentos de congestión, mientras que el de vídeo podría controlarse a 100 Mbps. Esto no sería posible con una sola clase de tráfico y un solo policía.
+
+## Herramientas para evitar la congestión
+Las técnicas para evitar la congestión monitorizan las cargas de tráfico de la red para anticipar y evitar la congestión mediante el descarte de paquetes. El mecanismo predeterminado para el dropping de paquetes es `tail drop`. Este `tail drop` trata todo el tráfico por igual y no distingue entre clases de servicio. Con _tail drop_, cuando los búferes de la cola de salida están llenos, se dropped todos los paquetes que intentan entrar en la queue, independientemente de su prioridad, hasta que se despeje la congestión y la queue ya no esté llena. Se debe evitar el _Tail drop_ en el tráfico TCP, ya que puede provocar la _global synchronization_ de TCP. La _global synchronization TCP_ se refiere al evento que ocurre cuando varias sesiones TCP que comparten el mismo enlace reducen su velocidad de transmisión simultáneamente cuando este se congestiona. Cuando esto sucede, el enlace queda infrautilizado y todas las sesiones TCP afectadas aumentan su velocidad de transmisión simultáneamente, lo que provoca que el enlace se congestione de nuevo y el ciclo se repite una y otra vez.
+
+Un mejor enfoque es utilizar un mecanismo conocido como random early detection (RED). RED evita la congestión descartando (dropping) paquetes aleatoriamente antes de que se llenen los queue buffers. Descartar paquetes aleatoriamente, en lugar de descartarlos (dropping) todos a la vez, como ocurre con el descarte de cola, evita la _global synchronization de TCP_. RED monitorea la profundidad del búfer y realiza descartes tempranos de paquetes aleatorios cuando se supera el umbral mínimo de cola definido.
+
+La implementación de RED en Cisco se conoce como `weighted RED (WRED)`. La diferencia entre RED y WRED radica en que la aleatoriedad de los descartes de paquetes se puede manipular mediante ponderaciones de tráfico, indicadas por la IP Precedence (IPP) o DSCP. Los paquetes con un valor de IPP más bajo se descartan con mayor agresividad que los valores de IPP más altos; por ejemplo, IPP 3 se descartaría con mayor agresividad que IPP 5 o DSCP, AFx3 se descartaría con mayor agresividad que AFx2, y AFx2 se descartaría con mayor agresividad que AFx1.
+
+![Image Alt]()
+
+## Configuración de CBWFQ:
+
+Con CBWFQ, cada clase de tráfico en un mapa de políticas puede realizar acciones de queue; por lo tanto, una clase de tráfico con acciones de queuing se comporta funcionalmente como una queue. Los comandos `priority`, `bandwidth` y `shape` son acciones de queuing (gestión de congestión) que habilitan la queuing para una clase. Los comandos `bandwidth` y `shape` se pueden usar juntos en la misma clase para garantizar un ancho de banda mínimo mediante el comando `bandwidth` y un ancho de banda máximo basado en la velocidad media del comando `shape`. La Tabla 14-10 enumera los comandos de cola CBWFQ y su sintaxis.
+
+> [!NOTE]
+> Los comandos descritos en esta sección pueden variar o no ser compatibles según la plataforma Cisco utilizada (IOS-XE, IOS-NX, IOS-XR). Visite www.cisco.com para obtener información específica sobre los comandos de su plataforma.
+
+Tabla 14-10 Comandos y descripciones de queuing CBWFQ
+Comando| Descripción
+|:---|:---|
+|`priority`|Habilita la cola de prioridad estricta LLQ. Con este método, se recomienda configurar un policer explícito con el comando `police` para limitar la velocidad del tráfico prioritario; de lo contrario, las demás colas podrían quedar sin ancho de banda.|
+|`priority <police-rate-in-kbps [burst-in-bytes]>` |Habilita la cola (queuing) de prioridad estricta LLQ con una velocidad de control policing en kbps. **El Policing solo se aplica en periodos de congestión**.|
+|`priority percent <police-rate-inpercentage [burst-in-bytes]>`| Habilita la cola de prioridad estricta LLQ con una tasa de control policing calculada como un porcentaje del ancho de banda de la interfaz o la tasa de configuración en una política jerárquica. **El Policing se aplica en momentos de congestión**.|
+|`priority level {1 \| 2}`|Prioridad estricta multinivel. Con este método, se recomienda configurar un policer explícito con el comando `police` para limitar la velocidad del tráfico prioritario; de lo contrario, las demás colas (queues) podrían quedar sin ancho de banda.|
+|`priority level {1 \| 2} <police-ratein-kbps [burst-in-bytes]>`|Prioridad estricta multinivel con velocidad de vigilancia en kbps. **La Policing solo está activa en periodos de congestión**.|
+|`priority level {1 \| 2} percent <police-rate-in-percentage [burst-in-bytes]>`|Prioridad estricta multinivel con tasa de policing calculada como porcentaje del ancho de banda de la interfaz o la tasa de shaping en una política jerárquica. **La Policing solo se aplica en periodos de congestión**.|
+|`bandwidth <bandwidth-kbps>`|Garantía mínima de ancho de banda, en kilobits por segundo (kbps), asignada a la clase.|
+|`bandwidth remaining percent <percentage>`| Garantía mínima de ancho de banda basada en un porcentaje relativo del ancho de banda disponible|
+|`bandwidth remaining ratio <ratio>`|Garantía de ancho de banda mínimo basada en una proporción relativa del ancho de banda disponible|
+|`bandwidth percent percentage`|Garantía de ancho de banda mínimo basada en un porcentaje absoluto del ancho de banda de la interfaz o en la tasa de _shaping_ en una política jerárquica.|
+
+<table>
+  <thead>
+    <tr>
+      <th>Comando</th>
+      <th>Descripción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="7">1. fair-queue<br><br>2. shape {average | peak} meanrate-in-bps [[committed-burstsize ] [excess-burst-size]]</td>
+      <td>1. Permite la gestión de colas basadas en flujos (flow-based queuing) para gestionar múltiples flujos que compiten por una sola cola.</td>
+    </tr>
+    <tr>
+      <td>2. Permite el class-based traffic shaping</td>
+    </tr>
+    <tr>
+      <td>(AVERAGE) shaping se utiliza para reenviar paquetes a la velocidad media configurada y permite la bursting hasta el Bc en cada Tc, y hasta Be cuando hay tokens adicionales disponibles. Este es el método de shaping más utilizado.</td>
+    </tr>
+    <tr>
+      <td>(PEAK) shaping se utiliza para reenviar paquetes a la velocidad media multiplicada por (1 + Be/Bc) en cada Tc. Este método no se utiliza comúnmente.</td>
+    </tr>
+    <tr>
+      <td>La velocidad media se puede configurar con los valores de sufijo k (kbps), m (Mbps) y g (Gbps). Los valores de sufijo admiten puntos decimales.</td>
+    </tr>
+    <tr>
+      <td>Se recomienda utilizar los valores predeterminados Bc y Be</td>
+    </tr>
+  </tbody>
+</table>
+
+Los comandos `queue-limit` y `random-detect` se utilizan para evitar la congestión de CBWFQ (gestión de colas). La Tabla 14-11 muestra su sintaxis y descripción de los comandos.
+
+Tabla 14-11 Comandos y descripciones de administración de queue CBWFQ
+Comando| Descripción
+:---|:---
+`queue-limit <queue-limit-size> {cos cos-value \|dscp dscp-value \| precedence-value} percent <percentage-of-packets>`|La Tail drop es el mecanismo predeterminado para cada clase. El comando `queue-limit` se utiliza en caso de que sea necesario cambiar los valores predeterminados de eliminación de paquetes de cola.
+`random-detect [dscp-based\|precedence-based\|cos-based]`|Este comando habilita WRED. La opción basada en precedencia es la predeterminada. Se recomienda usar la opción `dscp-based` para la clasificación. También se recomienda usar los valores predeterminados de umbral mínimo, umbral máximo y probabilidad de descarte.
