@@ -719,7 +719,7 @@ Si no se especifica `Bc` en el comando de `police`, el valor predeterminado es 1
 
 El Ejemplo 14-7 muestra la configuración de un _Two-Rate Three-Color (trTCM) policy map_ con una clase de tráfico. Para las políticas trTCM, primero se comprueba la condición de violación; por lo tanto, el tráfico que coincida con la clase VOIP-TELEPHONY y que viole el PIR de 100 Mbps se descartará; el tráfico que supere el CIR de 50 Mbps se reduce y se transmite con DSCP AF31; y el tráfico que cumple con el CIR se transmite tal cual.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/19363d62034621da2c8df72e21a56d48ac7e08bc/14.%20QOS/IMG/QOS%20POL/QOS%20POL%208.JPG)
 
 Ejemplo 14-7 Two-Rate Three-Color Marker/Policer Ejemplo
 ````
@@ -785,7 +785,7 @@ Un mejor enfoque es utilizar un mecanismo conocido como random early detection (
 
 La implementación de RED en Cisco se conoce como `weighted RED (WRED)`. La diferencia entre RED y WRED radica en que la aleatoriedad de los descartes de paquetes se puede manipular mediante ponderaciones de tráfico, indicadas por la IP Precedence (IPP) o DSCP. Los paquetes con un valor de IPP más bajo se descartan con mayor agresividad que los valores de IPP más altos; por ejemplo, IPP 3 se descartaría con mayor agresividad que IPP 5 o DSCP, AFx3 se descartaría con mayor agresividad que AFx2, y AFx2 se descartaría con mayor agresividad que AFx1.
 
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/19363d62034621da2c8df72e21a56d48ac7e08bc/14.%20QOS/IMG/QOS%20POL/QOS%20POL%209.jpg)
 
 ## Configuración de CBWFQ:
 
@@ -920,3 +920,4 @@ policy-map QUEUING
 interface GigabitEthernet1
   service-policy output QUEUING
 ````
+
