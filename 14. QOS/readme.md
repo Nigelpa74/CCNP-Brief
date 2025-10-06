@@ -607,7 +607,7 @@ La Figura 14-14 ilustra las diferentes acciones que puede realizar el policador 
 
 ![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/7c0c27d413baaa0c93e8590c5b6eb1517cfa994a/14.%20QOS/IMG/QOS%20POL/QOS%20POL%204.JPG)
 
-El Ejemplo 14-3 muestra la configuración de un mapa de políticas bicolor de velocidad única con dos clases de tráfico. El tráfico que coincide con la clase de tráfico VOIP-TELEFONÍA se controla a un CIR de 50 Mbps, y el tráfico que coincide con la clase de tráfico VIDEO se controla a 25 Mbps.
+El Ejemplo 14-3 muestra la configuración de un policy map bicolor de velocidad única con dos clases de tráfico. El tráfico que coincide con la clase de tráfico VOIP-TELEFONÍA se controla a un CIR de 50 Mbps, y el tráfico que coincide con la clase de tráfico VIDEO se controla a 25 Mbps.
 El tráfico de ambas clases que cumple con el CIR se transmite; el tráfico excedente de la clase de tráfico VOIP-TELEFONÍA se descarta, y el tráfico excedente de la clase de tráfico VIDEO se reduce y se transmite con el valor DSCP AF21.
 
 Example 14-3 Single-Rate Two-Color Marker/Policer Ejemplo:
@@ -789,7 +789,7 @@ La implementación de RED en Cisco se conoce como `weighted RED (WRED)`. La dife
 
 ## Configuración de CBWFQ:
 
-Con CBWFQ, cada clase de tráfico en un mapa de políticas puede realizar acciones de queue; por lo tanto, una clase de tráfico con acciones de queuing se comporta funcionalmente como una queue. Los comandos `priority`, `bandwidth` y `shape` son acciones de queuing (gestión de congestión) que habilitan la queuing para una clase. Los comandos `bandwidth` y `shape` se pueden usar juntos en la misma clase para garantizar un ancho de banda mínimo mediante el comando `bandwidth` y un ancho de banda máximo basado en la velocidad media del comando `shape`. La Tabla 14-10 enumera los comandos de cola CBWFQ y su sintaxis.
+Con CBWFQ, cada clase de tráfico en un policy map puede realizar acciones de queue; por lo tanto, una clase de tráfico con acciones de queuing se comporta funcionalmente como una queue. Los comandos `priority`, `bandwidth` y `shape` son acciones de queuing (gestión de congestión) que habilitan la queuing para una clase. Los comandos `bandwidth` y `shape` se pueden usar juntos en la misma clase para garantizar un ancho de banda mínimo mediante el comando `bandwidth` y un ancho de banda máximo basado en la velocidad media del comando `shape`. La Tabla 14-10 enumera los comandos de cola CBWFQ y su sintaxis.
 
 > [!NOTE]
 > Los comandos descritos en esta sección pueden variar o no ser compatibles según la plataforma Cisco utilizada (IOS-XE, IOS-NX, IOS-XR). Visite www.cisco.com para obtener información específica sobre los comandos de su plataforma.
@@ -845,3 +845,78 @@ Comando| Descripción
 :---|:---
 `queue-limit <queue-limit-size> {cos cos-value \|dscp dscp-value \| precedence-value} percent <percentage-of-packets>`|La Tail drop es el mecanismo predeterminado para cada clase. El comando `queue-limit` se utiliza en caso de que sea necesario cambiar los valores predeterminados de eliminación de paquetes de cola.
 `random-detect [dscp-based\|precedence-based\|cos-based]`|Este comando habilita WRED. La opción basada en precedencia es la predeterminada. Se recomienda usar la opción `dscp-based` para la clasificación. También se recomienda usar los valores predeterminados de umbral mínimo, umbral máximo y probabilidad de descarte.
+
+Se deben tener en cuenta las siguientes directrices al configurar las políticas de cola:
+- Los comandos `random-detect` y `fair-queue` requieren que los comandos de `bandwidth` o `shape` para que estén presentes en la misma user-defined class. Esto no aplica a la clase predeterminada.
+- El comando `queue-limit` requiere que los comandos de `bandwidth`, `shape`, o `priority` estén presentes en la misma clase definida por el usuario. Esto no aplica a la clase predeterminada.
+- Los comandos `random-detect`, `shape`, `fair-queue` y `bandwidth` **no** pueden coexistir con el comando `priority` en la misma clase.
+- Los comandos `bandwidth bandwidth-kbps` o `bandwidth percent` no pueden coexistir en el mismo policy map con colas de priority estricta configuradas con los comandos `priority` o `priority level {1 | 2}`, a menos que las colas de prioridad estricta se vigilen con el comando `police`.
+- El comando `bandwidth remaining percent` puede coexistir con los comandos `priority` o `priority level {1 | 2}` en el mismo policy map.
+- Los tipos de comandos de `bandwidth` mixtos no se admiten en un policy map. Todos deben ser coherentes en todas las clases del policy map.
+- Los comandos `priority percent police-rate-in-percentage` o `priority level {1 | 2} percent police-rate-in-percentage` no admiten un controlador explícito configurado con el comando `police`.
+- La suma total de los class bandwidths no debe superar el 100 %.
+- La shaping de tráfico Class-based solo se admite en una dirección de salida.
+
+El Ejemplo 14-9 muestra una policy con varias clases de queuing configuradas. Las clases VOIP y VIDEO utilizan políticas de prioridad multinivel, donde se les garantiza un ancho de banda mínimo del 30% del ancho de banda de la interfaz. Las clases CRITICAL y class-default tienen garantizado un ancho de banda mínimo del 10%, la clase TRANSACTIONAL un ancho de banda del 15% y la clase SCAVENGER un ancho de banda del 5%. Por ejemplo, si el bandwidth disponible para la interfaz donde se aplica la política es de 1 Gbps, en condiciones de congestión, las clases VOIP y VIDEO obtendrían un ancho de banda mínimo garantizado de 300 Mbps (30% cada una), las clases CRITICAL y class-default obtendrían 100 Mbps (10% cada una), la clase TRANSACTIONAL obtendría 150 Mbps (15%) y la clase SCAVENGER obtendría 50 Mbps (5%).
+
+Ejemplo 14-9: Política de colas con colas de prioridad multinivel controladas condicionalmente Ejemplo
+````
+! The VOIP and VIDEO classes are conditionally policed.
+! This means that the LLQ queues can use more than their configured
+! policing rate if there is enough bandwidth available to use
+
+policy-map QUEUING
+  class VOIP
+    priority level 1 percent 30
+  class VIDEO
+    priority level 2 percent 30
+  class CRITICAL
+    bandwidth percent 10
+  class SCAVENGER
+    bandwidth percent 5
+  class TRANSACTIONAL
+    bandwidth percent 15
+  class class-default
+    bandwidth percent 10
+    fair-queue
+    random-detect dscp-based
+    queue-limit 64
+
+interface GigabitEthernet1
+  service-policy output QUEUING
+````
+El Ejemplo 14-10 muestra una policy similar a la del Ejemplo 14-9. La diferencia radica en que, en esta nueva policy, las colas de prioridad estricta no se controlan (no tienen restricciones).
+Cuando las colas de prioridad estricta no tienen restricciones, no se puede garantizar un bandwidth mínimo específico al resto de las clases/colas. Por esta razón, los comandos `bandwidth <bandwidthkbps>` o `bandwidth percent`  no pueden coexistir en el mismo policy map, ya que requieren garantías de ancho de banda mínimo específicas.
+
+El comando `bandwidth remaining {percent <percentage> | ratio <ratio>}` se puede utilizar para este caso práctico, ya que se ajusta automáticamente al porcentaje o ratio relativo del bandwidth restante. Por ejemplo, supongamos que las clases VOIP y VIDEO utilizan 800 Mbps de los 1 Gbps disponibles para la interfaz. Esto dejaría 200 Mbps disponibles para las clases restantes. La clase CRÍTICA obtendría 80 Mbps (40 % de 200 Mbps) y el resto de las clases obtendrían 40 Mbps cada una (20 % de 200 Mbps).
+
+Ejemplo 14-10 Policy de colas con colas de Priority multinivel sin restricciones Ejemplo
+````
+! The VOIP and VIDEO classes do not have a policer (unconstrained).
+! They can take up all of the available bandwidth, leaving
+! no bandwidth remaining for the rest of the classes in the policy
+
+policy-map QUEUING
+  class VOIP
+    priority level 1
+  class VIDEO
+    priority level 2
+  class CRITICAL
+    bandwidth remaining percent 40
+
+! Each of the following classes can use up to 20 percent
+! of the remaining bandwidth left by the strict priority queues
+
+  class SCAVENGER
+    bandwidth remaining percent 20
+  class TRANSACTIONAL
+    bandwidth remaining percent 20
+  class class-default
+    bandwidth remaining percent 20
+    fair-queue
+    random-detect dscp-based
+    queue-limit 64
+
+interface GigabitEthernet1
+  service-policy output QUEUING
+````
