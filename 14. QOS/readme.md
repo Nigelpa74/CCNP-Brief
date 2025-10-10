@@ -898,26 +898,52 @@ Ejemplo 14-10 Policy de colas con colas de Priority multinivel sin restricciones
 
 policy-map QUEUING
   class VOIP
-    priority level 1
+    priority level 1 <--------------------
   class VIDEO
-    priority level 2
+    priority level 2 <--------------------
   class CRITICAL
-    bandwidth remaining percent 40
+    bandwidth remaining percent 40 <--------------------
 
 ! Each of the following classes can use up to 20 percent
 ! of the remaining bandwidth left by the strict priority queues
 
   class SCAVENGER
-    bandwidth remaining percent 20
+    bandwidth remaining percent 20 <--------------------
   class TRANSACTIONAL
-    bandwidth remaining percent 20
+    bandwidth remaining percent 20 <--------------------
   class class-default
-    bandwidth remaining percent 20
-    fair-queue
-    random-detect dscp-based
-    queue-limit 64
+    bandwidth remaining percent 20 <--------------------
+    fair-queue <--------------------
+    random-detect dscp-based <--------------------
+    queue-limit 64 <--------------------
 
 interface GigabitEthernet1
   service-policy output QUEUING
 ````
 
+Supongamos que el tráfico saliente de la interfaz de 1 Gbps del Ejemplo 14-10 debe ajustarse (shaped) a 100 Mbps para cumplir con el SLA del proveedor de servicios (SP), manteniendo intacta la configuración del mapa de políticas de colas (QUEUING). Esto se puede lograr mediante un ajuste basado en clases (class-based shaping) en una política de QoS _jerárquica_.
+
+El Ejemplo 14-11 muestra la policy del Ejemplo 14-10 aplicada como **política hija** bajo la **política principal de SHAPING**. Esta política principal SHAPING **ajusta todo el tráfico a 100 Mbps**. En este caso, la QUEUING policy **no utiliza el ancho de banda de la interfaz de 1 Gbps como referenci**a para sus cálculos de ancho de banda de queue; en su lugar, utiliza la velocidad media de la política de shaping de tráfico, que es de 100 Mbps. Por ejemplo, supongamos que las clases VoIP y Vídeo utilizan 80 Mbps de los 100 Mbps disponibles. Esto dejaría 20 Mbps disponibles para las clases restantes. La clase CRÍTICA obtendría 8 Mbps (40 % de 20 Mbps) y las tres clases restantes obtendrían 4 Mbps cada una (20 % de 20 Mbps).
+
+Ejemplo 14-11 Modelado jerárquico basado en clases con ejemplo de Queuing anidadas
+````
+! Policy map SHAPING is the parent policy
+  policy-map SHAPING
+    class class-default
+      shape average 100000000
+! Policy map QUEUING is the child policy
+      service-policy QUEUING <--------------------
+
+! The parent policy SHAPING is the one applied to the interface
+  interface GigabitEthernet1
+    service-policy output SHAPING <--------------------
+````
+
+# Terminos clave de capitulo:
+````
+802.1Q, 802.1p, Differentiated Services (DiffServ), Differentiated Services Code Point
+(DSCP), per-hop behavior (PHB), type of service (ToS)
+````
+
+# Comandos
+![Image Alt]()
