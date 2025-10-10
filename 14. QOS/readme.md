@@ -946,4 +946,4 @@ Ejemplo 14-11 Modelado jerárquico basado en clases con ejemplo de Queuing anida
 ````
 
 # Comandos
-![Image Alt]()
+![Image Alt](https://github.com/Nigelpa74/CCNP-Brief/blob/3e39aae658142365404306305bbd5590da2f8092/14.%20QOS/IMG/QOS%20COMMANDS.png)
