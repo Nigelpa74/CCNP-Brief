@@ -39,6 +39,8 @@ key chain EIGRPKEY
 router eigrp 100
  maximum-paths 6
  variance 2
+ no auto-summary
+ redistribute (BGP,ISIS,OSPF)
  eigrp router-id 192.168.1.1
  passive-interface default
  passive-interface gi0/2
@@ -79,6 +81,8 @@ router eigrp EIGRP-NAMED
   !
   topology base
    variance 2
+   no auto-summary
+   redistribute (BGP,ISIS,OSPF)
    maximum-paths 6 (default es max 4)
   exit-af-topology
   network 0.0.0.0
