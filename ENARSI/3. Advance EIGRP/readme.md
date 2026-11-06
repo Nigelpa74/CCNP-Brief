@@ -101,7 +101,7 @@ show ip protocols
 ### SUMMARY:
 EIGRP cuando lo sumarizas se instala por default una ruta NULL para evitar loops.
 ### STUB:
-Los routers configurados como STUB solo anuncian `CONNECTED` y `SUMMARY routes` pero se puedec configurar para que reparta más:
+Los routers configurados como STUB solo anuncian `CONNECTED` y `SUMMARY routes` pero se puede configurar para que reparta más:
 ````
 eigrp stub {connected | received-only | redistributed | static | summary}
 ````
