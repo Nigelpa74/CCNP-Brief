@@ -48,7 +48,65 @@ R4(config)# router ospf 1
 R4(config-router)# area 34 nssa
 ````
 
-- Totally NSSAs: Mientras totally stubby prohibe LSA 3, 4 y 5 de entrar al área por el ABR, además de prohibir rutas de ser redisitribuidas en el área. En tal caso que áreas que necesiten bloquear LSAs 3 y 5 pero aún asi proveer la capacidad de redistribuir rutas externas en OSPF `DEBEN SER OSPF TOTALLY NSSA`. Cuando el ASBR redistribuye la ruta en OSPF, el ASBR lo hace como un tipo de LSA 7 y cuando ese LSA alcance el ABR lo tranforma en LSA 5. Cuando un ABR de totally NSSA recibe un LSA tipo 3 del backbone, se genera una ruta `default route` para el área totally NSSA. Cuando una interfaz del ABR está con el área 0 actúa como el disparador 
+- Totally NSSAs: Mientras totally stubby prohibe LSA 3, 4 y 5 de entrar al área por el ABR, además de prohibir rutas de ser redisitribuidas en el área. En tal caso que áreas que necesiten bloquear LSAs 3 y 5 pero aún asi proveer la capacidad de redistribuir rutas externas en OSPF `DEBEN SER OSPF TOTALLY NSSA`. Cuando el ASBR redistribuye la ruta en OSPF, el ASBR lo hace como un tipo de LSA 7 y cuando ese LSA alcance el ABR lo tranforma en LSA 5. Cuando un ABR de totally NSSA recibe un LSA tipo 3 del backbone, se genera una ruta `default route` para el área totally NSSA. Cuando una interfaz del ABR está con el área 0 actúa como el disparador.
+````
+Config SOLO DEL ABR:
+R3(config)# router ospf 1
+R3(config-router)# area 34 nssa no-summary --------
 
+Config de los Miembros
+R4(config)# router ospf 1
+R4(config-router)# area 34 nssa 
+redistribute connected metric-type 1 subnets ---------- Config extra de un NSSA
+````
 > [!NOTE]
 >  Totally stubby areas y totally NSSAs no son definidos en el RFC 2328
+
+### Orden se selección de rutas:
+- Intra-area, Inter-area, E1, E2
+
+### Coste:
+- No olvidar que el bandwitdh de comparación inicial es 10^8 con un costo máximo de 65,535.
+
+### ECMP:
+Default máximo es 4, se puede ajustar con `maximum-paths *maximum-paths*`
+
+### Sumarización:
+- Sumarización Interna-Intra
+Con el comando `area area-id range network subnet mask [advertise | not-advertise] [cost metric]` dentro del proceso OSPF
+````
+router ospf 1
+ router-id 192.168.2.2
+ area 12 range 172.16.0.0 255.255.0.0 cost 45
+ network 10.12.0.0 0.0.255.255 area 12
+ network 10.23.0.0 0.0.255.255 area 0
+````
+
+- Sumarización EXTERNA
+Con el comando `summary-address network subnet-mask` dentro del proceso OSPF
+````
+router ospf 1
+ router-id 192.168.6.6
+ summary-address 172.16.0.0 255.255.240.0 ----------
+ redistribute eigrp 1 subnets -----
+ network 10.56.1.0 0.0.0.255 area 56
+````
+
+> [!NOTE]
+>  ABRs para NSSAs actua como el ASBRs cuando un tipo 7 de LSA es convertido en un tipo 5. SOLO ABR pueden ejecutar la SUMARIZACIÓN EXTERNA cuando iguale este escenario.
+
+### Links Virtuales:
+Ante casos de redes discontinuas se tiene un método. Usar un link virtual es como correr un túnel virtual. Los links virtuales son construidos entre routers del mismo área y realizados entre Routers-ID. Ver su estado es `show ip ospf virtual-links`
+````
+router ospf 1
+ router-id 192.168.2.2
+ area 234 virtual-link 192.168.4.4 ----------
+ network 10.2.2.2 0.0.0.0 area 0
+ network 10.12.1.2 0.0.0.0 area
+---------------------------------
+router ospf 1
+ router-id 192.168.4.4
+ area 234 virtual-link 192.168.2.2 ----------
+ network 10.4.4.4 0.0.0.0 area 0
+ network 10.34.1.4 0.0.0.0 area 
+````
