@@ -17,3 +17,12 @@
 - Error en timers: A diferencia de EIGRP, los timers de HOLA y DEAD tienen que encajar. Se verifica con `show ip ospf interface gigabitEthernet 1/0` o incluso con `debug ip ospf hello`
 - Error en número de área: Verificable con `show ip ospf interface *interface_type and number*`.
 - Error en tipo de área: Se puede con el comando `show ip ospf`
+- Diferente subred: Se tiene que ver la ip `show running-config interface interface_type interface_number`.
+- Interfaz pasiva: Se puede ver con `show ip protocols`
+- Autenticación errónea: Se puede ver con `show ip ospf interface gigabitEthernet 1/0`, `show ip ospf` y `debug ip ospf adj`
+- ACL: Se puede verificar en `show ip protocols`
+- Diferente tipo de red: Broadcast y demás. Se puede verificar con `show ip ospf interface *interface_type interface_number*`
+- Verificar STUBBY AREAS: Con el comando `show ip ospf`
+- Túneles GRE: Se verifica con el comando `show ip ospf interface ser 1/0`
+- Errores en sumarización: Se puede verificar con `show ip ospf`
+- Discontinuidad: Todas las áreas si o si deben estar conectadas al área 0. En caso de no estarlo se tiene que usar `virtual-link`
