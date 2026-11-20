@@ -39,8 +39,16 @@ The link LSA maps all the global unicast address prefixes associated with an int
 - 0x2009 (Intra-area prefix):
 The intra-area-prefix LSA is used to advertise one or more IPv6 prefixes that are associated with a router, stub, or transit network segment.
 
-### Bits que describen capacidades des router:
+### Bits que describen capacidades del router:
+V6-Bit: El router participa en routing IPV6
+E-Bit: Capaz de procesar `rutas Externas`
+R-Bit: Router participa activamente en `ENVIAR TRÁFICO`
+DC-Bit: Descarte y suprimir `Hellos futuros` de ser enviados sobre la interface
+N-Bit: Soporta Tipo 7 LSAs NSSA
+MC-Bit: Soporta Multicast
 
+Para poder ver la capacidades de un router se tiene lo siguiente:
+`show ospfv3 database router`
 ## Estructura de configuración:
 ````
 ipv6 unicast routing ----------

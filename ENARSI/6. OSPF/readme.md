@@ -6,12 +6,15 @@
 ### Router ID:
 The OSPF router ID (RID) is a 32-bit number.
 ### BITS:
-V6-Bit: 
+V6-Bit: El router participa en routing IPV6
 E-Bit: Capaz de procesar `rutas Externas`
-R-Bit:
+R-Bit: Router participa activamente en `ENVIAR TRÁFICO`
 DC-Bit: Descarte y suprimir `Hellos futuros` de ser enviados sobre la interface
-N-Bit: Soporta Tipo 7 LSAs
+N-Bit: Soporta Tipo 7 LSAs NSSA
 MC-Bit: Soporta Multicast
+
+Para poder ver la capacidades de un router se tiene lo siguiente:
+`show ospfv3 database router`
 ### External OSPF Rutas:
 Los routers que importen ya se convierten en ASBR. Existen 2 tipos de rutas externas, donde el tipo 1 es preferido sobre el tipo 2:
 - Tipo 1: Métrica es igual la métrica de redistribución MÁS la métrica total de ruta hacia el ASBR. Si el LSA se propaga más lejos, la métrica incrementa.
